@@ -1,0 +1,23 @@
+Iranian Sans.ttf
+Mj_Neda Outline_0.TTF
+Mj_Neda_0.ttf
+Mj_Tehran_0.ttf
+Sahel-Black.eot
+Sahel-Black.ttf
+Sahel-Black.woff
+Sahel-Bold.eot
+Sahel-Bold.ttf
+Sahel-Bold.woff
+Sahel.ttf
+Sahel.woff
+Samim-Bold.eot
+Samim-Bold.ttf
+Samim-Bold.woff
+Samim-Bold.woff2
+Samim.eot
+Samim.ttf
+Samim.woff
+Samim.woff2
+Vazirmatn-Bold.woff2
+Vazirmatn-Regular.woff2
+Yekan.ttf
