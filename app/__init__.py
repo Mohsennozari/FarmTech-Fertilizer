@@ -1,3 +1,0 @@
-# Platform-v3\backend\app\__init__.py
-
-# Empty file to mark directory as Python package
