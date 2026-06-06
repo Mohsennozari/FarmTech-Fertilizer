@@ -8,6 +8,9 @@ from .models import (
     Interaction, Acid, Tank, CalculationHistory
 )
 
+# ============================================================
+# ضرایب تبدیل و توابع کمکی
+# ============================================================
 P2O5_TO_P = 0.436
 K2O_TO_K = 0.83
 CaO_TO_Ca = 0.715
@@ -34,7 +37,7 @@ def seed_database():
     db = SessionLocal()
     
     try:
-        print("Clearing existing data...")
+        print("🗑️ حذف داده‌های قبلی...")
         db.query(CalculationHistory).delete()
         db.query(Tank).delete()
         db.query(Interaction).delete()
@@ -45,9 +48,9 @@ def seed_database():
         db.query(Crop).delete()
         db.query(Acid).delete()
         db.commit()
-        print("Previous data cleared")
+        print("✅ داده‌های قبلی حذف شدند")
         
-        print("\nCreating crops...")
+        print("\n📦 ایجاد محصولات...")
         strawberry = Crop(
             name="توت‌فرنگی",
             scientific_name="Fragaria × ananassa",
@@ -55,59 +58,61 @@ def seed_database():
         )
         db.add(strawberry)
         db.flush()
-        print(f"   Crop: {strawberry.name}")
+        print(f"   ✅ محصول: {strawberry.name}")
         
-        print("\nCreating varieties...")
+        print("\n🌱 ایجاد ارقام...")
         san_andreas = Variety(
             crop_id=strawberry.id,
             name="سن اندرسا",
-            description="High yield variety suitable for hydroponics",
+            description="رقم پابلند با عملکرد بالا، مناسب کشت هیدروپونیک و خاکی",
             growth_days=90,
-            yield_potential="High"
+            yield_potential="بالا"
         )
         db.add(san_andreas)
         
         camarosa = Variety(
             crop_id=strawberry.id,
             name="کاماروسا",
-            description="Early ripening with large fruits",
+            description="رقم زودرس با میوه درشت و بازارپسند، مناسب مناطق معتدل",
             growth_days=80,
-            yield_potential="Very High"
+            yield_potential="بسیار بالا"
         )
         db.add(camarosa)
         db.flush()
-        print(f"   Variety: {san_andreas.name}")
-        print(f"   Variety: {camarosa.name}")
+        print(f"   ✅ رقم: {san_andreas.name}")
+        print(f"   ✅ رقم: {camarosa.name}")
         
-        print("\nCreating brands...")
+        print("\n🏭 ایجاد برندها...")
         gol_sam = Brand(
             name="گل سم گرگان",
-            country="Iran",
+            country="ایران",
             website="www.golsam.com",
-            notes="Fertilizer manufacturer"
+            notes="تولیدکننده کودهای تخصصی گلخانه‌ای"
         )
         db.add(gol_sam)
         
         razak = Brand(
             name="رازاک شیمی",
-            country="Iran",
+            country="ایران",
             website="www.razakshimi.com",
-            notes="NPK and sulfate fertilizer manufacturer"
+            notes="تولیدکننده کودهای کامل NPK و سولفات‌ها"
         )
         db.add(razak)
         db.flush()
-        print(f"   Brand: {gol_sam.name}")
-        print(f"   Brand: {razak.name}")
+        print(f"   ✅ برند: {gol_sam.name}")
+        print(f"   ✅ برند: {razak.name}")
         
-        print("\nCreating fertilizers...")
+        print("\n🧪 ایجاد کودها...")
         
         fertilizers_data = [
+            # ========== گل سم گرگان - کود پودری ==========
             {
                 "name": "یونی کمپلکس پودری",
                 "brand_id": gol_sam.id,
                 "brand_name": gol_sam.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "ریزمغذی",
-                "chemical_formula": "Complete Micro",
+                "chemical_formula": "کامل ریزمغذی",
                 "purity_percent": 100,
                 "max_dose_g_per_liter": 5.0,
                 "min_dose_g_per_liter": 0.5,
@@ -124,10 +129,11 @@ def seed_database():
                 "name": "فرتی‌گل 36-12-12",
                 "brand_id": gol_sam.id,
                 "brand_name": gol_sam.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "NPK",
                 "chemical_formula": "NPK 12-12-36",
                 "purity_percent": 100,
-                "max_dose_g_per_liter": 3.0,
+                "max_dose_g_per_liter": 5.0,
                 "min_dose_g_per_liter": 0.5,
                 "n_percent": 12.0,
                 "p_percent": convert_p2o5_to_p(12.0),
@@ -142,10 +148,11 @@ def seed_database():
                 "name": "فرتی‌گل 10-50-10",
                 "brand_id": gol_sam.id,
                 "brand_name": gol_sam.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "NPK",
                 "chemical_formula": "NPK 10-50-10",
                 "purity_percent": 100,
-                "max_dose_g_per_liter": 3.0,
+                "max_dose_g_per_liter": 5.0,
                 "min_dose_g_per_liter": 0.5,
                 "n_percent": 10.0,
                 "p_percent": convert_p2o5_to_p(50.0),
@@ -155,10 +162,11 @@ def seed_database():
                 "name": "فرتی‌گل 30-5-15",
                 "brand_id": gol_sam.id,
                 "brand_name": gol_sam.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "NPK",
                 "chemical_formula": "NPK 15-5-30",
                 "purity_percent": 100,
-                "max_dose_g_per_liter": 3.0,
+                "max_dose_g_per_liter": 5.0,
                 "min_dose_g_per_liter": 0.5,
                 "n_percent": 15.0,
                 "p_percent": convert_p2o5_to_p(5.0),
@@ -169,24 +177,27 @@ def seed_database():
                 "name": "فرتی‌گل 20-20-20",
                 "brand_id": gol_sam.id,
                 "brand_name": gol_sam.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "NPK",
                 "chemical_formula": "NPK 20-20-20",
                 "purity_percent": 100,
-                "max_dose_g_per_liter": 3.0,
+                "max_dose_g_per_liter": 5.0,
                 "min_dose_g_per_liter": 0.5,
                 "n_percent": 20.0,
                 "p_percent": convert_p2o5_to_p(20.0),
                 "k_percent": convert_k2o_to_k(20.0),
                 "mg_percent": convert_mgo_to_mg(1.0),
             },
+            # ========== رازاک شیمی - کود پودری ==========
             {
                 "name": "NPK 20-20-20 گرین استار",
                 "brand_id": razak.id,
                 "brand_name": razak.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "NPK",
                 "chemical_formula": "NPK 20-20-20",
                 "purity_percent": 100,
-                "max_dose_g_per_liter": 3.0,
+                "max_dose_g_per_liter": 5.0,
                 "min_dose_g_per_liter": 0.5,
                 "n_percent": 20.0,
                 "p_percent": convert_p2o5_to_p(20.0),
@@ -196,10 +207,11 @@ def seed_database():
                 "name": "NPK 12-12-36 گرین استار",
                 "brand_id": razak.id,
                 "brand_name": razak.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "NPK",
                 "chemical_formula": "NPK 12-12-36",
                 "purity_percent": 100,
-                "max_dose_g_per_liter": 3.0,
+                "max_dose_g_per_liter": 5.0,
                 "min_dose_g_per_liter": 0.5,
                 "n_percent": 12.0,
                 "p_percent": convert_p2o5_to_p(12.0),
@@ -209,38 +221,170 @@ def seed_database():
                 "name": "NPK 10-52-10 زاگرا استار",
                 "brand_id": razak.id,
                 "brand_name": razak.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "NPK",
                 "chemical_formula": "NPK 10-52-10",
                 "purity_percent": 100,
-                "max_dose_g_per_liter": 3.0,
+                "max_dose_g_per_liter": 5.0,
                 "min_dose_g_per_liter": 0.5,
                 "n_percent": 10.0,
                 "p_percent": convert_p2o5_to_p(52.0),
                 "k_percent": convert_k2o_to_k(10.0),
             },
             {
+                "name": "NPK 12-12-36 زاگرا استار",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "NPK",
+                "chemical_formula": "NPK 12-12-36",
+                "purity_percent": 100,
+                "max_dose_g_per_liter": 5.0,
+                "min_dose_g_per_liter": 0.5,
+                "n_percent": 12.0,
+                "p_percent": convert_p2o5_to_p(12.0),
+                "k_percent": convert_k2o_to_k(36.0),
+            },
+            {
+                "name": "NPK 15-5-30 زاگرا استار",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "NPK",
+                "chemical_formula": "NPK 15-5-30",
+                "purity_percent": 100,
+                "max_dose_g_per_liter": 5.0,
+                "min_dose_g_per_liter": 0.5,
+                "n_percent": 15.0,
+                "p_percent": convert_p2o5_to_p(5.0),
+                "k_percent": convert_k2o_to_k(30.0),
+            },
+            {
+                "name": "NPK 30-10-10 زاگرا استار",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "NPK",
+                "chemical_formula": "NPK 30-10-10",
+                "purity_percent": 100,
+                "max_dose_g_per_liter": 5.0,
+                "min_dose_g_per_liter": 0.5,
+                "n_percent": 30.0,
+                "p_percent": convert_p2o5_to_p(10.0),
+                "k_percent": convert_k2o_to_k(10.0),
+            },
+            {
+                "name": "NPK 20-20-20 زاگرا استار",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "NPK",
+                "chemical_formula": "NPK 20-20-20",
+                "purity_percent": 100,
+                "max_dose_g_per_liter": 5.0,
+                "min_dose_g_per_liter": 0.5,
+                "n_percent": 20.0,
+                "p_percent": convert_p2o5_to_p(20.0),
+                "k_percent": convert_k2o_to_k(20.0),
+            },
+            # ========== رازاک شیمی - سولفات‌ها ==========
+            {
                 "name": "سولفات پتاسیم",
                 "brand_id": razak.id,
                 "brand_name": razak.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "تک عنصری",
                 "chemical_formula": "K2SO4",
                 "purity_percent": 100,
-                "max_dose_g_per_liter": 2.0,
+                "max_dose_g_per_liter": 3.0,
                 "min_dose_g_per_liter": 0.2,
                 "k_percent": 51.0,
                 "s_percent": 18.0,
             },
             {
+                "name": "سولفات روی",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "تک عنصری",
+                "chemical_formula": "ZnSO4",
+                "purity_percent": 100,
+                "max_dose_g_per_liter": 2.0,
+                "min_dose_g_per_liter": 0.1,
+                "zn_percent": 35.0,
+            },
+            {
+                "name": "سولفات منگنز",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "تک عنصری",
+                "chemical_formula": "MnSO4",
+                "purity_percent": 100,
+                "max_dose_g_per_liter": 2.0,
+                "min_dose_g_per_liter": 0.1,
+                "mn_percent": 32.0,
+            },
+            {
+                "name": "سولفات مس",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "تک عنصری",
+                "chemical_formula": "CuSO4",
+                "purity_percent": 100,
+                "max_dose_g_per_liter": 1.0,
+                "min_dose_g_per_liter": 0.05,
+                "cu_percent": 25.0,
+            },
+            {
+                "name": "سولفات منیزیم",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "تک عنصری",
+                "chemical_formula": "MgSO4",
+                "purity_percent": 100,
+                "max_dose_g_per_liter": 3.0,
+                "min_dose_g_per_liter": 0.2,
+                "mg_percent": 9.8,
+                "s_percent": 13.0,
+            },
+            {
+                "name": "سولفات آهن",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "تک عنصری",
+                "chemical_formula": "FeSO4",
+                "purity_percent": 100,
+                "max_dose_g_per_liter": 2.0,
+                "min_dose_g_per_liter": 0.1,
+                "fe_percent": 19.0,
+            },
+            {
                 "name": "نیترات کلسیم",
                 "brand_id": razak.id,
                 "brand_name": razak.name,
+                "fertilizer_form": "powder",
                 "fertilizer_type": "تک عنصری",
                 "chemical_formula": "Ca(NO3)2",
                 "purity_percent": 100,
-                "max_dose_g_per_liter": 2.0,
+                "max_dose_g_per_liter": 3.0,
                 "min_dose_g_per_liter": 0.2,
                 "n_percent": 15.5,
                 "ca_percent": 19.0,
+            },
+            {
+                "name": "هیومیک اسید",
+                "brand_id": razak.id,
+                "brand_name": razak.name,
+                "fertilizer_form": "powder",
+                "fertilizer_type": "آلی",
+                "chemical_formula": "Humic Acid",
+                "purity_percent": 95,
+                "max_dose_g_per_liter": 2.0,
+                "min_dose_g_per_liter": 0.1,
             },
         ]
         
@@ -251,9 +395,9 @@ def seed_database():
             fertilizers.append(fert)
         
         db.flush()
-        print(f"   {len(fertilizers)} fertilizers created")
+        print(f"   ✅ {len(fertilizers)} کود ایجاد شد")
         
-        print("\nCreating growth stages...")
+        print("\n📈 ایجاد مراحل رشد...")
         
         san_andreas_needs = {
             "استقرار نشاء": {"N": 50, "P": 30, "K": 60, "Ca": 40, "Mg": 20, "S": 15, "Fe": 2, "Zn": 0.5, "Mn": 0.5, "Cu": 0.1, "B": 0.2, "Mo": 0.05, "Cl": 0},
@@ -299,7 +443,7 @@ def seed_database():
                 variety_id=san_andreas.id,
                 name=name,
                 stage_order=stage_orders[i],
-                description=f"Stage {name} for San Andreas",
+                description=f"مرحله {name} توت‌فرنگی رقم سن اندرسا",
                 nutrient_needs=san_andreas_needs[name],
                 target_ec_min=ec_min,
                 target_ec_max=ec_max,
@@ -317,7 +461,7 @@ def seed_database():
                 variety_id=camarosa.id,
                 name=name,
                 stage_order=stage_orders[i],
-                description=f"Stage {name} for Camarosa",
+                description=f"مرحله {name} توت‌فرنگی رقم کاماروسا",
                 nutrient_needs=camarosa_needs[name],
                 target_ec_min=ec_min,
                 target_ec_max=ec_max,
@@ -335,7 +479,7 @@ def seed_database():
                 variety_id=None,
                 name=name,
                 stage_order=stage_orders[i],
-                description=f"General stage {name} for Strawberry",
+                description=f"مرحله عمومی {name} توت‌فرنگی",
                 nutrient_needs=san_andreas_needs[name],
                 target_ec_min=ec_min,
                 target_ec_max=ec_max,
@@ -347,9 +491,10 @@ def seed_database():
             stages.append(stage)
         
         db.flush()
-        print(f"   {len(stages)} growth stages created")
+        print(f"   ✅ {len(stages)} مرحله رشد ایجاد شد")
         
-        print("\nCreating interactions...")
+        print("\n⚠️ ایجاد تداخلات شیمیایی...")
+        
         calcium_nitrate = db.query(Fertilizer).filter(Fertilizer.name == "نیترات کلسیم").first()
         high_phosphorus = db.query(Fertilizer).filter(Fertilizer.name.ilike("%10-52-10%")).first()
         
@@ -359,33 +504,46 @@ def seed_database():
                 fertilizer_b_id=high_phosphorus.id,
                 reaction_type="precipitation",
                 severity="critical",
-                precipitate_product="Calcium Phosphate",
-                description="Do not mix calcium nitrate with phosphorus fertilizers"
+                precipitate_product="کلسیم فسفات",
+                description="ترکیب نیترات کلسیم با کودهای فسفره باعث رسوب کلسیم فسفات و انسداد قطره‌چکان‌ها می‌شود"
             )
             db.add(interaction)
         
         db.flush()
         
-        print("\nCreating acids...")
+        print("\n🧪 ایجاد اسیدهای رایج...")
+        
         acids_data = [
             {
-                "name": "Phosphoric Acid",
+                "name": "اسید فسفریک",
                 "chemical_formula": "H3PO4",
                 "concentration_percent": 85.0,
                 "density_g_per_ml": 1.685,
                 "supplies_element": "P",
                 "element_percent": 27.0,
-                "ml_per_1000L_per_ph_point": 50
+                "ml_per_1000L_per_ph_point": 50,
+                "notes": "برای خنثی‌سازی بیکربنات و تنظیم pH"
             },
             {
-                "name": "Nitric Acid",
+                "name": "اسید نیتریک",
                 "chemical_formula": "HNO3",
                 "concentration_percent": 68.0,
                 "density_g_per_ml": 1.41,
                 "supplies_element": "N",
                 "element_percent": 15.0,
-                "ml_per_1000L_per_ph_point": 30
+                "ml_per_1000L_per_ph_point": 30,
+                "notes": "منبع نیتروژن و تنظیم pH"
             },
+            {
+                "name": "اسید سولفوریک",
+                "chemical_formula": "H2SO4",
+                "concentration_percent": 98.0,
+                "density_g_per_ml": 1.84,
+                "supplies_element": "S",
+                "element_percent": 32.0,
+                "ml_per_1000L_per_ph_point": 20,
+                "notes": "تنظیم pH و تامین گوگرد"
+            }
         ]
         
         for acid_data in acids_data:
@@ -393,24 +551,25 @@ def seed_database():
             db.add(acid)
         
         db.flush()
-        print(f"   {len(acids_data)} acids created")
+        print(f"   ✅ {len(acids_data)} اسید ایجاد شد")
         
         db.commit()
         
         print("\n" + "="*50)
-        print("Database seeded successfully!")
+        print("🎉 دیتابیس با موفقیت سید شد!")
         print("="*50)
-        print(f"\nStatistics:")
-        print(f"   Crops: 1")
-        print(f"   Varieties: 2")
-        print(f"   Brands: 2")
-        print(f"   Fertilizers: {len(fertilizers)}")
-        print(f"   Growth Stages: {len(stages)}")
-        print(f"   Acids: {len(acids_data)}")
+        print(f"\n📊 آمار نهایی:")
+        print(f"   - محصولات: 1")
+        print(f"   - ارقام: 2")
+        print(f"   - برندها: 2")
+        print(f"   - کودها: {len(fertilizers)}")
+        print(f"   - مراحل رشد: {len(stages)}")
+        print(f"   - تداخلات: 1")
+        print(f"   - اسیدها: {len(acids_data)}")
         
     except Exception as e:
         db.rollback()
-        print(f"\nError seeding database: {e}")
+        print(f"\n❌ خطا در سید دیتابیس: {e}")
         import traceback
         traceback.print_exc()
     finally:
@@ -418,10 +577,10 @@ def seed_database():
 
 
 def init_db():
-    print("Initializing FarmTech Database...")
+    print("🚀 راه‌اندازی دیتابیس FarmTech...")
     print("="*50)
     Base.metadata.create_all(bind=engine)
-    print("Database tables created")
+    print("✅ جداول دیتابیس ایجاد شدند")
     seed_database()
 
 

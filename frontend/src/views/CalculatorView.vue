@@ -23,6 +23,13 @@
             <button v-if="result" @click="printResult" class="px-3 py-1 text-sm text-gray-600 hover:text-green-600 border border-gray-200 rounded-lg transition">
               🖨️ پرینت
             </button>
+            <!-- اضافه کنید بعد از دکمه پرینت -->
+            <router-link 
+              to="/admin/fertilizers" 
+              class="px-3 py-1 text-sm text-gray-600 hover:text-green-600 border border-gray-200 rounded-lg transition"
+            >
+              📋 کودها
+            </router-link>
           </div>
         </div>
       </div>
@@ -33,57 +40,65 @@
       <!-- Form Card -->
       <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100">
-          <h2 class="text-lg font-semibold text-gray-800">اطلاعات محاسبه</h2>
+          <h2 class="text-lg font-semibold text-gray-800">📊 اطلاعات محاسبه</h2>
           <p class="text-sm text-gray-500 mt-0.5">لطفاً اطلاعات مورد نیاز را وارد کنید</p>
         </div>
         
         <div class="p-6 space-y-6">
-          <!-- محصول -->
+          <!-- Row 1: Variety, Stage -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">🌾 محصول</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                🌾 محصول
+                <span class="text-xs text-gray-400 cursor-help ml-1" title="نوع گیاه مورد نظر">ⓘ</span>
+              </label>
               <select v-model="selectedCrop" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl" disabled>
-                <option value="توت‌فرنگی">توت‌فرنگی</option>
+                <option value="توت‌فرنگی">🍓 توت‌فرنگی</option>
               </select>
-              <p class="text-xs text-gray-400 mt-1">نوع گیاه مورد نظر</p>
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">🍓 رقم گیاه</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                🍓 رقم گیاه
+                <span class="text-xs text-gray-400 cursor-help ml-1" title="واریته توت‌فرنگی - نیازهای غذایی متفاوتی دارند">ⓘ</span>
+              </label>
               <select v-model="selectedVariety" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-green-500 focus:ring-1 focus:ring-green-500 transition">
                 <option value="">انتخاب کنید</option>
-                <option value="سن اندرسا">سن اندرسا</option>
-                <option value="کاماروسا">کاماروسا</option>
+                <option value="سن اندرسا">سن اندرسا (San Andreas)</option>
+                <option value="کاماروسا">کاماروسا (Camarosa)</option>
               </select>
-              <p class="text-xs text-gray-400 mt-1">رقم توت‌فرنگی - نیازهای غذایی متفاوتی دارند</p>
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">📈 مرحله رشد</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                📈 مرحله رشد
+                <span class="text-xs text-gray-400 cursor-help ml-1" title="هر مرحله نیاز مغذی متفاوتی دارد">ⓘ</span>
+              </label>
               <select v-model="selectedStage" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-green-500 focus:ring-1 focus:ring-green-500 transition">
                 <option value="">انتخاب کنید</option>
-                <option value="استقرار نشاء">🌱 استقرار نشاء</option>
-                <option value="ریشه‌زایی">🌿 ریشه‌زایی</option>
-                <option value="رشد رویشی">🍃 رشد رویشی</option>
-                <option value="گلدهی">🌸 گلدهی</option>
-                <option value="میوه‌دهی">🍓 میوه‌دهی</option>
+                <option value="استقرار نشاء">🌱 استقرار نشاء (روزهای 1-15)</option>
+                <option value="ریشه‌زایی">🌿 ریشه‌زایی (روزهای 15-30)</option>
+                <option value="رشد رویشی">🍃 رشد رویشی (روزهای 30-50)</option>
+                <option value="گلدهی">🌸 گلدهی (روزهای 50-65)</option>
+                <option value="میوه‌دهی">🍓 میوه‌دهی (روزهای 65-90)</option>
               </select>
-              <p class="text-xs text-gray-400 mt-1">هر مرحله نیاز مغذی متفاوتی دارد</p>
             </div>
           </div>
           
-          <!-- برند -->
+          <!-- Brand Filter -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">🏭 فیلتر برند</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+              🏭 فیلتر برند
+              <span class="text-xs text-gray-400 cursor-help ml-1" title="اختیاری - سیستم فقط از کودهای برند انتخاب شده استفاده می‌کند">ⓘ</span>
+            </label>
             <select v-model="selectedBrand" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:border-green-500 focus:ring-1 focus:ring-green-500 transition">
               <option value="">همه برندها</option>
-              <option value="گل سم گرگان">گل سم گرگان</option>
-              <option value="رازاک شیمی">رازاک شیمی</option>
+              <option value="گل سم گرگان">🌾 گل سم گرگان</option>
+              <option value="رازاک شیمی">🧪 رازاک شیمی</option>
             </select>
-            <p class="text-xs text-gray-400 mt-1">اختیاری - سیستم فقط از کودهای برند انتخاب شده استفاده می‌کند</p>
           </div>
           
-          <!-- مخازن -->
+          <!-- Tanks Section -->
           <div>
             <div class="flex justify-between items-center mb-3">
               <label class="text-sm font-medium text-gray-700">🗄️ مخازن</label>
@@ -133,21 +148,24 @@
                 </div>
               </div>
             </div>
-            <p class="text-xs text-gray-400 mt-2">مخزن مورد نظر را انتخاب کنید</p>
           </div>
           
-          <!-- پارامترهای آب برای مخزن انتخاب شده (فقط در زمان محاسبه) -->
+          <!-- Water Parameters for Selected Tank -->
           <div v-if="selectedTank" class="p-4 bg-blue-50 rounded-xl border border-blue-100">
             <h4 class="text-sm font-medium text-blue-800 mb-3 flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
               </svg>
-              پارامترهای آب مخزن {{ selectedTank.name }}
+              💧 پارامترهای آب مخزن {{ selectedTank.name }}
             </h4>
             <p class="text-xs text-blue-600 mb-3">لطفاً مقادیر اندازه‌گیری شده با دستگاه EC و pH متر را وارد کنید</p>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">EC آب (mS/cm)</label>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div class="relative">
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  EC آب (mS/cm)
+                  <span class="text-xs text-gray-400 cursor-help ml-1" title="هدایت الکتریکی آب - با EC متر اندازه‌گیری کنید. محدوده مجاز: 0 تا 10">ⓘ</span>
+                </label>
                 <input 
                   type="number" 
                   step="0.1" 
@@ -157,10 +175,13 @@
                   class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-blue-500"
                   placeholder="0.8"
                 >
-                <p class="text-xs text-gray-400 mt-0.5">محدوده 0 تا 10</p>
               </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">pH آب</label>
+              
+              <div class="relative">
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  pH آب
+                  <span class="text-xs text-gray-400 cursor-help ml-1" title="اسیدیته آب - با pH متر اندازه‌گیری کنید. محدوده مجاز: 0 تا 14">ⓘ</span>
+                </label>
                 <input 
                   type="number" 
                   step="0.1" 
@@ -170,34 +191,54 @@
                   class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-blue-500"
                   placeholder="7.0"
                 >
-                <p class="text-xs text-gray-400 mt-0.5">محدوده 0 تا 14</p>
               </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">کلسیم (ppm)</label>
+              
+              <div class="relative">
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  بیکربنات HCO₃ (ppm)
+                  <span class="text-xs text-gray-400 cursor-help ml-1" title="بیکربنات آب - در صورت بالا بودن نیاز به اسید بیشتری برای تنظیم pH دارد">ⓘ</span>
+                </label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  max="500"
+                  v-model.number="tempWaterHco3"
+                  class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-blue-500"
+                  placeholder="120"
+                >
+              </div>
+              
+              <div class="relative">
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  کلسیم (ppm)
+                  <span class="text-xs text-gray-400 cursor-help ml-1" title="کلسیم موجود در آب - اختیاری">ⓘ</span>
+                </label>
                 <input 
                   type="number" 
                   min="0"
                   v-model.number="tempWaterCa"
-                  class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"
+                  class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-blue-500"
                   placeholder="40"
                 >
-                <p class="text-xs text-gray-400 mt-0.5">اختیاری - آنالیز آب</p>
               </div>
-              <div>
-                <label class="block text-xs font-medium text-gray-700 mb-1">منیزیم (ppm)</label>
+              
+              <div class="relative">
+                <label class="block text-xs font-medium text-gray-700 mb-1">
+                  منیزیم (ppm)
+                  <span class="text-xs text-gray-400 cursor-help ml-1" title="منیزیم موجود در آب - اختیاری">ⓘ</span>
+                </label>
                 <input 
                   type="number" 
                   min="0"
                   v-model.number="tempWaterMg"
-                  class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"
+                  class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-blue-500"
                   placeholder="15"
                 >
-                <p class="text-xs text-gray-400 mt-0.5">اختیاری - آنالیز آب</p>
               </div>
             </div>
           </div>
           
-          <!-- دکمه محاسبه -->
+          <!-- Calculate Button -->
           <button 
             @click="calculate"
             :disabled="isLoading || !selectedVariety || !selectedStage || !selectedTank"
@@ -210,19 +251,19 @@
             <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            {{ isLoading ? 'در حال محاسبه...' : 'محاسبه ترکیب بهینه' }}
+            {{ isLoading ? 'در حال محاسبه...' : '🚀 محاسبه ترکیب بهینه' }}
           </button>
         </div>
       </div>
       
-      <!-- نمایش خطاهای اعتبارسنجی -->
+      <!-- Validation Errors -->
       <div v-if="validationErrors.length > 0" class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
         <div class="flex gap-3">
           <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div class="flex-1">
-            <h4 class="text-sm font-bold text-red-800">خطاهای اعتبارسنجی</h4>
+            <h4 class="text-sm font-bold text-red-800">❌ خطاهای اعتبارسنجی</h4>
             <ul class="mt-1 text-sm text-red-700 list-disc list-inside">
               <li v-for="(err, idx) in validationErrors" :key="idx">{{ err }}</li>
             </ul>
@@ -231,7 +272,7 @@
         </div>
       </div>
       
-      <!-- سایر خطاها -->
+      <!-- Error Message -->
       <div v-if="errorMessage" class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
         <div class="flex gap-3">
           <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +283,7 @@
         </div>
       </div>
       
-      <!-- در حال بارگذاری -->
+      <!-- Loading -->
       <div v-if="isLoading" class="mt-8 flex justify-center">
         <div class="bg-white rounded-xl shadow-card px-6 py-4 flex items-center gap-3">
           <div class="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
@@ -250,17 +291,17 @@
         </div>
       </div>
       
-      <!-- نتایج -->
+      <!-- Results -->
       <div v-if="result" class="mt-8">
         <ResultsDisplay :result="result" />
       </div>
     </main>
     
-    <!-- مودال افزودن مخزن (بدون فیلد EC و PH) -->
+    <!-- Tank Modal -->
     <div v-if="showTankModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showTankModal = false">
       <div class="bg-white rounded-2xl max-w-md w-full shadow-xl">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-          <h3 class="text-lg font-semibold text-gray-800">افزودن مخزن جدید</h3>
+          <h3 class="text-lg font-semibold text-gray-800">➕ افزودن مخزن جدید</h3>
           <button @click="showTankModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
         </div>
         <div class="p-6 space-y-4">
@@ -274,7 +315,7 @@
             <input type="number" min="1" v-model.number="newTankVolume" placeholder="1000" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-green-500">
             <p class="text-xs text-gray-400 mt-1">ظرفیت مخزن بر حسب لیتر</p>
           </div>
-          <p class="text-xs text-blue-600 mt-2">⚠️ پارامترهای EC و pH آب را بعد از انتخاب مخزن می‌توانید وارد کنید</p>
+          <p class="text-xs text-blue-600 mt-2">ℹ️ پارامترهای EC، pH، بیکربنات و سایر عناصر آب را بعد از انتخاب مخزن می‌توانید وارد کنید</p>
         </div>
         <div class="px-6 py-4 bg-gray-50 rounded-b-2xl flex gap-3">
           <button @click="addTank" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition">افزودن</button>
@@ -294,7 +335,7 @@ import ResultsDisplay from '../components/calculator/ResultsDisplay.vue'
 
 const api = axios.create({
   baseURL: 'http://127.0.0.1:8000/api/v1',
-  timeout: 30000
+  timeout: 60000
 })
 
 // Connection Status
@@ -315,13 +356,14 @@ const result = ref<any>(null)
 const errorMessage = ref('')
 const validationErrors = ref<string[]>([])
 
-// Temporary water parameters for selected tank (only for calculation)
+// Temporary water parameters for selected tank
 const tempWaterEc = ref<number | null>(null)
 const tempWaterPh = ref<number | null>(null)
+const tempWaterHco3 = ref<number>(0)
 const tempWaterCa = ref<number>(0)
 const tempWaterMg = ref<number>(0)
 
-// New tank data (without EC and PH)
+// New tank data
 const newTankName = ref('')
 const newTankVolume = ref(1000)
 
@@ -337,7 +379,7 @@ const checkConnection = async () => {
     connectionStatus.value = 'connected'
   } catch (err) {
     connectionStatus.value = 'disconnected'
-    errorMessage.value = 'خطا در اتصال به سرور. لطفاً سرور بک‌اند را بررسی کنید.'
+    errorMessage.value = '❌ خطا در اتصال به سرور. لطفاً سرور بک‌اند را بررسی کنید.'
   }
 }
 
@@ -375,12 +417,12 @@ const addTank = async () => {
       volume_liters: newTankVolume.value,
       water_ec_ms_cm: null,
       water_ph: null,
+      water_hco3_ppm: 0,
       water_ca_ppm: 0,
       water_mg_ppm: 0,
       water_na_ppm: 0,
       water_cl_ppm: 0,
       water_so4_ppm: 0,
-      water_hco3_ppm: 0,
       water_no3_ppm: 0,
       water_fe_ppm: 0
     })
@@ -423,10 +465,11 @@ const selectTank = (tank: any) => {
 }
 
 const resetTempParams = () => {
-  tempWaterEc.value = null
-  tempWaterPh.value = null
-  tempWaterCa.value = 0
-  tempWaterMg.value = 0
+  tempWaterEc.value = selectedTank.value?.water_ec_ms_cm ?? null
+  tempWaterPh.value = selectedTank.value?.water_ph ?? null
+  tempWaterHco3.value = selectedTank.value?.water_hco3_ppm ?? 0
+  tempWaterCa.value = selectedTank.value?.water_ca_ppm ?? 0
+  tempWaterMg.value = selectedTank.value?.water_mg_ppm ?? 0
 }
 
 const calculate = async () => {
@@ -452,7 +495,7 @@ const calculate = async () => {
       validationErrors.value.push('EC آب نمی‌تواند منفی باشد')
     }
     if (tempWaterEc.value > 10) {
-      validationErrors.value.push('EC آب باید کمتر یا مساوی 10 باشد (مقدار وارد شده: ' + tempWaterEc.value + ')')
+      validationErrors.value.push(`EC آب باید کمتر یا مساوی 10 باشد (مقدار وارد شده: ${tempWaterEc.value})`)
     }
   }
   
@@ -461,8 +504,15 @@ const calculate = async () => {
       validationErrors.value.push('pH آب نمی‌تواند منفی باشد')
     }
     if (tempWaterPh.value > 14) {
-      validationErrors.value.push('pH آب باید بین 0 تا 14 باشد (مقدار وارد شده: ' + tempWaterPh.value + ')')
+      validationErrors.value.push(`pH آب باید بین 0 تا 14 باشد (مقدار وارد شده: ${tempWaterPh.value})`)
     }
+  }
+  
+  if (tempWaterHco3.value < 0) {
+    validationErrors.value.push('بیکربنات آب نمی‌تواند منفی باشد')
+  }
+  if (tempWaterHco3.value > 500) {
+    validationErrors.value.push(`بیکربنات آب باید کمتر یا مساوی 500 ppm باشد (مقدار وارد شده: ${tempWaterHco3.value})`)
   }
   
   if (validationErrors.value.length > 0) {
@@ -484,12 +534,12 @@ const calculate = async () => {
         volume_liters: selectedTank.value.volume_liters,
         water_ec_ms_cm: tempWaterEc.value,
         water_ph: tempWaterPh.value,
+        water_hco3_ppm: tempWaterHco3.value || 0,
         water_ca_ppm: tempWaterCa.value || 0,
         water_mg_ppm: tempWaterMg.value || 0,
         water_na_ppm: 0,
         water_cl_ppm: 0,
         water_so4_ppm: 0,
-        water_hco3_ppm: 0,
         water_no3_ppm: 0,
         water_fe_ppm: 0
       }
@@ -502,7 +552,15 @@ const calculate = async () => {
       if (typeof err.response.data.detail === 'string') {
         errorMessage.value = err.response.data.detail
       } else if (Array.isArray(err.response.data.detail)) {
-        validationErrors.value = err.response.data.detail.map((e: any) => `${e.loc.join('.')}: ${e.msg}`)
+        validationErrors.value = err.response.data.detail.map((e: any) => {
+          if (e.msg === 'Input should be less than or equal to 10') {
+            return `مقدار ${e.loc.join('.')} باید کمتر یا مساوی 10 باشد`
+          }
+          if (e.msg === 'Input should be less than or equal to 14') {
+            return `مقدار ${e.loc.join('.')} باید کمتر یا مساوی 14 باشد`
+          }
+          return `${e.loc.join('.')}: ${e.msg}`
+        })
       } else {
         errorMessage.value = JSON.stringify(err.response.data.detail)
       }

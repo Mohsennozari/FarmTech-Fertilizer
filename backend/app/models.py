@@ -1,11 +1,13 @@
 # Platform-v3\backend\app\models.py
 
-from sqlalchemy import Column, Integer, String, Float, JSON, ForeignKey, Table, DateTime
+from sqlalchemy import Column, Integer, String, Float, JSON, ForeignKey, Table, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
 
-# جدول واسط برای رابطه چند به چند
+# ============================================================
+# جدول واسط برای رابطه چند به چند (بدون تعریف کلاس جداگانه)
+# ============================================================
 growth_stage_fertilizer = Table(
     'growth_stage_fertilizer',
     Base.metadata,
@@ -23,7 +25,7 @@ class Brand(Base):
     website = Column(String, nullable=True)
     notes = Column(String, nullable=True)
     
-    fertilizers = relationship("Fertilizer", back_populates="brand")
+    fertilizers = relationship("Fertilizer", back_populates="brand", lazy="select")
 
 
 class Crop(Base):
@@ -34,8 +36,8 @@ class Crop(Base):
     scientific_name = Column(String, nullable=True)
     cultivation_type = Column(String, nullable=True)
     
-    varieties = relationship("Variety", back_populates="crop")
-    growth_stages = relationship("GrowthStage", back_populates="crop")
+    varieties = relationship("Variety", back_populates="crop", cascade="all, delete-orphan", lazy="select")
+    growth_stages = relationship("GrowthStage", back_populates="crop", lazy="select")
 
 
 class Variety(Base):
@@ -48,8 +50,8 @@ class Variety(Base):
     growth_days = Column(Integer, nullable=True)
     yield_potential = Column(String, nullable=True)
     
-    crop = relationship("Crop", back_populates="varieties")
-    growth_stages = relationship("GrowthStage", back_populates="variety")
+    crop = relationship("Crop", back_populates="varieties", lazy="select")
+    growth_stages = relationship("GrowthStage", back_populates="variety", lazy="select")
 
 
 class Fertilizer(Base):
@@ -59,12 +61,17 @@ class Fertilizer(Base):
     name = Column(String, nullable=False)
     brand_id = Column(Integer, ForeignKey("brands.id"), nullable=True)
     brand_name = Column(String, nullable=True)
+    
+    fertilizer_form = Column(String, default="powder")
     chemical_formula = Column(String, nullable=True)
     molecular_weight = Column(Float, nullable=True)
     purity_percent = Column(Float, default=100.0)
     fertilizer_type = Column(String, nullable=True)
+    
     max_dose_g_per_liter = Column(Float, nullable=True)
+    max_dose_ml_per_liter = Column(Float, nullable=True)
     min_dose_g_per_liter = Column(Float, nullable=True, default=0.01)
+    density_g_per_ml = Column(Float, nullable=True)
     
     n_percent = Column(Float, default=0)
     p_percent = Column(Float, default=0)
@@ -84,9 +91,11 @@ class Fertilizer(Base):
     solubility_g_per_l = Column(Float, nullable=True)
     ph_effect = Column(String, nullable=True)
     notes = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
     
-    brand = relationship("Brand", back_populates="fertilizers")
-    growth_stages = relationship("GrowthStage", secondary=growth_stage_fertilizer, back_populates="fertilizers")
+    # روابط
+    brand = relationship("Brand", back_populates="fertilizers", lazy="select")
+    growth_stages = relationship("GrowthStage", secondary=growth_stage_fertilizer, back_populates="fertilizers", lazy="select")
 
 
 class GrowthStage(Base):
@@ -105,9 +114,10 @@ class GrowthStage(Base):
     target_ph_max = Column(Float, nullable=True)
     priority = Column(String, nullable=True)
     
-    crop = relationship("Crop", back_populates="growth_stages")
-    variety = relationship("Variety", back_populates="growth_stages")
-    fertilizers = relationship("Fertilizer", secondary=growth_stage_fertilizer, back_populates="growth_stages")
+    # روابط
+    crop = relationship("Crop", back_populates="growth_stages", lazy="select")
+    variety = relationship("Variety", back_populates="growth_stages", lazy="select")
+    fertilizers = relationship("Fertilizer", secondary=growth_stage_fertilizer, back_populates="growth_stages", lazy="select")
 
 
 class Interaction(Base):
@@ -121,8 +131,8 @@ class Interaction(Base):
     precipitate_product = Column(String, nullable=True)
     description = Column(String, nullable=True)
     
-    fertilizer_a = relationship("Fertilizer", foreign_keys=[fertilizer_a_id])
-    fertilizer_b = relationship("Fertilizer", foreign_keys=[fertilizer_b_id])
+    fertilizer_a = relationship("Fertilizer", foreign_keys=[fertilizer_a_id], lazy="select")
+    fertilizer_b = relationship("Fertilizer", foreign_keys=[fertilizer_b_id], lazy="select")
 
 
 class Acid(Base):
@@ -145,19 +155,21 @@ class Tank(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     volume_liters = Column(Float, nullable=False)
+    
     water_ec_ms_cm = Column(Float, nullable=True)
     water_ph = Column(Float, nullable=True)
+    water_hco3_ppm = Column(Float, default=0)
     water_ca_ppm = Column(Float, default=0)
     water_mg_ppm = Column(Float, default=0)
     water_na_ppm = Column(Float, default=0)
     water_cl_ppm = Column(Float, default=0)
     water_so4_ppm = Column(Float, default=0)
-    water_hco3_ppm = Column(Float, default=0)
     water_no3_ppm = Column(Float, default=0)
     water_fe_ppm = Column(Float, default=0)
+    
     notes = Column(String, nullable=True)
     
-    calculations = relationship("CalculationHistory", back_populates="tank")
+    calculations = relationship("CalculationHistory", back_populates="tank", lazy="select")
 
 
 class CalculationHistory(Base):
@@ -174,6 +186,7 @@ class CalculationHistory(Base):
     tank_volume_liters = Column(Float, nullable=False)
     water_ec_ms_cm = Column(Float, nullable=True)
     water_ph = Column(Float, nullable=True)
+    water_hco3_ppm = Column(Float, default=0)
     target_needs_ppm = Column(JSON, nullable=False)
     water_contribution_ppm = Column(JSON, nullable=False)
     remaining_needs_ppm = Column(JSON, nullable=False)
@@ -182,7 +195,8 @@ class CalculationHistory(Base):
     warnings = Column(JSON, nullable=False)
     ec_ph_targets = Column(JSON, nullable=False)
     mixing_instructions = Column(String, nullable=True)
+    acid_adjustment = Column(JSON, nullable=True)
     success = Column(Integer, default=1)
     error_message = Column(String, nullable=True)
     
-    tank = relationship("Tank", back_populates="calculations")
+    tank = relationship("Tank", back_populates="calculations", lazy="select")

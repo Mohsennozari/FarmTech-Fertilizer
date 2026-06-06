@@ -2,6 +2,7 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
 import CalculatorView from '../views/CalculatorView.vue'
+import FertilizerListView from '../components/admin/FertilizerList.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -10,6 +11,11 @@ const router = createRouter({
       path: '/',
       name: 'calculator',
       component: CalculatorView
+    },
+    {
+      path: '/admin/fertilizers',
+      name: 'fertilizers',
+      component: FertilizerListView
     }
   ]
 })
