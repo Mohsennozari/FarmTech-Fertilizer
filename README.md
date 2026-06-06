@@ -270,3 +270,5 @@ npm install
 
 # 3. اجرای سرور توسعه
 npm run dev
+----
+Omid Was Here!
