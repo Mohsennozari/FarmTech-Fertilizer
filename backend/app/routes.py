@@ -19,11 +19,10 @@ from .schemas import (
 from .calculator import (
     SUPPORTED_ELEMENTS,
     calculate_water_contribution,
-    calculate_acid_contribution,
     calculate_acid_for_hco3,
-    optimize_fertilizer_doses_professional_v2,
     calculate_tank_doses,
-    generate_scientific_mixing_instructions
+    generate_mixing_instructions,
+    optimize_fertilizer_doses_professional_v3
 )
 
 router = APIRouter()
@@ -237,14 +236,18 @@ def calculate_fertilizer(
     db: Session = Depends(get_db)
 ):
     """
-    محاسبه بهترین ترکیب کود با الگوریتم حرفه‌ای دو مرحله‌ای
+    محاسبه بهترین ترکیب کود با الگوریتم حرفه‌ای 4 مرحله‌ای
     
-    ویژگی‌های الگوریتم:
-    - وزن دهی به عناصر بر اساس اهمیت (فسفر مهم‌ترین)
-    - محدودیت‌های ایمنی و سمیت بر اساس استانداردهای علمی
-    - بازه خطای مجاز (تحمل 15% برای عناصر اصلی)
-    - اولویت کودهای تخصصی برای ریزمغذی‌ها
-    - هشدارهای کیفی برای کمبود یا بیش‌بود عناصر
+    مراحل الگوریتم:
+    1. تامین اجباری فسفر (P) - مهم‌ترین عنصر برای ریشه
+    2. تامین نیتروژن (N) و پتاسیم (K) از کودهای NPK
+    3. تامین کلسیم (Ca) و منیزیم (Mg)
+    4. تامین ریزمغذی‌ها (Fe, Zn, Mn, Cu, B, Mo, Cl)
+    
+    محدودیت‌های علمی:
+    - فسفر: 20-80 ppm
+    - مس: حداکثر 0.5 ppm (برای جلوگیری از سمیت)
+    - گوگرد: حداکثر 50 ppm
     """
     try:
         # ============================================================
@@ -313,19 +316,14 @@ def calculate_fertilizer(
             acid_adjustment = calculate_acid_for_hco3(tank.water_hco3_ppm)
         
         # ============================================================
-        # 7. سهم اسید (اختیاری - از درخواست کاربر)
-        # ============================================================
-        acid_contribution = {elem: 0.0 for elem in SUPPORTED_ELEMENTS}
-        
-        # ============================================================
-        # 8. محاسبه نیاز باقیمانده (پس از کسر سهم آب و اسید)
+        # 7. محاسبه نیاز باقیمانده (پس از کسر سهم آب)
         # ============================================================
         remaining_needs = {}
         for elem in SUPPORTED_ELEMENTS:
-            remaining_needs[elem] = max(0, target_needs[elem] - water_contribution[elem] - acid_contribution[elem])
+            remaining_needs[elem] = max(0, target_needs[elem] - water_contribution[elem])
         
         # ============================================================
-        # 9. دریافت کودهای فعال از دیتابیس
+        # 8. دریافت کودهای فعال از دیتابیس
         # ============================================================
         query = db.query(Fertilizer).filter(Fertilizer.is_active == True)
         if request.brand_filter:
@@ -340,19 +338,19 @@ def calculate_fertilizer(
             )
         
         # ============================================================
-        # 10. اجرای الگوریتم حرفه‌ای بهینه‌سازی (نسخه 2)
+        # 9. اجرای الگوریتم حرفه‌ای (نسخه 3 - 4 مرحله‌ای)
         # ============================================================
-        doses, calculated_supply, optimization_warnings, supply_quality = optimize_fertilizer_doses_professional_v2(
-            remaining_needs, all_fertilizers, request.brand_filter, 10.0
+        doses, calculated_supply, optimization_warnings = optimize_fertilizer_doses_professional_v3(
+            remaining_needs, all_fertilizers, request.brand_filter
         )
         
         # ============================================================
-        # 11. محاسبه دوز برای حجم مخزن و استوک 200 برابر
+        # 10. محاسبه دوز برای حجم مخزن و استوک 200 برابر
         # ============================================================
         doses_with_tank = calculate_tank_doses(doses, tank.volume_liters)
         
         # ============================================================
-        # 12. تبدیل هشدارها به فرمت استاندارد
+        # 11. تبدیل هشدارها به فرمت استاندارد
         # ============================================================
         warnings = []
         
@@ -360,36 +358,25 @@ def calculate_fertilizer(
             warnings.append(WarningResponse(
                 type=warn.get('type', 'unknown'),
                 severity=warn.get('severity', 'warning'),
-                product=None,
+                product=warn.get('element', None),
                 description=warn.get('message', ''),
                 fertilizers=[warn.get('fertilizer', '')] if warn.get('fertilizer') else []
             ))
         
-        for sq in supply_quality:
-            warnings.append(WarningResponse(
-                type=sq.get('type', 'supply_quality'),
-                severity=sq.get('severity', 'warning'),
-                product=sq.get('element', None),
-                description=sq.get('message', ''),
-                fertilizers=[]
-            ))
-        
         # ============================================================
-        # 13. تولید دستورالعمل اختلاط علمی
+        # 12. تولید دستورالعمل اختلاط
         # ============================================================
-        mixing_instructions = generate_scientific_mixing_instructions(
+        mixing_instructions = generate_mixing_instructions(
             doses_with_tank, 
             [w.model_dump() for w in warnings], 
             tank.volume_liters,
             {
-                "hco3_ppm": tank.water_hco3_ppm or 0,
                 "ml_per_1000L": acid_adjustment.get("ml_per_1000L", 0) if acid_adjustment else 0
-            } if acid_adjustment and acid_adjustment.get("ml_per_1000L", 0) > 0 else None,
-            supply_quality
+            } if acid_adjustment and acid_adjustment.get("ml_per_1000L", 0) > 0 else None
         )
         
         # ============================================================
-        # 14. ذخیره در تاریخچه محاسبات
+        # 13. ذخیره در تاریخچه محاسبات
         # ============================================================
         history = CalculationHistory(
             crop_name=request.crop_name,
@@ -416,8 +403,7 @@ def calculate_fertilizer(
             },
             mixing_instructions=mixing_instructions,
             acid_adjustment={
-                "ml_per_1000L": acid_adjustment.get("ml_per_1000L", 0),
-                "element_added_ppm": acid_adjustment.get("element_added_ppm", 0)
+                "ml_per_1000L": acid_adjustment.get("ml_per_1000L", 0) if acid_adjustment else 0
             } if acid_adjustment else None,
             success=1
         )
@@ -425,7 +411,7 @@ def calculate_fertilizer(
         db.commit()
         
         # ============================================================
-        # 15. ساخت پاسخ نهایی
+        # 14. ساخت پاسخ نهایی
         # ============================================================
         return CalculationResponse(
             success=True,
@@ -436,7 +422,7 @@ def calculate_fertilizer(
             tank_volume_liters=tank.volume_liters,
             target_needs_ppm=target_needs,
             water_contribution_ppm=water_contribution,
-            acid_contribution_ppm=acid_contribution,
+            acid_contribution_ppm={elem: 0.0 for elem in SUPPORTED_ELEMENTS},
             remaining_needs_ppm=remaining_needs,
             calculated_supply_ppm={k: round(v, 2) for k, v in calculated_supply.items()},
             doses=[DoseResponse(**d) for d in doses_with_tank],
@@ -450,7 +436,7 @@ def calculate_fertilizer(
             mixing_instructions=mixing_instructions,
             message="محاسبه با موفقیت انجام شد",
             acid_adjustment={
-                "ml_per_1000L": acid_adjustment.get("ml_per_1000L", 0),
+                "ml_per_1000L": acid_adjustment.get("ml_per_1000L", 0) if acid_adjustment else 0,
                 "hco3_neutralized": tank.water_hco3_ppm or 0
             } if acid_adjustment and acid_adjustment.get("ml_per_1000L", 0) > 0 else None
         )
@@ -466,7 +452,7 @@ def calculate_fertilizer(
 
 
 # ============================================================
-# Debug Endpoint (برای عیب‌یابی)
+# Debug Endpoints (برای عیب‌یابی)
 # ============================================================
 @router.get("/debug/stages")
 def debug_stages(db: Session = Depends(get_db)):
