@@ -45,23 +45,20 @@ class FertilizerBase(BaseModel):
     name: str
     brand_id: Optional[int] = None
     brand_name: Optional[str] = None
-    fertilizer_form: str = "power"  # powder, liquid
     chemical_formula: Optional[str] = None
     molecular_weight: Optional[float] = None
     purity_percent: float = 100.0
     fertilizer_type: Optional[str] = None
     max_dose_g_per_liter: Optional[float] = None
-    max_dose_ml_per_liter: Optional[float] = None
     min_dose_g_per_liter: Optional[float] = 0.01
-    density_g_per_ml: Optional[float] = None
-    
+
     n_percent: float = 0
     p_percent: float = 0
     k_percent: float = 0
     ca_percent: float = 0
     mg_percent: float = 0
     s_percent: float = 0
-    
+
     fe_percent: float = 0
     zn_percent: float = 0
     mn_percent: float = 0
@@ -69,11 +66,10 @@ class FertilizerBase(BaseModel):
     b_percent: float = 0
     mo_percent: float = 0
     cl_percent: float = 0
-    
+
     solubility_g_per_l: Optional[float] = None
     ph_effect: Optional[str] = None
     notes: Optional[str] = None
-    is_active: bool = True
 
 class FertilizerResponse(FertilizerBase):
     id: int
@@ -122,7 +118,6 @@ class AcidBase(BaseModel):
     supplies_element: Optional[str] = None
     element_percent: Optional[float] = None
     ml_per_1000L_per_ph_point: Optional[float] = None
-    notes: Optional[str] = None
 
 class AcidResponse(AcidBase):
     id: int
@@ -135,14 +130,14 @@ class TankBase(BaseModel):
     volume_liters: float = Field(..., gt=0, le=100000)
     water_ec_ms_cm: Optional[float] = Field(None, ge=0, le=10)
     water_ph: Optional[float] = Field(None, ge=0, le=14)
-    water_hco3_ppm: Optional[float] = Field(0, ge=0, le=500)
-    water_ca_ppm: Optional[float] = Field(0, ge=0)
-    water_mg_ppm: Optional[float] = Field(0, ge=0)
-    water_na_ppm: Optional[float] = Field(0, ge=0)
-    water_cl_ppm: Optional[float] = Field(0, ge=0)
-    water_so4_ppm: Optional[float] = Field(0, ge=0)
-    water_no3_ppm: Optional[float] = Field(0, ge=0)
-    water_fe_ppm: Optional[float] = Field(0, ge=0)
+    water_ca_ppm: float = 0
+    water_mg_ppm: float = 0
+    water_na_ppm: float = 0
+    water_cl_ppm: float = 0
+    water_so4_ppm: float = 0
+    water_hco3_ppm: float = 0
+    water_no3_ppm: float = 0
+    water_fe_ppm: float = 0
     notes: Optional[str] = None
 
 class TankCreate(TankBase):
@@ -168,13 +163,9 @@ class DoseResponse(BaseModel):
     id: int
     name: str
     brand_name: Optional[str]
-    fertilizer_form: str = "powder"
     dose_g_per_liter: float
-    dose_ml_per_liter: Optional[float] = None
     dose_g_for_tank: float
-    dose_ml_for_tank: Optional[float] = None
     stock_200x_g_per_liter: float
-    stock_200x_ml_per_liter: Optional[float] = None
     chemical_formula: Optional[str]
     max_dose_warning: Optional[str] = None
 
@@ -196,7 +187,7 @@ class CalculationResponse(BaseModel):
     tank_volume_liters: float
     target_needs_ppm: Dict[str, float]
     water_contribution_ppm: Dict[str, float]
-    acid_contribution_ppm: Dict[str, float]
+    acid_contribution_ppm: Optional[Dict[str, float]] = None  # ← آپشنال شد
     remaining_needs_ppm: Dict[str, float]
     calculated_supply_ppm: Dict[str, float]
     doses: List[DoseResponse]
@@ -204,7 +195,6 @@ class CalculationResponse(BaseModel):
     ec_ph_targets: Dict[str, Optional[float]]
     mixing_instructions: str
     message: Optional[str] = None
-    acid_adjustment: Optional[Dict[str, float]] = None
 
 
 class CalculationHistoryResponse(BaseModel):
@@ -217,6 +207,6 @@ class CalculationHistoryResponse(BaseModel):
     tank_volume_liters: float
     success: int
     error_message: Optional[str]
-    
+
     class Config:
         from_attributes = True
