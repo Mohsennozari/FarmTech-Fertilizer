@@ -154,6 +154,7 @@ class CalculationRequest(BaseModel):
     variety_name: str
     stage_name: str
     brand_filter: Optional[str] = None
+    tank_id: Optional[int] = None
     tank: TankCreate
     acid_id: Optional[int] = None
     acid_dose_ml_per_liter: Optional[float] = None
@@ -168,6 +169,17 @@ class DoseResponse(BaseModel):
     stock_200x_g_per_liter: float
     chemical_formula: Optional[str]
     max_dose_warning: Optional[str] = None
+
+
+# ============================================================
+# مهم: TankDosesResponse باید قبل از CalculationResponse تعریف شود
+# ============================================================
+
+class TankDosesResponse(BaseModel):
+    """کودهای یک مخزن"""
+    name: str
+    description: Optional[str] = None
+    doses: List[DoseResponse]
 
 
 class WarningResponse(BaseModel):
@@ -185,14 +197,17 @@ class CalculationResponse(BaseModel):
     variety_name: str
     tank_name: str
     tank_volume_liters: float
+    water_ec_ms_cm: Optional[float] = None  # اضافه شد
     target_needs_ppm: Dict[str, float]
     water_contribution_ppm: Dict[str, float]
-    acid_contribution_ppm: Optional[Dict[str, float]] = None  # ← آپشنال شد
+    acid_contribution_ppm: Optional[Dict[str, float]] = None
     remaining_needs_ppm: Dict[str, float]
     calculated_supply_ppm: Dict[str, float]
-    doses: List[DoseResponse]
+    tanks: List[TankDosesResponse]
     warnings: List[WarningResponse]
     ec_ph_targets: Dict[str, Optional[float]]
+    predicted_ec: float = 0.0  # اضافه شد
+    ec_warning: Optional[str] = None  # اضافه شد
     mixing_instructions: str
     message: Optional[str] = None
 
