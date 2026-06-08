@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict
 from datetime import datetime
 
 from .database import get_db
@@ -22,7 +22,9 @@ from .calculator import (
     calculate_acid_contribution,
     optimize_fertilizer_doses_professional,
     calculate_tank_doses,
-    generate_professional_mixing_instructions
+    generate_professional_mixing_instructions,
+    calculate_final_ec,
+    get_ec_warning
 )
 
 router = APIRouter()
@@ -187,8 +189,10 @@ def get_calculation_history(
     return db.query(CalculationHistory).order_by(
         CalculationHistory.created_at.desc()
     ).limit(limit).all()
-    # ============================================================
-# Main Calculation Endpoint (ادامه از بخش قبلی)
+
+
+# ============================================================
+# Main Calculation Endpoint
 # ============================================================
 
 @router.post("/calculate", response_model=CalculationResponse)
@@ -217,11 +221,35 @@ def calculate_fertilizer(
         if not stage:
             raise HTTPException(status_code=404, detail=f"Growth stage '{request.stage_name}' not found")
 
-        # 3. ایجاد مخزن موقت
+        # 3. ایجاد مخزن (اگر tank_id نباشد، جدید بساز)
         tank_data = request.tank.model_dump()
-        tank = Tank(**tank_data)
-        db.add(tank)
-        db.flush()
+
+        if request.tank_id:
+            # اگر tank_id ارسال شده، از مخزن موجود استفاده کن
+            existing_tank = db.query(Tank).filter(Tank.id == request.tank_id).first()
+            if existing_tank:
+                # به‌روزرسانی پارامترهای موقت آب
+                existing_tank.water_ec_ms_cm = tank_data.get('water_ec_ms_cm')
+                existing_tank.water_ph = tank_data.get('water_ph')
+                existing_tank.water_ca_ppm = tank_data.get('water_ca_ppm', 0)
+                existing_tank.water_mg_ppm = tank_data.get('water_mg_ppm', 0)
+                existing_tank.water_na_ppm = tank_data.get('water_na_ppm', 0)
+                existing_tank.water_cl_ppm = tank_data.get('water_cl_ppm', 0)
+                existing_tank.water_so4_ppm = tank_data.get('water_so4_ppm', 0)
+                existing_tank.water_hco3_ppm = tank_data.get('water_hco3_ppm', 0)
+                existing_tank.water_no3_ppm = tank_data.get('water_no3_ppm', 0)
+                existing_tank.water_fe_ppm = tank_data.get('water_fe_ppm', 0)
+                tank = existing_tank
+            else:
+                # اگر مخزن وجود نداشت، مخزن جدید بساز
+                tank = Tank(**tank_data)
+                db.add(tank)
+                db.flush()
+        else:
+            # اگر tank_id ارسال نشده بود، مخزن جدید بساز
+            tank = Tank(**tank_data)
+            db.add(tank)
+            db.flush()
 
         # 4. نیازهای هدف گیاه
         target_needs = stage.nutrient_needs or {}
@@ -256,17 +284,30 @@ def calculate_fertilizer(
 
         # 9. بهینه‌سازی دوز کودها (نسخه بهبود یافته)
         doses, calculated_supply, optimization_warnings = optimize_fertilizer_doses_professional(
-            remaining_needs, all_fertilizers, request.brand_filter, max_total_dose=5.0
+            remaining_needs, all_fertilizers, request.brand_filter, 5.0
         )
 
         # 10. محاسبه دوز برای حجم مخزن و استوک 200x
         doses_with_tank = calculate_tank_doses(doses, tank.volume_liters)
 
-        # 11. بررسی تداخلات شیمیایی بین کودهای انتخاب شده
+        # 11. محاسبه EC نهایی
+        water_ec = tank.water_ec_ms_cm or 0.0
+        predicted_ec = calculate_final_ec(water_ec, doses_with_tank)
+        ec_warning = get_ec_warning(
+            predicted_ec,
+            stage.target_ec_min,
+            stage.target_ec_max
+        )
+
+        # 12. بررسی تداخلات شیمیایی بین کودهای انتخاب شده
         selected_fertilizer_ids = [d['id'] for d in doses_with_tank]
         interaction_warnings = check_fertilizer_interactions(selected_fertilizer_ids, db)
 
-        # 12. ترکیب همه هشدارها
+        # 13. تفکیک به مخازن A و B
+        from .calculator import separate_into_tanks
+        separated_tanks = separate_into_tanks(doses_with_tank)
+
+        # 14. ترکیب همه هشدارها
         all_warnings = []
 
         # هشدارهای بهینه‌سازی
@@ -289,12 +330,22 @@ def calculate_fertilizer(
                 fertilizers=warn.get('fertilizers', [])
             ))
 
-        # 13. تولید دستورالعمل اختلاط
+        # هشدار EC
+        if ec_warning:
+            all_warnings.append(WarningResponse(
+                type="ec_warning",
+                severity="warning",
+                product=None,
+                description=ec_warning,
+                fertilizers=[]
+            ))
+
+        # 15. تولید دستورالعمل اختلاط
         mixing_instructions = generate_professional_mixing_instructions(
             doses_with_tank, [w.model_dump() for w in all_warnings], tank.volume_liters
         )
 
-        # 14. ذخیره در تاریخچه
+        # 16. ذخیره در تاریخچه
         history = CalculationHistory(
             crop_name=request.crop_name,
             variety_name=request.variety_name,
@@ -323,7 +374,7 @@ def calculate_fertilizer(
         db.add(history)
         db.commit()
 
-        # 15. بازگشت پاسخ
+        # 17. بازگشت پاسخ
         return CalculationResponse(
             success=True,
             created_at=datetime.now(),
@@ -333,9 +384,10 @@ def calculate_fertilizer(
             tank_volume_liters=tank.volume_liters,
             target_needs_ppm=target_needs,
             water_contribution_ppm=water_contribution,
+            acid_contribution_ppm=acid_contribution,
             remaining_needs_ppm=remaining_needs,
             calculated_supply_ppm={k: round(v, 2) for k, v in calculated_supply.items()},
-            doses=[DoseResponse(**d) for d in doses_with_tank],
+            tanks=separated_tanks,
             warnings=all_warnings,
             ec_ph_targets={
                 "ec_min": stage.target_ec_min,
@@ -343,6 +395,8 @@ def calculate_fertilizer(
                 "ph_min": stage.target_ph_min,
                 "ph_max": stage.target_ph_max
             },
+            predicted_ec=predicted_ec,
+            ec_warning=ec_warning,
             mixing_instructions=mixing_instructions,
             message="Calculation completed successfully"
         )
