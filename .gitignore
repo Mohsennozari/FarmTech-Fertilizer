@@ -42,3 +42,9 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+echo "__pycache__/" >> .gitignore
+echo "*.db" >> .gitignore
+git add .gitignore
+git commit -m "chore: update .gitignore - exclude pycache and database"
+git push origin mohsen
