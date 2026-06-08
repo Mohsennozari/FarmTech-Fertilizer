@@ -1,7 +1,10 @@
+
+
+
 # 🌱 FarmTech - سیستم هوشمند نسخه‌دهی کود دیجیتال
 
 **Version:** 3.1.0
-**Release Date:** 1405/03/18
+**Release Date:** 1405/03/16
 **Status:** ✅ Active & Production Ready
 
 ---
@@ -26,15 +29,14 @@
 
 ## Overview
 
-**FarmTech** is a professional digital fertilizer prescription system for hydroponic cultivation. Using advanced optimization algorithms (Layered SLSQP) and agricultural chemistry knowledge, it calculates optimal fertilizer doses based on:
+**FarmTech** is a professional digital fertilizer prescription system for hydroponic cultivation. Using advanced optimization algorithms (SLSQP) and agricultural chemistry knowledge, it calculates optimal fertilizer doses based on:
 
 - ✅ **13 essential elements** (N, P, K, Ca, Mg, S, Fe, Zn, Mn, Cu, B, Mo, Cl)
 - ✅ **Crop growth stage** nutritional requirements
 - ✅ **Available fertilizers** (auto-selected by the system)
-- ✅ **Water quality analysis** (EC, pH, Calcium, Magnesium, Bicarbonate)
+- ✅ **Water quality analysis** (EC, pH, Calcium, Magnesium)
 - ✅ **Chemical interactions** (precipitation warnings)
 - ✅ **Brand filtering** (manufacturer selection)
-- ✅ **Final EC prediction** with warning system
 
 ---
 
@@ -45,9 +47,7 @@
 | Feature | Description |
 |---------|-------------|
 | **13 Essential Elements** | Complete nutritional profile |
-| **Layered Optimization** | 3 layers: NPK → Secondary → Micro |
-| **Tank Separation** | Automatic calcium separation (Tank A / Tank B) |
-| **EC Prediction** | Final EC calculation with target range warnings |
+| **SLSQP Optimization** | Constrained optimization with physical limits |
 | **Interaction Detection** | Automatic precipitation and antagonism warnings |
 | **Water & Acid Contribution** | Subtracts from plant requirements |
 
@@ -69,7 +69,6 @@
 | **Responsive** | Mobile, tablet, and desktop ready |
 | **Persian Fonts** | Vazirmatn, Sahel, Samim, Yekan |
 | **Print Ready** | Optimized print layout |
-| **Tank Display** | Separate display for Tank A (Calcium) and Tank B (Main) |
 
 ---
 
@@ -227,7 +226,7 @@ FarmTech-Fertilizer/              # Root directory (any name works)
 │   │   ├── database.py           # Database connection
 │   │   ├── models.py             # SQLAlchemy models
 │   │   ├── schemas.py            # Pydantic schemas
-│   │   ├── calculator.py         # Core optimization logic (Layered)
+│   │   ├── calculator.py         # Core optimization logic
 │   │   ├── routes.py             # API endpoints
 │   │   └── seed.py               # Database seed script
 │   │
@@ -242,7 +241,7 @@ FarmTech-Fertilizer/              # Root directory (any name works)
 │   ├── src/
 │   │   ├── components/           # Vue components
 │   │   │   ├── calculator/
-│   │   │   │   └── ResultsDisplay.vue  # Displays Tank A/B + EC
+│   │   │   │   └── ResultsDisplay.vue
 │   │   │   └── common/
 │   │   │       ├── Button.vue
 │   │   │       ├── Card.vue
@@ -251,7 +250,7 @@ FarmTech-Fertilizer/              # Root directory (any name works)
 │   │   │       ├── LoadingSpinner.vue
 │   │   │       └── Select.vue
 │   │   ├── views/
-│   │   │   └── CalculatorView.vue  # Main calculator with HCO₃ field
+│   │   │   └── CalculatorView.vue
 │   │   ├── router/
 │   │   │   └── index.ts
 │   │   ├── App.vue
@@ -264,8 +263,6 @@ FarmTech-Fertilizer/              # Root directory (any name works)
 │   ├── tailwind.config.js
 │   └── postcss.config.js
 │
-├── backup.py                     # Database backup utility
-├── generate_context.py           # Core context generator
 ├── .gitignore
 └── README.md
 ```
@@ -301,13 +298,11 @@ POST /api/v1/calculate
   "variety_name": "سن اندرسا",
   "stage_name": "رشد رویشی",
   "brand_filter": null,
-  "tank_id": 1,
   "tank": {
     "name": "مخزن A",
     "volume_liters": 1000,
     "water_ec_ms_cm": 0.8,
     "water_ph": 7.0,
-    "water_hco3_ppm": 120,
     "water_ca_ppm": 40,
     "water_mg_ppm": 15
   }
@@ -323,18 +318,12 @@ POST /api/v1/calculate
   "variety_name": "سن اندرسا",
   "tank_name": "مخزن A",
   "tank_volume_liters": 1000,
-  "predicted_ec": 1.6,
-  "ec_warning": null,
-  "tanks": [
+  "doses": [
     {
-      "name": "🧪 مخزن A - کلسیم",
-      "description": "⚠️ این مخزن حاوی کلسیم است. هرگز با مخزن B مخلوط نشود!",
-      "doses": [...]
-    },
-    {
-      "name": "🧪 مخزن B - اصلی",
-      "description": "حاوی NPK، منیزیم، سولفات و ریز مغذی‌ها",
-      "doses": [...]
+      "name": "فرتی‌گل 36-12-12",
+      "dose_g_per_liter": 0.85,
+      "dose_g_for_tank": 850,
+      "stock_200x_g_per_liter": 170
     }
   ],
   "warnings": [],
@@ -368,7 +357,7 @@ POST /api/v1/calculate
 src/
 ├── components/
 │   ├── calculator/
-│   │   └── ResultsDisplay.vue    # Calculation results (Tank A/B + EC)
+│   │   └── ResultsDisplay.vue    # Calculation results
 │   └── common/
 │       ├── Button.vue            # Reusable button
 │       ├── Card.vue              # Content card
@@ -388,16 +377,14 @@ src/
 2. **Select growth stage** (5 stages available)
 3. **Filter by brand** (optional)
 4. **Select or create a tank**
-5. **Enter water parameters** (EC, pH, HCO₃, Ca, Mg)
+5. **Enter water parameters** (EC, pH, Ca, Mg)
 6. **Click "Calculate Optimal Mix"**
 7. **View results:**
-   - Tank A (Calcium) and Tank B (Main) separated
    - Fertilizer doses (g/L and total for tank)
    - 200x stock solution instructions
    - Target vs. supplied nutrients (ppm)
-   - Final EC prediction with target range check
    - Chemical interaction warnings
-   - Professional mixing instructions
+   - Mixing instructions
 
 ---
 
@@ -407,20 +394,16 @@ src/
 
 | Improvement | Description |
 |-------------|-------------|
-| **Layered Optimization** | 3 independent layers: NPK → Secondary → Micro |
-| **SLSQP Algorithm** | Constrained optimization with physical limits |
+| **SLSQP Algorithm** | Replaced least squares with constrained optimization |
 | **Dose Bounds** | Min/max dose per fertilizer enforced |
 | **Total Dose Limit** | Maximum 5 g/L to prevent precipitation |
-| **Numerical Stability** | 99% stability (no more locking) |
+| **Numerical Stability** | Ignore elements with < 0.5 ppm requirement |
 
 ### Chemical Improvements
 
 | Improvement | Description |
 |-------------|-------------|
-| **Tank Separation** | Automatic calcium separation (Tank A / Tank B) |
 | **K/Ca Ratio Fix** | Reduced potassium, increased calcium across all stages |
-| **EC Prediction** | Final EC calculation with coefficient table |
-| **HCO₃ Support** | Bicarbonate water parameter added |
 | **Interactions Enabled** | Precipitation warning system activated |
 | **Sulfuric Acid Added** | pH adjustment and sulfur supply |
 | **Potassium Chloride Added** | Chlorine element supply |
@@ -432,12 +415,7 @@ src/
 | Element Coverage | 85% | 95% |
 | K/Ca Ratio (Vegetative) | 1.88 ❌ | 1.14 ✅ |
 | Interaction Checking | Disabled | Enabled |
-| Optimization Algorithm | Least Squares (unstable) | Layered SLSQP (stable) |
-| Tank Separation | ❌ | ✅ (A: Calcium, B: Main) |
-| EC Prediction | ❌ | ✅ |
-| Output Fertilizers | 19 | 4-6 |
-| Algorithm Stability | 70% | 99% |
-| Industry Standard Alignment | 40% | 85% |
+| Optimization Algorithm | Least Squares | SLSQP |
 
 ---
 
@@ -470,21 +448,7 @@ python -c "from app.seed import init_db; init_db()"
 
 1. Add more fertilizers to the database
 2. Widen dose bounds for existing fertilizers
-3. The layered algorithm handles this better than previous version
-
-### Error: Cannot delete tank (foreign key constraint)
-
-```bash
-# Delete calculation history first
-python -c "
-from app.database import SessionLocal
-from app.models import CalculationHistory, Tank
-db = SessionLocal()
-db.query(CalculationHistory).filter(CalculationHistory.tank_id == TANK_ID).delete()
-db.query(Tank).filter(Tank.id == TANK_ID).delete()
-db.commit()
-"
-```
+3. Ignore elements with very low requirements (already handled)
 
 ### Port already in use
 
@@ -521,17 +485,6 @@ Then re-initialize database:
 
 ```bash
 python -c "from app.seed import init_db; init_db()"
-```
-
-### Adding EC Coefficient for New Fertilizer
-
-Edit `backend/app/calculator.py` and add to `EC_COEFFICIENTS`:
-
-```python
-EC_COEFFICIENTS = {
-    # ... existing coefficients ...
-    "Your Fertilizer Name": 0.70,
-}
 ```
 
 ### Adding a Chemical Interaction
@@ -607,30 +560,6 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ---
 
-## Utilities
-
-### Backup Script
-
-```bash
-# Run backup
-python backup.py
-
-# List backups
-python backup.py list
-
-# Restore from backup
-python backup.py restore
-```
-
-### Generate Core Context
-
-```bash
-# Generate CORE_CONTEXT.md with all source files
-python generate_context.py
-```
-
----
-
 ## License
 
 This project is licensed under the **MIT License**.
@@ -643,10 +572,7 @@ For issues, bug reports, or feature requests, please use the GitHub Issues secti
 
 ---
 
-## Contributors
-
-- FarmTech Development Team
-
----
-
 **Built with 🌱 for sustainable agriculture**
+
+
+

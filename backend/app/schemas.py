@@ -45,20 +45,23 @@ class FertilizerBase(BaseModel):
     name: str
     brand_id: Optional[int] = None
     brand_name: Optional[str] = None
+    fertilizer_form: str = "power"  # powder, liquid
     chemical_formula: Optional[str] = None
     molecular_weight: Optional[float] = None
     purity_percent: float = 100.0
     fertilizer_type: Optional[str] = None
     max_dose_g_per_liter: Optional[float] = None
+    max_dose_ml_per_liter: Optional[float] = None
     min_dose_g_per_liter: Optional[float] = 0.01
-
+    density_g_per_ml: Optional[float] = None
+    
     n_percent: float = 0
     p_percent: float = 0
     k_percent: float = 0
     ca_percent: float = 0
     mg_percent: float = 0
     s_percent: float = 0
-
+    
     fe_percent: float = 0
     zn_percent: float = 0
     mn_percent: float = 0
@@ -66,10 +69,11 @@ class FertilizerBase(BaseModel):
     b_percent: float = 0
     mo_percent: float = 0
     cl_percent: float = 0
-
+    
     solubility_g_per_l: Optional[float] = None
     ph_effect: Optional[str] = None
     notes: Optional[str] = None
+    is_active: bool = True
 
 class FertilizerResponse(FertilizerBase):
     id: int
@@ -118,6 +122,7 @@ class AcidBase(BaseModel):
     supplies_element: Optional[str] = None
     element_percent: Optional[float] = None
     ml_per_1000L_per_ph_point: Optional[float] = None
+    notes: Optional[str] = None
 
 class AcidResponse(AcidBase):
     id: int
@@ -130,14 +135,14 @@ class TankBase(BaseModel):
     volume_liters: float = Field(..., gt=0, le=100000)
     water_ec_ms_cm: Optional[float] = Field(None, ge=0, le=10)
     water_ph: Optional[float] = Field(None, ge=0, le=14)
-    water_ca_ppm: float = 0
-    water_mg_ppm: float = 0
-    water_na_ppm: float = 0
-    water_cl_ppm: float = 0
-    water_so4_ppm: float = 0
-    water_hco3_ppm: float = 0
-    water_no3_ppm: float = 0
-    water_fe_ppm: float = 0
+    water_hco3_ppm: Optional[float] = Field(0, ge=0, le=500)
+    water_ca_ppm: Optional[float] = Field(0, ge=0)
+    water_mg_ppm: Optional[float] = Field(0, ge=0)
+    water_na_ppm: Optional[float] = Field(0, ge=0)
+    water_cl_ppm: Optional[float] = Field(0, ge=0)
+    water_so4_ppm: Optional[float] = Field(0, ge=0)
+    water_no3_ppm: Optional[float] = Field(0, ge=0)
+    water_fe_ppm: Optional[float] = Field(0, ge=0)
     notes: Optional[str] = None
 
 class TankCreate(TankBase):
@@ -154,7 +159,6 @@ class CalculationRequest(BaseModel):
     variety_name: str
     stage_name: str
     brand_filter: Optional[str] = None
-    tank_id: Optional[int] = None
     tank: TankCreate
     acid_id: Optional[int] = None
     acid_dose_ml_per_liter: Optional[float] = None
@@ -164,22 +168,15 @@ class DoseResponse(BaseModel):
     id: int
     name: str
     brand_name: Optional[str]
+    fertilizer_form: str = "powder"
     dose_g_per_liter: float
+    dose_ml_per_liter: Optional[float] = None
     dose_g_for_tank: float
+    dose_ml_for_tank: Optional[float] = None
     stock_200x_g_per_liter: float
+    stock_200x_ml_per_liter: Optional[float] = None
     chemical_formula: Optional[str]
     max_dose_warning: Optional[str] = None
-
-
-# ============================================================
-# مهم: TankDosesResponse باید قبل از CalculationResponse تعریف شود
-# ============================================================
-
-class TankDosesResponse(BaseModel):
-    """کودهای یک مخزن"""
-    name: str
-    description: Optional[str] = None
-    doses: List[DoseResponse]
 
 
 class WarningResponse(BaseModel):
@@ -197,19 +194,17 @@ class CalculationResponse(BaseModel):
     variety_name: str
     tank_name: str
     tank_volume_liters: float
-    water_ec_ms_cm: Optional[float] = None  # اضافه شد
     target_needs_ppm: Dict[str, float]
     water_contribution_ppm: Dict[str, float]
-    acid_contribution_ppm: Optional[Dict[str, float]] = None
+    acid_contribution_ppm: Dict[str, float]
     remaining_needs_ppm: Dict[str, float]
     calculated_supply_ppm: Dict[str, float]
-    tanks: List[TankDosesResponse]
+    doses: List[DoseResponse]
     warnings: List[WarningResponse]
     ec_ph_targets: Dict[str, Optional[float]]
-    predicted_ec: float = 0.0  # اضافه شد
-    ec_warning: Optional[str] = None  # اضافه شد
     mixing_instructions: str
     message: Optional[str] = None
+    acid_adjustment: Optional[Dict[str, float]] = None
 
 
 class CalculationHistoryResponse(BaseModel):
@@ -222,6 +217,6 @@ class CalculationHistoryResponse(BaseModel):
     tank_volume_liters: float
     success: int
     error_message: Optional[str]
-
+    
     class Config:
         from_attributes = True
