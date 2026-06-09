@@ -1,5 +1,3 @@
-<!-- Platform-v3\frontend\src\views\CalculatorView.vue -->
-
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
@@ -152,6 +150,10 @@
               <option value="">همه برندها</option>
               <option value="گل سم گرگان">گل سم گرگان</option>
               <option value="رازاک شیمی">رازاک شیمی</option>
+              <option value="گرین استار">گرین استار</option>
+              <option value="زاگرا استار">زاگرا استار</option>
+              <option value="اطلس">اطلس</option>
+              <option value="ردسا">ردسا</option>
             </select>
             <p class="text-xs text-gray-400 mt-1">در صورت تمایل می‌توانید برند خاصی را فیلتر کنید</p>
           </div>
@@ -193,62 +195,62 @@
                   v-model.number="tankMain.water_ec_ms_cm"
                   label="EC آب (mS/cm)"
                   type="number"
-                  placeholder="0.4"
+                  placeholder="اختیاری"
                   icon="M13 10V3L4 14h7v7l9-11h-7z"
                   :step="0.1"
                   :min="0"
-                  help-text="مقدار EC آب پایه - معمولاً بین 0.2 تا 0.8"
+                  help-text="مقدار EC آب پایه - اختیاری"
                 />
                 <InputField
                   v-model.number="tankMain.water_ph"
                   label="pH آب"
                   type="number"
-                  placeholder="7.0"
+                  placeholder="اختیاری"
                   icon="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 6.34l-1.41-1.41M17.66 6.34l1.41-1.41"
                   :step="0.1"
                   :min="0"
                   :max="14"
-                  help-text="pH آب پایه - معمولاً بین 6.5 تا 7.5"
+                  help-text="pH آب پایه - اختیاری"
                 />
                 <InputField
                   v-model.number="tankMain.water_ca_ppm"
                   label="کلسیم آب (ppm)"
                   type="number"
-                  placeholder="40"
+                  placeholder="اختیاری"
                   icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM12 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
                   :step="1"
                   :min="0"
-                  help-text="مقدار کلسیم موجود در آب - از آنالیز آب بدست می‌آید"
+                  help-text="مقدار کلسیم موجود در آب - اختیاری"
                 />
                 <InputField
                   v-model.number="tankMain.water_mg_ppm"
                   label="منیزیم آب (ppm)"
                   type="number"
-                  placeholder="15"
+                  placeholder="اختیاری"
                   icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM12 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
                   :step="1"
                   :min="0"
-                  help-text="مقدار منیزیم موجود در آب - از آنالیز آب بدست می‌آید"
+                  help-text="مقدار منیزیم موجود در آب - اختیاری"
                 />
                 <InputField
                   v-model.number="tankMain.water_hco3_ppm"
                   label="بیکربنات (ppm)"
                   type="number"
-                  placeholder="0"
+                  placeholder="اختیاری"
                   icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   :step="1"
                   :min="0"
-                  help-text="بیکربنات آب - هرچه بالاتر باشد، نیاز به اسید بیشتری برای تنظیم pH دارد"
+                  help-text="بیکربنات آب - اختیاری"
                 />
                 <InputField
                   v-model.number="tankMain.water_cl_ppm"
                   label="کلر آب (ppm)"
                   type="number"
-                  placeholder="0"
+                  placeholder="اختیاری"
                   icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
                   :step="1"
                   :min="0"
-                  help-text="کلر آب - مقادیر بالای 50 ppm برای گیاه مضر است"
+                  help-text="کلر آب - اختیاری"
                 />
               </div>
             </div>
@@ -291,63 +293,108 @@
                   v-model.number="tankCalcium.water_ec_ms_cm"
                   label="EC آب (mS/cm)"
                   type="number"
-                  placeholder="0.4"
+                  placeholder="اختیاری"
                   icon="M13 10V3L4 14h7v7l9-11h-7z"
                   :step="0.1"
                   :min="0"
-                  help-text="مقدار EC آب پایه - معمولاً بین 0.2 تا 0.8"
+                  help-text="مقدار EC آب پایه - اختیاری"
                 />
                 <InputField
                   v-model.number="tankCalcium.water_ph"
                   label="pH آب"
                   type="number"
-                  placeholder="7.0"
+                  placeholder="اختیاری"
                   icon="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 6.34l-1.41-1.41M17.66 6.34l1.41-1.41"
                   :step="0.1"
                   :min="0"
                   :max="14"
-                  help-text="pH آب پایه - معمولاً بین 6.5 تا 7.5"
+                  help-text="pH آب پایه - اختیاری"
                 />
                 <InputField
                   v-model.number="tankCalcium.water_ca_ppm"
                   label="کلسیم آب (ppm)"
                   type="number"
-                  placeholder="40"
+                  placeholder="اختیاری"
                   icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM12 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
                   :step="1"
                   :min="0"
-                  help-text="مقدار کلسیم موجود در آب - از آنالیز آب بدست می‌آید"
+                  help-text="مقدار کلسیم موجود در آب - اختیاری"
                 />
                 <InputField
                   v-model.number="tankCalcium.water_mg_ppm"
                   label="منیزیم آب (ppm)"
                   type="number"
-                  placeholder="15"
+                  placeholder="اختیاری"
                   icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM12 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
                   :step="1"
                   :min="0"
-                  help-text="مقدار منیزیم موجود در آب - از آنالیز آب بدست می‌آید"
+                  help-text="مقدار منیزیم موجود در آب - اختیاری"
                 />
                 <InputField
                   v-model.number="tankCalcium.water_hco3_ppm"
                   label="بیکربنات (ppm)"
                   type="number"
-                  placeholder="0"
+                  placeholder="اختیاری"
                   icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   :step="1"
                   :min="0"
-                  help-text="بیکربنات آب - هرچه بالاتر باشد، نیاز به اسید بیشتری برای تنظیم pH دارد"
+                  help-text="بیکربنات آب - اختیاری"
                 />
                 <InputField
                   v-model.number="tankCalcium.water_cl_ppm"
                   label="کلر آب (ppm)"
                   type="number"
-                  placeholder="0"
+                  placeholder="اختیاری"
                   icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
                   :step="1"
                   :min="0"
-                  help-text="کلر آب - مقادیر بالای 50 ppm برای گیاه مضر است"
+                  help-text="کلر آب - اختیاری"
                 />
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================================ -->
+          <!-- تنظیمات سیستم استوک -->
+          <!-- ============================================================ -->
+          <div class="border border-purple-200 rounded-xl overflow-hidden">
+            <div class="bg-purple-50 px-4 py-3 border-b border-purple-200">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+                <h3 class="font-semibold text-purple-800">تنظیمات سیستم استوک (محلول مادر)</h3>
+              </div>
+              <p class="text-xs text-purple-600 mt-1">این تنظیمات برای محاسبه مقدار کود مورد نیاز برای ساخت استوک استفاده می‌شود</p>
+            </div>
+            <div class="p-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField
+                  v-model.number="stockTankVolume"
+                  label="حجم مخزن استوک (لیتر)"
+                  type="number"
+                  placeholder="20"
+                  icon="M4 20h16a2 2 0 002-2V8a2 2 0 00-2-2h-7.93a2 2 0 01-1.66-.9l-.82-1.2A2 2 0 007.93 3H4a2 2 0 00-2 2v13a2 2 0 002 2z"
+                  :step="1"
+                  :min="1"
+                  :max="500"
+                  help-text="ظرفی که محلول استوک در آن ساخته می‌شود - پیش‌فرض 20 لیتر"
+                />
+                <InputField
+                  v-model.number="injectorRatio"
+                  label="نسبت تزریق (1 : X)"
+                  type="number"
+                  placeholder="200"
+                  icon="M13 10V3L4 14h7v7l9-11h-7z"
+                  :step="10"
+                  :min="50"
+                  :max="1000"
+                  help-text="مثال: 200 یعنی 1 لیتر استوک + 199 لیتر آب = 200 لیتر محلول نهایی"
+                />
+              </div>
+              <div class="mt-3 text-xs text-gray-500 bg-gray-50 rounded-lg p-2">
+                <span class="font-medium">💡 مفهوم نسبت تزریق:</span>
+                <span> به ازای هر 1 لیتر استوک، {{ injectorRatio - 1 }} لیتر آب اضافه می‌شود تا {{ injectorRatio }} لیتر محلول نهایی بدست آید.</span>
               </div>
             </div>
           </div>
@@ -406,7 +453,11 @@
 
       <!-- Results -->
       <div v-if="result" class="mt-8">
-        <ResultsDisplay :result="result" />
+        <ResultsDisplay 
+          :result="result" 
+          :stock-tank-volume="stockTankVolume"
+          :injector-ratio="injectorRatio"
+        />
       </div>
     </main>
   </div>
@@ -432,6 +483,12 @@ const errorMessage = ref('')
 const validationErrors = ref<string[]>([])
 const showFertilizerList = ref(false)
 const fertilizers = ref<any[]>([])
+
+// ============================================================
+// فیلدهای جدید سیستم استوک
+// ============================================================
+const stockTankVolume = ref(20)
+const injectorRatio = ref(200)
 
 // مخزن اصلی
 const tankMain = ref({
@@ -525,11 +582,17 @@ const calculateDualTank = async () => {
   if (!selectedStage.value) {
     validationErrors.value.push('لطفاً مرحله رشد را انتخاب کنید')
   }
-  if (!tankMain.value.volume_liters || tankMain.value.volume_liters <= 0) {
-    validationErrors.value.push('حجم مخزن اصلی را وارد کنید')
+  
+  // اعتبارسنجی حجم مخزن اصلی
+  const mainVolume = Number(tankMain.value.volume_liters)
+  if (isNaN(mainVolume) || mainVolume <= 0) {
+    validationErrors.value.push('حجم مخزن اصلی معتبر نیست (باید عدد مثبت باشد)')
   }
-  if (!tankCalcium.value.volume_liters || tankCalcium.value.volume_liters <= 0) {
-    validationErrors.value.push('حجم مخزن کلسیم را وارد کنید')
+  
+  // اعتبارسنجی حجم مخزن کلسیم
+  const calciumVolume = Number(tankCalcium.value.volume_liters)
+  if (isNaN(calciumVolume) || calciumVolume <= 0) {
+    validationErrors.value.push('حجم مخزن کلسیم معتبر نیست (باید عدد مثبت باشد)')
   }
 
   if (validationErrors.value.length > 0) {
@@ -547,13 +610,37 @@ const calculateDualTank = async () => {
       stage_name: selectedStage.value,
       brand_filter: selectedBrand.value || null,
       tank_main: {
-        ...tankMain.value,
-        volume_liters: Number(tankMain.value.volume_liters)
+        name: tankMain.value.name,
+        tank_type: tankMain.value.tank_type,
+        volume_liters: mainVolume,
+        water_ec_ms_cm: tankMain.value.water_ec_ms_cm,
+        water_ph: tankMain.value.water_ph,
+        water_ca_ppm: tankMain.value.water_ca_ppm || 0,
+        water_mg_ppm: tankMain.value.water_mg_ppm || 0,
+        water_hco3_ppm: tankMain.value.water_hco3_ppm || 0,
+        water_cl_ppm: tankMain.value.water_cl_ppm || 0,
+        water_na_ppm: tankMain.value.water_na_ppm || 0,
+        water_so4_ppm: tankMain.value.water_so4_ppm || 0,
+        water_no3_ppm: tankMain.value.water_no3_ppm || 0,
+        water_fe_ppm: tankMain.value.water_fe_ppm || 0
       },
       tank_calcium: {
-        ...tankCalcium.value,
-        volume_liters: Number(tankCalcium.value.volume_liters)
-      }
+        name: tankCalcium.value.name,
+        tank_type: tankCalcium.value.tank_type,
+        volume_liters: calciumVolume,
+        water_ec_ms_cm: tankCalcium.value.water_ec_ms_cm,
+        water_ph: tankCalcium.value.water_ph,
+        water_ca_ppm: tankCalcium.value.water_ca_ppm || 0,
+        water_mg_ppm: tankCalcium.value.water_mg_ppm || 0,
+        water_hco3_ppm: tankCalcium.value.water_hco3_ppm || 0,
+        water_cl_ppm: tankCalcium.value.water_cl_ppm || 0,
+        water_na_ppm: tankCalcium.value.water_na_ppm || 0,
+        water_so4_ppm: tankCalcium.value.water_so4_ppm || 0,
+        water_no3_ppm: tankCalcium.value.water_no3_ppm || 0,
+        water_fe_ppm: tankCalcium.value.water_fe_ppm || 0
+      },
+      stock_tank_volume_liters: stockTankVolume.value,
+      injector_ratio: injectorRatio.value
     }
     
     console.log('Sending request:', payload)

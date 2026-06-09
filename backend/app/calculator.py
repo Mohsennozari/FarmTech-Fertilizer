@@ -1,5 +1,3 @@
-# Platform-v3\backend\app\calculator.py
-
 import numpy as np
 from typing import List, Dict, Tuple, Optional
 
@@ -440,6 +438,158 @@ def optimize_fertilizer_doses_professional(
     return result_doses, final_supply, all_warnings
 
 
+# ============================================================
+# توابع محاسبات استوک (جدید در نسخه 3.3.0)
+# ============================================================
+
+def calculate_dose_kg_for_stock(
+    dose_gpl: float,
+    injector_ratio: float,
+    stock_tank_volume_liters: float
+) -> float:
+    """
+    محاسبه مقدار کود مورد نیاز برای ساخت استوک (کیلوگرم)
+    
+    فرمول: مقدار کود (کیلوگرم) = (دوز مصرف (گرم در لیتر) × نسبت تزریق (X) × حجم استوک (لیتر)) ÷ 1000
+    
+    Args:
+        dose_gpl: دوز مصرف کود به گرم در لیتر (محلول نهایی)
+        injector_ratio: نسبت تزریق (مثلاً 200 برای 1:200)
+        stock_tank_volume_liters: حجم مخزن استوک به لیتر
+    
+    Returns:
+        مقدار کود به کیلوگرم (با گردش به 2 رقم اعشار)
+    """
+    dose_kg = (dose_gpl * injector_ratio * stock_tank_volume_liters) / 1000
+    return round(dose_kg, 2)
+
+
+def calculate_stock_consumption(
+    injector_ratio: float,
+    main_tank_volume_liters: float
+) -> Tuple[float, float]:
+    """
+    محاسبه مقدار مصرف استوک در مخزن اصلی
+    
+    Args:
+        injector_ratio: نسبت تزریق (مثلاً 200 برای 1:200)
+        main_tank_volume_liters: حجم مخزن اصلی به لیتر
+    
+    Returns:
+        (stock_liters_for_main_tank, stock_ml_per_liter)
+        - stock_liters_for_main_tank: مقدار استوک بر حسب لیتر برای کل مخزن
+        - stock_ml_per_liter: مقدار استوک بر حسب میلی‌لیتر برای هر لیتر آب
+    """
+    stock_liters_for_main_tank = round(main_tank_volume_liters / injector_ratio, 2)
+    stock_ml_per_liter = round(1000 / injector_ratio, 1)
+    return stock_liters_for_main_tank, stock_ml_per_liter
+
+
+def get_injector_explanation(injector_ratio: float) -> str:
+    """تولید توضیح ساده برای مفهوم نسبت تزریق"""
+    water_ratio = injector_ratio - 1
+    return f"""📖 نسبت تزریق 1:{int(injector_ratio)} یعنی:
+   1 لیتر استوک + {int(water_ratio)} لیتر آب = {int(injector_ratio)} لیتر محلول نهایی
+
+مثال با نسبت 1:{int(injector_ratio)}:
+   1 لیتر استوک + {int(water_ratio)} لیتر آب = {int(injector_ratio)} لیتر محلول نهایی"""
+
+
+def get_stock_mixing_instructions(fertilizer_names: List[str]) -> str:
+    """تولید دستورالعمل گام به گام ساخت استوک"""
+    instructions = """🔧 روش ساخت استوک:
+1. مخزن تمیز با حجم مناسب آماده کنید
+2. 70% حجم مخزن را آب بریزید
+3. کودها را به ترتیب زیر اضافه کنید:\n"""
+    
+    for i, name in enumerate(fertilizer_names, 1):
+        instructions += f"   {i}. {name}\n"
+    
+    instructions += """4. بعد از هر کود، 2 دقیقه هم بزنید
+5. آب را به حجم نهایی برسانید
+6. 5 دقیقه دیگر هم بزنید
+7. برچسب بزنید: نام کودها، تاریخ ساخت، نسبت تزریق"""
+    
+    return instructions
+
+
+def get_stock_usage_instructions(injector_ratio: float) -> str:
+    """تولید دستورالعمل مصرف استوک در مخزن اصلی"""
+    return f"""🔧 روش مصرف استوک در مخزن اصلی:
+
+با نسبت تزریق 1:{int(injector_ratio)}:
+
+1. قبل از مصرف، استوک را خوب تکان دهید
+2. مقدار مورد نیاز را اندازه بگیرید
+3. به آرامی به مخزن اصلی اضافه کنید
+4. 5 دقیقه هم بزنید
+
+⚠️ نکته: هیچگاه استوک حاوی کلسیم را با استوک حاوی سولفات/فسفات قبل از ورود به مخزن اصلی مخلوط نکنید."""
+
+
+def get_storage_instructions() -> Tuple[str, str, str, str]:
+    """تولید نکات نگهداری و ایمنی استوک"""
+    storage_instructions = """⚠️ نکات نگهداری و ایمنی استوک:
+
+• همیشه ظرف استوک را محکم ببندید
+• دور از نور مستقیم خورشید و در جای خنک نگهداری کنید
+• برچسب بزنید: نام کودها، تاریخ ساخت، نسبت تزریق
+• دور از دسترس کودکان نگهداری شود"""
+    
+    shelf_life_fridge = "7 روز در یخچال (دمای 4 درجه)"
+    shelf_life_room = "3 روز در دمای محیط (زیر 25 درجه)"
+    warning_signs = "نشانه‌های خرابی: رسوب سفید، تغییر رنگ، بوی نامطبوع، باد کردگی ظرف"
+    
+    return storage_instructions, shelf_life_fridge, shelf_life_room, warning_signs
+
+
+def add_stock_calculations_to_doses(
+    doses: List[Dict],
+    tank_volume_liters: float,
+    injector_ratio: float,
+    stock_tank_volume_liters: float
+) -> List[Dict]:
+    """
+    اضافه کردن محاسبات استوک به لیست دوزها
+    
+    Args:
+        doses: لیست دوزهای محاسبه شده (هر دوز شامل dose_g_per_liter و name)
+        tank_volume_liters: حجم مخزن اصلی
+        injector_ratio: نسبت تزریق
+        stock_tank_volume_liters: حجم مخزن استوک
+    
+    Returns:
+        لیست دوزها با فیلدهای جدید استوک
+    """
+    result = []
+    for dose in doses:
+        dose_gpl = dose.get('dose_g_per_liter', 0)
+        
+        # محاسبات جدید استوک
+        dose_kg_for_stock = calculate_dose_kg_for_stock(
+            dose_gpl=dose_gpl,
+            injector_ratio=injector_ratio,
+            stock_tank_volume_liters=stock_tank_volume_liters
+        )
+        
+        dose_g_for_stock_alternative = None
+        if dose_kg_for_stock < 1 and dose_kg_for_stock > 0:
+            dose_g_for_stock_alternative = round(dose_kg_for_stock * 1000, 0)
+        
+        # کپی دوز و اضافه کردن فیلدهای جدید
+        new_dose = dose.copy()
+        new_dose['dose_kg_for_stock'] = dose_kg_for_stock
+        new_dose['dose_g_for_stock_alternative'] = dose_g_for_stock_alternative
+        
+        result.append(new_dose)
+    
+    return result
+
+
+# ============================================================
+# توابع قبلی (حفظ شده)
+# ============================================================
+
 def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[Dict]:
     """محاسبه دوز برای کل مخزن و استوک 200x"""
     result = []
@@ -510,7 +660,7 @@ def generate_professional_mixing_instructions(doses: List[Dict], warnings: List[
 
 
 # ============================================================
-# بهبود تابع تفکیک به مخازن A و B
+# توابع تفکیک به دو مخزن (حفظ شده)
 # ============================================================
 
 def separate_into_tanks_professional(doses: List[Dict]) -> List[Dict]:
@@ -587,8 +737,13 @@ def separate_into_tanks_professional(doses: List[Dict]) -> List[Dict]:
     return result
 
 
+def separate_into_tanks(doses: List[Dict]) -> List[Dict]:
+    """تفکیک کودها به دو مخزن (نسخه قبلی برای سازگاری)"""
+    return separate_into_tanks_professional(doses)
+
+
 # ============================================================
-# تابع جدید: محاسبه حرفه‌ای دو مخزن
+# توابع محاسبه دو مخزن حرفه‌ای (حفظ شده)
 # ============================================================
 
 def calculate_dual_tank_professional(
@@ -602,21 +757,15 @@ def calculate_dual_tank_professional(
     """
     محاسبه دوز بهینه برای دو مخزن با استفاده از الگوریتم لایه‌به‌لایه حرفه‌ای
     
-    این تابع از الگوریتم اصلی optimize_fertilizer_doses_professional استفاده می‌کند
-    و کودها را به طور هوشمند بین دو مخزن تقسیم می‌کند
-    
     Returns:
-        result_main: نتایج مخزن اصلی (دوزها، تامین شده، هشدارها، دستورالعمل)
+        result_main: نتایج مخزن اصلی
         result_calcium: نتایج مخزن کلسیم
-        combined_warnings: هشدارهای ترکیبی هر دو مخزن
-        general_instructions: دستورالعمل کلی فارسی برای کشاورز
+        combined_warnings: هشدارهای ترکیبی
+        general_instructions: دستورالعمل کلی فارسی
     """
     
     import copy
     
-    # ============================================================
-    # مرحله 1: فیلتر برند
-    # ============================================================
     if brand_filter:
         all_fertilizers = [f for f in all_fertilizers if f.brand_name == brand_filter]
     
@@ -630,12 +779,9 @@ def calculate_dual_tank_professional(
         }
         return empty_result, empty_result, [], ""
     
-    # ============================================================
-    # مرحله 2: تفکیک هوشمند کودها به دو دسته
-    # ============================================================
-    
-    fertilizers_for_calcium = []  # مخزن A - کودهای حاوی کلسیم و آهن
-    fertilizers_for_main = []      # مخزن B - بقیه کودها
+    # تفکیک هوشمند کودها
+    fertilizers_for_calcium = []
+    fertilizers_for_main = []
     
     calcium_keywords = [
         'calcium', 'کلسیم', 'نیترات کلسیم', 'calcium nitrate',
@@ -657,30 +803,22 @@ def calculate_dual_tank_professional(
         else:
             fertilizers_for_main.append(fert)
     
-    # ============================================================
-    # مرحله 3: تقسیم نیازهای گیاه بین دو مخزن
-    # ============================================================
-    
+    # تقسیم نیازها
     water_calcium = calculate_water_contribution(tank_calcium)
     water_main = calculate_water_contribution(tank_main)
     
-    # نیازهای مخزن کلسیم (کلسیم، آهن، و بخشی از نیتروژن)
     needs_calcium = {
         'Ca': max(0, remaining_needs.get('Ca', 0) - water_calcium.get('Ca', 0)),
         'Fe': max(0, remaining_needs.get('Fe', 0) - water_calcium.get('Fe', 0)),
-        'N': max(0, remaining_needs.get('N', 0) * 0.35),  # 35% نیتروژن از نیترات کلسیم
+        'N': max(0, remaining_needs.get('N', 0) * 0.35),
     }
     
-    # نیازهای مخزن اصلی (بقیه عناصر)
     needs_main = copy.deepcopy(remaining_needs)
     needs_main['Ca'] = max(0, remaining_needs.get('Ca', 0) - water_main.get('Ca', 0) - needs_calcium.get('Ca', 0))
     needs_main['Fe'] = max(0, remaining_needs.get('Fe', 0) - water_main.get('Fe', 0) - needs_calcium.get('Fe', 0))
     needs_main['N'] = max(0, remaining_needs.get('N', 0) - needs_calcium.get('N', 0))
     
-    # ============================================================
-    # مرحله 4: محاسبه مخزن کلسیم با الگوریتم لایه‌به‌لایه
-    # ============================================================
-    
+    # محاسبه مخزن کلسیم
     doses_calcium_raw, supply_calcium, warnings_calcium = optimize_fertilizer_doses_professional(
         remaining_needs=needs_calcium,
         fertilizers=fertilizers_for_calcium,
@@ -689,11 +827,8 @@ def calculate_dual_tank_professional(
     )
     
     doses_calcium = calculate_tank_doses(doses_calcium_raw, tank_calcium.volume_liters)
-    
-    # محاسبه EC پیش‌بینی شده برای مخزن کلسیم
     ec_calcium = calculate_final_ec(tank_calcium.water_ec_ms_cm or 0, doses_calcium)
     
-    # دستورالعمل اختلاط فارسی برای مخزن کلسیم
     mixing_calcium = generate_persian_mixing_instructions(
         tank_name="مخزن کلسیم",
         tank_type="calcium",
@@ -704,10 +839,7 @@ def calculate_dual_tank_professional(
         warnings=warnings_calcium
     )
     
-    # ============================================================
-    # مرحله 5: محاسبه مخزن اصلی با الگوریتم لایه‌به‌لایه
-    # ============================================================
-    
+    # محاسبه مخزن اصلی
     doses_main_raw, supply_main, warnings_main = optimize_fertilizer_doses_professional(
         remaining_needs=needs_main,
         fertilizers=fertilizers_for_main,
@@ -716,11 +848,8 @@ def calculate_dual_tank_professional(
     )
     
     doses_main = calculate_tank_doses(doses_main_raw, tank_main.volume_liters)
-    
-    # محاسبه EC پیش‌بینی شده برای مخزن اصلی
     ec_main = calculate_final_ec(tank_main.water_ec_ms_cm or 0, doses_main)
     
-    # دستورالعمل اختلاط فارسی برای مخزن اصلی
     mixing_main = generate_persian_mixing_instructions(
         tank_name="مخزن اصلی",
         tank_type="main",
@@ -731,10 +860,7 @@ def calculate_dual_tank_professional(
         warnings=warnings_main
     )
     
-    # ============================================================
-    # مرحله 6: جمع‌آوری هشدارهای ترکیبی
-    # ============================================================
-    
+    # جمع‌آوری هشدارها
     combined_warnings = []
     combined_warnings.extend(warnings_calcium)
     combined_warnings.extend(warnings_main)
@@ -753,10 +879,7 @@ def calculate_dual_tank_professional(
             "message": "⚠️ هیچ کود اصلی (غیر کلسیمی) در سیستم یافت نشد!"
         })
     
-    # ============================================================
-    # مرحله 7: دستورالعمل کلی فارسی برای کشاورز
-    # ============================================================
-    
+    # دستورالعمل کلی
     general_instructions = generate_persian_general_instructions(
         tank_main_volume=tank_main.volume_liters,
         tank_calcium_volume=tank_calcium.volume_liters,
@@ -764,10 +887,6 @@ def calculate_dual_tank_professional(
         ec_calcium=ec_calcium,
         warnings=combined_warnings
     )
-    
-    # ============================================================
-    # مرحله 8: ساخت نتایج نهایی
-    # ============================================================
     
     result_main = {
         "doses": doses_main,
@@ -791,7 +910,7 @@ def calculate_dual_tank_professional(
 
 
 # ============================================================
-# توابع جدید: تولید دستورالعمل‌های فارسی حرفه‌ای
+# توابع تولید دستورالعمل فارسی (حفظ شده)
 # ============================================================
 
 def generate_persian_mixing_instructions(
@@ -850,7 +969,6 @@ def generate_persian_mixing_instructions(
     instructions.append("")
     instructions.append("=" * 60)
     
-    # اضافه کردن هشدارها
     if warnings:
         instructions.append("")
         instructions.append("⚠️ هشدارهای مهم:")
@@ -906,31 +1024,13 @@ def generate_persian_general_instructions(
     instructions.append("=" * 60)
     instructions.append("")
     instructions.append("1️⃣ هرگز کودهای دو مخزن را قبل از مصرف با هم مخلوط نکنید!")
-    instructions.append("   - این کار باعث رسوب و از بین رفتن محلول غذایی می‌شود")
-    instructions.append("")
-    instructions.append("2️⃣ ترتیب ساخت مخازن:")
-    instructions.append("   - ابتدا مخزن اصلی (B) را آماده کنید")
-    instructions.append("   - سپس مخزن کلسیم (A) را آماده کنید")
-    instructions.append("")
-    instructions.append("3️⃣ نحوه تزریق به سیستم آبیاری:")
-    instructions.append("   - از دو انژکتور جداگانه استفاده کنید")
-    instructions.append("   - هر دو مخزن را همزمان و با دبی یکسان تزریق کنید")
-    instructions.append("")
-    instructions.append("4️⃣ برنامه تغذیه پیشنهادی:")
-    instructions.append("   - هفته اول: 50% دوز محاسبه شده")
-    instructions.append("   - هفته دوم: 75% دوز محاسبه شده")
-    instructions.append("   - هفته سوم به بعد: 100% دوز محاسبه شده")
-    instructions.append("")
-    instructions.append("5️⃣ در صورت مشاهده رسوب سفید:")
-    instructions.append("   - دوز کودهای کلسیمی را کاهش دهید")
-    instructions.append("   - pH مخزن کلسیم را دقیقاً در 6.2 تنظیم کنید")
-    instructions.append("   - آب ورودی را تصفیه کنید")
+    instructions.append("2️⃣ ترتیب ساخت: ابتدا مخزن اصلی، سپس مخزن کلسیم")
+    instructions.append("3️⃣ از دو انژکتور جداگانه برای تزریق استفاده کنید")
+    instructions.append("4️⃣ برنامه تغذیه: هفته اول 50%، هفته دوم 75%، هفته سوم 100%")
     instructions.append("")
     
-    # اضافه کردن هشدارهای اضافی
     severe_warnings = [w for w in warnings if w.get('severity') == 'error']
     if severe_warnings:
-        instructions.append("")
         instructions.append("=" * 60)
         instructions.append("🚨 هشدارهای بحرانی")
         instructions.append("=" * 60)
@@ -943,14 +1043,3 @@ def generate_persian_general_instructions(
     instructions.append("=" * 60)
     
     return "\n".join(instructions)
-
-
-# ============================================================
-# تابع قبلی separate_into_tanks (حفظ شده برای سازگاری)
-# ============================================================
-
-def separate_into_tanks(doses: List[Dict]) -> List[Dict]:
-    """
-    تفکیک کودها به دو مخزن بر اساس استاندارد جهانی (نسخه قبلی برای سازگاری)
-    """
-    return separate_into_tanks_professional(doses)

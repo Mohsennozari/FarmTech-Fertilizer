@@ -1,5 +1,3 @@
-# Platform-v3\backend\app\routes.py
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -17,7 +15,17 @@ from app.calculator import (
     calculate_tank_doses,
     generate_professional_mixing_instructions,
     separate_into_tanks,
-    calculate_dual_tank_professional
+    calculate_dual_tank_professional,
+    # ============================================================
+    # توابع جدید نسخه 3.3.0
+    # ============================================================
+    calculate_dose_kg_for_stock,
+    calculate_stock_consumption,
+    get_injector_explanation,
+    get_stock_mixing_instructions,
+    get_stock_usage_instructions,
+    get_storage_instructions,
+    add_stock_calculations_to_doses
 )
 import logging
 
@@ -31,19 +39,19 @@ router = APIRouter(prefix="/api/v1", tags=["FarmTech API"])
 # ============================================================
 @router.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.1.0", "dual_tank_support": True}
+    return {"status": "ok", "version": "3.3.0", "dual_tank_support": True, "stock_system": True}
 
 
 # ============================================================
 # Crops
 # ============================================================
-@router.get("/crops", response_model=List[schemas.Crop])
+@router.get("/crops", response_model=List[schemas.CropResponse])
 def get_crops(db: Session = Depends(get_db)):
     crops = db.query(models.Crop).all()
     return crops
 
 
-@router.post("/crops", response_model=schemas.Crop)
+@router.post("/crops", response_model=schemas.CropResponse)
 def create_crop(crop: schemas.CropCreate, db: Session = Depends(get_db)):
     db_crop = models.Crop(**crop.dict())
     db.add(db_crop)
@@ -55,7 +63,7 @@ def create_crop(crop: schemas.CropCreate, db: Session = Depends(get_db)):
 # ============================================================
 # Varieties
 # ============================================================
-@router.get("/varieties", response_model=List[schemas.Variety])
+@router.get("/varieties", response_model=List[schemas.VarietyResponse])
 def get_varieties(crop_id: Optional[int] = None, db: Session = Depends(get_db)):
     query = db.query(models.Variety)
     if crop_id:
@@ -63,7 +71,7 @@ def get_varieties(crop_id: Optional[int] = None, db: Session = Depends(get_db)):
     return query.all()
 
 
-@router.post("/varieties", response_model=schemas.Variety)
+@router.post("/varieties", response_model=schemas.VarietyResponse)
 def create_variety(variety: schemas.VarietyCreate, db: Session = Depends(get_db)):
     db_variety = models.Variety(**variety.dict())
     db.add(db_variety)
@@ -75,7 +83,7 @@ def create_variety(variety: schemas.VarietyCreate, db: Session = Depends(get_db)
 # ============================================================
 # Growth Stages
 # ============================================================
-@router.get("/growth-stages", response_model=List[schemas.GrowthStage])
+@router.get("/growth-stages", response_model=List[schemas.GrowthStageResponse])
 def get_growth_stages(
     crop_id: Optional[int] = None, 
     variety_id: Optional[int] = None,
@@ -89,7 +97,7 @@ def get_growth_stages(
     return query.order_by(models.GrowthStage.stage_order).all()
 
 
-@router.post("/growth-stages", response_model=schemas.GrowthStage)
+@router.post("/growth-stages", response_model=schemas.GrowthStageResponse)
 def create_growth_stage(stage: schemas.GrowthStageCreate, db: Session = Depends(get_db)):
     db_stage = models.GrowthStage(**stage.dict())
     db.add(db_stage)
@@ -101,12 +109,12 @@ def create_growth_stage(stage: schemas.GrowthStageCreate, db: Session = Depends(
 # ============================================================
 # Brands
 # ============================================================
-@router.get("/brands", response_model=List[schemas.Brand])
+@router.get("/brands", response_model=List[schemas.BrandResponse])
 def get_brands(db: Session = Depends(get_db)):
     return db.query(models.Brand).all()
 
 
-@router.post("/brands", response_model=schemas.Brand)
+@router.post("/brands", response_model=schemas.BrandResponse)
 def create_brand(brand: schemas.BrandCreate, db: Session = Depends(get_db)):
     db_brand = models.Brand(**brand.dict())
     db.add(db_brand)
@@ -118,7 +126,7 @@ def create_brand(brand: schemas.BrandCreate, db: Session = Depends(get_db)):
 # ============================================================
 # Fertilizers
 # ============================================================
-@router.get("/fertilizers", response_model=List[schemas.Fertilizer])
+@router.get("/fertilizers", response_model=List[schemas.FertilizerResponse])
 def get_fertilizers(
     brand_id: Optional[int] = None,
     fertilizer_type: Optional[str] = None,
@@ -133,7 +141,7 @@ def get_fertilizers(
     return query.all()
 
 
-@router.post("/fertilizers", response_model=schemas.Fertilizer)
+@router.post("/fertilizers", response_model=schemas.FertilizerResponse)
 def create_fertilizer(fertilizer: schemas.FertilizerCreate, db: Session = Depends(get_db)):
     db_fertilizer = models.Fertilizer(**fertilizer.dict())
     db.add(db_fertilizer)
@@ -145,12 +153,12 @@ def create_fertilizer(fertilizer: schemas.FertilizerCreate, db: Session = Depend
 # ============================================================
 # Interactions
 # ============================================================
-@router.get("/interactions", response_model=List[schemas.Interaction])
+@router.get("/interactions", response_model=List[schemas.InteractionResponse])
 def get_interactions(db: Session = Depends(get_db)):
     return db.query(models.Interaction).all()
 
 
-@router.post("/interactions", response_model=schemas.Interaction)
+@router.post("/interactions", response_model=schemas.InteractionResponse)
 def create_interaction(interaction: schemas.InteractionCreate, db: Session = Depends(get_db)):
     db_interaction = models.Interaction(**interaction.dict())
     db.add(db_interaction)
@@ -162,12 +170,12 @@ def create_interaction(interaction: schemas.InteractionCreate, db: Session = Dep
 # ============================================================
 # Acids
 # ============================================================
-@router.get("/acids", response_model=List[schemas.Acid])
+@router.get("/acids", response_model=List[schemas.AcidResponse])
 def get_acids(db: Session = Depends(get_db)):
     return db.query(models.Acid).all()
 
 
-@router.post("/acids", response_model=schemas.Acid)
+@router.post("/acids", response_model=schemas.AcidResponse)
 def create_acid(acid: schemas.AcidCreate, db: Session = Depends(get_db)):
     db_acid = models.Acid(**acid.dict())
     db.add(db_acid)
@@ -179,7 +187,7 @@ def create_acid(acid: schemas.AcidCreate, db: Session = Depends(get_db)):
 # ============================================================
 # Tanks
 # ============================================================
-@router.get("/tanks", response_model=List[schemas.Tank])
+@router.get("/tanks", response_model=List[schemas.TankResponse])
 def get_tanks(
     tank_type: Optional[str] = None,
     db: Session = Depends(get_db)
@@ -190,7 +198,7 @@ def get_tanks(
     return query.all()
 
 
-@router.post("/tanks", response_model=schemas.Tank)
+@router.post("/tanks", response_model=schemas.TankResponse)
 def create_tank(tank: schemas.TankCreate, db: Session = Depends(get_db)):
     db_tank = models.Tank(**tank.dict())
     db.add(db_tank)
@@ -199,7 +207,7 @@ def create_tank(tank: schemas.TankCreate, db: Session = Depends(get_db)):
     return db_tank
 
 
-@router.get("/tanks/{tank_id}", response_model=schemas.Tank)
+@router.get("/tanks/{tank_id}", response_model=schemas.TankResponse)
 def get_tank(tank_id: int, db: Session = Depends(get_db)):
     tank = db.query(models.Tank).filter(models.Tank.id == tank_id).first()
     if not tank:
@@ -207,7 +215,7 @@ def get_tank(tank_id: int, db: Session = Depends(get_db)):
     return tank
 
 
-@router.put("/tanks/{tank_id}", response_model=schemas.Tank)
+@router.put("/tanks/{tank_id}", response_model=schemas.TankResponse)
 def update_tank(tank_id: int, tank: schemas.TankCreate, db: Session = Depends(get_db)):
     db_tank = db.query(models.Tank).filter(models.Tank.id == tank_id).first()
     if not db_tank:
@@ -233,15 +241,23 @@ def delete_tank(tank_id: int, db: Session = Depends(get_db)):
 
 
 # ============================================================
-# محاسبه با یک مخزن (Endpoint قبلی - بدون تغییر)
 # ============================================================
-@router.post("/calculate", response_model=schemas.CalculateResponse)
-def calculate(request: schemas.CalculateRequest, db: Session = Depends(get_db)):
+# محاسبه با یک مخزن - نسخه 3.3.0 با پشتیبانی از سیستم استوک
+# ============================================================
+# ============================================================
+@router.post("/calculate", response_model=schemas.CalculationResponse)
+def calculate(request: schemas.CalculationRequest, db: Session = Depends(get_db)):
     """
-    محاسبه دوز بهینه کودها برای یک مخزن
-    این endpoint برای سازگاری با نسخه‌های قبلی حفظ شده است
+    محاسبه دوز بهینه کودها برای یک مخزن - نسخه 3.3.0
+    
+    این endpoint با پشتیبانی از سیستم استوک به‌روزرسانی شده است:
+    - محاسبه مقدار کود مورد نیاز برای ساخت استوک (کیلوگرم)
+    - محاسبه مقدار مصرف استوک در مخزن اصلی
+    - توضیح مفهوم نسبت تزریق برای کاربر
+    - دستورالعمل گام به گام ساخت و مصرف استوک
     """
     try:
+        # دریافت مرحله رشد
         growth_stage = db.query(models.GrowthStage).join(models.Crop).join(models.Variety).filter(
             models.Crop.name == request.crop_name,
             models.Variety.name == request.variety_name,
@@ -251,6 +267,7 @@ def calculate(request: schemas.CalculateRequest, db: Session = Depends(get_db)):
         if not growth_stage:
             raise HTTPException(status_code=404, detail="Growth stage not found")
         
+        # دریافت کودها با فیلتر برند
         query = db.query(models.Fertilizer).filter(models.Fertilizer.is_active == True)
         if request.brand_filter:
             query = query.filter(models.Fertilizer.brand_name == request.brand_filter)
@@ -258,34 +275,107 @@ def calculate(request: schemas.CalculateRequest, db: Session = Depends(get_db)):
         fertilizers = query.all()
         
         if not fertilizers:
-            return schemas.CalculateResponse(
+            # ایجاد پاسخ خطا با ساختار کامل StockInstructions
+            empty_stock_instructions = schemas.StockInstructions(
+                stock_tank_volume_liters=request.stock_tank_volume_liters,
+                injector_ratio=request.injector_ratio,
+                main_tank_volume_liters=request.tank.volume_liters,
+                injector_explanation=get_injector_explanation(request.injector_ratio),
+                fertilizers_for_stock=[],
+                mixing_instructions=get_stock_mixing_instructions([]),
+                stock_liters_for_main_tank=0,
+                stock_ml_per_liter=0,
+                usage_instructions=get_stock_usage_instructions(request.injector_ratio),
+                storage_instructions=get_storage_instructions()[0],
+                shelf_life_fridge=get_storage_instructions()[1],
+                shelf_life_room=get_storage_instructions()[2],
+                warning_signs=get_storage_instructions()[3]
+            )
+            
+            return schemas.CalculationResponse(
                 success=False,
-                stage_name=request.stage_name,
+                crop_name=request.crop_name,
                 variety_name=request.variety_name,
+                stage_name=request.stage_name,
                 tank_name=request.tank.name,
                 tank_volume_liters=request.tank.volume_liters,
                 doses=[],
-                warnings=["هیچ کود فعالی برای محاسبه وجود ندارد"],
-                mixing_instructions="لطفاً ابتدا کودها را در سیستم ثبت کنید"
+                stock_instructions=empty_stock_instructions,
+                warnings=["هیچ کود فعالی برای محاسبه وجود ندارد"]
             )
         
+        # محاسبه سهم عناصر از آب
         water_contribution = calculate_water_contribution(request.tank)
         
+        # محاسبه نیاز باقیمانده پس از کسر سهم آب
         remaining_needs = {}
         for elem, need in (growth_stage.nutrient_needs or {}).items():
             water = water_contribution.get(elem, 0)
             remaining_needs[elem] = max(0, need - water)
         
+        # بهینه‌سازی دوز کودها
         doses_raw, final_supply, warnings = optimize_fertilizer_doses_professional(
             remaining_needs=remaining_needs,
             fertilizers=fertilizers,
             brand_filter=request.brand_filter
         )
         
+        # محاسبه دوز برای کل مخزن
         doses = calculate_tank_doses(doses_raw, request.tank.volume_liters)
         
+        # ============================================================
+        # بخش جدید: اضافه کردن محاسبات استوک به دوزها
+        # ============================================================
+        doses_with_stock = add_stock_calculations_to_doses(
+            doses=doses,
+            tank_volume_liters=request.tank.volume_liters,
+            injector_ratio=request.injector_ratio,
+            stock_tank_volume_liters=request.stock_tank_volume_liters
+        )
+        
+        # محاسبه مصرف استوک در مخزن اصلی
+        stock_liters_for_main_tank, stock_ml_per_liter = calculate_stock_consumption(
+            injector_ratio=request.injector_ratio,
+            main_tank_volume_liters=request.tank.volume_liters
+        )
+        
+        # آماده سازی لیست کودها برای دستورالعمل ساخت استوک
+        fertilizers_for_stock = []
+        for dose in doses_with_stock:
+            fertilizers_for_stock.append({
+                "name": dose.get("name", ""),
+                "kg": dose.get("dose_kg_for_stock", 0),
+                "g_alternative": dose.get("dose_g_for_stock_alternative")
+            })
+        
+        # دریافت دستورالعمل‌های استوک
+        fertilizer_names = [d.get("name", "") for d in doses_with_stock]
+        mixing_instructions = get_stock_mixing_instructions(fertilizer_names)
+        usage_instructions = get_stock_usage_instructions(request.injector_ratio)
+        storage_instructions, shelf_life_fridge, shelf_life_room, warning_signs = get_storage_instructions()
+        injector_explanation = get_injector_explanation(request.injector_ratio)
+        
+        # ساخت دستورالعمل استوک کامل
+        stock_instructions = schemas.StockInstructions(
+            stock_tank_volume_liters=request.stock_tank_volume_liters,
+            injector_ratio=request.injector_ratio,
+            main_tank_volume_liters=request.tank.volume_liters,
+            injector_explanation=injector_explanation,
+            fertilizers_for_stock=fertilizers_for_stock,
+            mixing_instructions=mixing_instructions,
+            stock_liters_for_main_tank=stock_liters_for_main_tank,
+            stock_ml_per_liter=stock_ml_per_liter,
+            usage_instructions=usage_instructions,
+            storage_instructions=storage_instructions,
+            shelf_life_fridge=shelf_life_fridge,
+            shelf_life_room=shelf_life_room,
+            warning_signs=warning_signs
+        )
+        
+        # محاسبه EC پیش‌بینی شده
         ec_predicted = calculate_final_ec(request.tank.water_ec_ms_cm or 0, doses)
         
+        # هشدار EC
         ec_warning = get_ec_warning(
             predicted_ec=ec_predicted,
             target_ec_min=growth_stage.target_ec_min,
@@ -298,32 +388,37 @@ def calculate(request: schemas.CalculateRequest, db: Session = Depends(get_db)):
                 "message": ec_warning
             })
         
-        mixing_instructions = generate_professional_mixing_instructions(
-            doses=doses,
-            warnings=warnings,
-            tank_volume=request.tank.volume_liters
-        )
+        # تبدیل هشدارها به لیست رشته‌ها
+        warnings_list = [w.get('message', str(w)) for w in warnings]
         
-        return schemas.CalculateResponse(
+        # ساخت پاسخ نهایی
+        return schemas.CalculationResponse(
             success=True,
-            stage_name=request.stage_name,
+            crop_name=request.crop_name,
             variety_name=request.variety_name,
+            stage_name=request.stage_name,
             tank_name=request.tank.name,
             tank_volume_liters=request.tank.volume_liters,
-            doses=doses,
-            warnings=[w.get('message', str(w)) for w in warnings],
-            mixing_instructions=mixing_instructions,
-            target_nutrients=growth_stage.nutrient_needs,
-            supplied_nutrients=final_supply
+            doses=doses_with_stock,
+            stock_instructions=stock_instructions,
+            warnings=warnings_list,
+            interactions=[],
+            nutrient_comparison=None,
+            target_ec=growth_stage.target_ec_max,
+            target_ph=growth_stage.target_ph_max
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Calculation error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================================
-# محاسبه با دو مخزن (Endpoint جدید)
+# ============================================================
+# محاسبه با دو مخزن (Endpoint نسخه 3.3.0)
+# ============================================================
 # ============================================================
 @router.post("/calculate-dual-tank")
 async def calculate_dual_tank(
@@ -331,7 +426,7 @@ async def calculate_dual_tank(
     db: Session = Depends(get_db)
 ):
     """
-    محاسبه دوز بهینه کودها برای دو مخزن جداگانه
+    محاسبه دوز بهینه کودها برای دو مخزن جداگانه - نسخه 3.3.0
     
     مخزن اصلی (Main): برای کودهای غیر کلسیمی (NPK، سولفات‌ها، ریز مغذی‌ها)
     مخزن کلسیم (Calcium): برای کودهای حاوی کلسیم (نیترات کلسیم، کلات آهن)
@@ -392,7 +487,7 @@ async def calculate_dual_tank(
             "crop_name": request.crop_name,
             "variety_name": request.variety_name,
             "stage_name": request.stage_name,
-            "target_needs": plant_needs,  # این خط مهم است - نیاز گیاه
+            "target_needs": plant_needs,
             "tank_main_result": {
                 "tank_name": request.tank_main.name,
                 "tank_type": "main",
@@ -436,7 +531,7 @@ async def calculate_dual_tank(
 # ============================================================
 # History
 # ============================================================
-@router.get("/history", response_model=List[schemas.CalculationHistoryResponse])
+@router.get("/history", response_model=List[schemas.HistoryResponse])
 def get_history(limit: int = 50, db: Session = Depends(get_db)):
     history = db.query(models.CalculationHistory).order_by(
         desc(models.CalculationHistory.created_at)
@@ -444,7 +539,7 @@ def get_history(limit: int = 50, db: Session = Depends(get_db)):
     return history
 
 
-@router.get("/history/{history_id}", response_model=schemas.CalculationHistoryResponse)
+@router.get("/history/{history_id}", response_model=schemas.HistoryResponse)
 def get_history_item(history_id: int, db: Session = Depends(get_db)):
     history = db.query(models.CalculationHistory).filter(
         models.CalculationHistory.id == history_id
@@ -465,3 +560,30 @@ def delete_history_item(history_id: int, db: Session = Depends(get_db)):
     db.delete(history)
     db.commit()
     return {"message": "History item deleted successfully"}
+
+
+# ============================================================
+# ذخیره محاسبه در تاریخچه
+# ============================================================
+@router.post("/save-calculation")
+def save_calculation(
+    calculation_data: Dict[str, Any],
+    db: Session = Depends(get_db)
+):
+    """ذخیره یک محاسبه در تاریخچه"""
+    try:
+        history = models.CalculationHistory(
+            crop_name=calculation_data.get("crop_name"),
+            variety_name=calculation_data.get("variety_name"),
+            stage_name=calculation_data.get("stage_name"),
+            tank_name=calculation_data.get("tank_name"),
+            tank_volume_liters=calculation_data.get("tank_volume_liters"),
+            result_summary=calculation_data.get("result_summary", {})
+        )
+        db.add(history)
+        db.commit()
+        db.refresh(history)
+        return {"success": True, "id": history.id}
+    except Exception as e:
+        logger.error(f"Save calculation error: {str(e)}")
+        return {"success": False, "error": str(e)}
