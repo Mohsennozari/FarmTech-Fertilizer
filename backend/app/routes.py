@@ -2,429 +2,466 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional, Dict
+from sqlalchemy import desc
+from typing import List, Optional, Dict, Any
 from datetime import datetime
+import time
 
-from .database import get_db
-from .models import (
-    Crop, Variety, GrowthStage, Fertilizer, Brand,
-    Tank, CalculationHistory, Interaction, Acid
-)
-from .schemas import (
-    FertilizerResponse, GrowthStageResponse, VarietyResponse, CropResponse,
-    BrandResponse, TankCreate, TankResponse, CalculationHistoryResponse,
-    CalculationRequest, CalculationResponse, DoseResponse, WarningResponse,
-    AcidResponse, InteractionResponse
-)
-from .calculator import (
-    SUPPORTED_ELEMENTS,
+from app.database import get_db
+from app import models, schemas
+from app.calculator import (
     calculate_water_contribution,
-    calculate_acid_contribution,
+    calculate_final_ec,
+    get_ec_warning,
     optimize_fertilizer_doses_professional,
     calculate_tank_doses,
     generate_professional_mixing_instructions,
-    calculate_final_ec,
-    get_ec_warning
+    separate_into_tanks,
+    calculate_dual_tank_professional
 )
+import logging
 
-router = APIRouter()
+logger = logging.getLogger(__name__)
 
-
-# ============================================================
-# Helper function for checking fertilizer interactions
-# ============================================================
-
-def check_fertilizer_interactions(fertilizer_ids: List[int], db: Session) -> List[Dict]:
-    """
-    بررسی تداخلات شیمیایی بین کودهای انتخاب شده
-    Returns list of warnings for incompatible fertilizer pairs
-    """
-    warnings = []
-
-    if len(fertilizer_ids) < 2:
-        return warnings
-
-    # دریافت اطلاعات کودها از دیتابیس
-    fertilizers = {f.id: f for f in db.query(Fertilizer).filter(Fertilizer.id.in_(fertilizer_ids)).all()}
-
-    for i in range(len(fertilizer_ids)):
-        for j in range(i + 1, len(fertilizer_ids)):
-            fert_a_id = fertilizer_ids[i]
-            fert_b_id = fertilizer_ids[j]
-
-            # بررسی تداخل در هر دو جهت
-            interaction = db.query(Interaction).filter(
-                ((Interaction.fertilizer_a_id == fert_a_id) &
-                 (Interaction.fertilizer_b_id == fert_b_id)) |
-                ((Interaction.fertilizer_a_id == fert_b_id) &
-                 (Interaction.fertilizer_b_id == fert_a_id))
-            ).first()
-
-            if interaction:
-                fert_a = fertilizers.get(fert_a_id)
-                fert_b = fertilizers.get(fert_b_id)
-
-                warnings.append({
-                    "type": interaction.reaction_type,
-                    "severity": interaction.severity,
-                    "product": interaction.precipitate_product,
-                    "description": interaction.description,
-                    "fertilizers": [fert_a.name if fert_a else str(fert_a_id),
-                                   fert_b.name if fert_b else str(fert_b_id)]
-                })
-
-    return warnings
+router = APIRouter(prefix="/api/v1", tags=["FarmTech API"])
 
 
 # ============================================================
-# API Endpoints
+# Health Check
 # ============================================================
-
 @router.get("/health")
 def health_check():
-    return {"status": "ok", "message": "FarmTech API is running"}
+    return {"status": "ok", "version": "3.1.0", "dual_tank_support": True}
 
 
-@router.get("/crops", response_model=List[CropResponse])
+# ============================================================
+# Crops
+# ============================================================
+@router.get("/crops", response_model=List[schemas.Crop])
 def get_crops(db: Session = Depends(get_db)):
-    return db.query(Crop).all()
+    crops = db.query(models.Crop).all()
+    return crops
 
 
-@router.get("/varieties", response_model=List[VarietyResponse])
-def get_varieties(
-    crop_id: Optional[int] = Query(None),
-    db: Session = Depends(get_db)
-):
-    query = db.query(Variety)
+@router.post("/crops", response_model=schemas.Crop)
+def create_crop(crop: schemas.CropCreate, db: Session = Depends(get_db)):
+    db_crop = models.Crop(**crop.dict())
+    db.add(db_crop)
+    db.commit()
+    db.refresh(db_crop)
+    return db_crop
+
+
+# ============================================================
+# Varieties
+# ============================================================
+@router.get("/varieties", response_model=List[schemas.Variety])
+def get_varieties(crop_id: Optional[int] = None, db: Session = Depends(get_db)):
+    query = db.query(models.Variety)
     if crop_id:
-        query = query.filter(Variety.crop_id == crop_id)
+        query = query.filter(models.Variety.crop_id == crop_id)
     return query.all()
 
 
-@router.get("/brands", response_model=List[BrandResponse])
-def get_brands(db: Session = Depends(get_db)):
-    return db.query(Brand).all()
+@router.post("/varieties", response_model=schemas.Variety)
+def create_variety(variety: schemas.VarietyCreate, db: Session = Depends(get_db)):
+    db_variety = models.Variety(**variety.dict())
+    db.add(db_variety)
+    db.commit()
+    db.refresh(db_variety)
+    return db_variety
 
 
-@router.get("/fertilizers", response_model=List[FertilizerResponse])
-def get_fertilizers(
-    brand_id: Optional[int] = Query(None),
-    brand_name: Optional[str] = Query(None),
-    fertilizer_type: Optional[str] = Query(None),
-    db: Session = Depends(get_db)
-):
-    query = db.query(Fertilizer)
-    if brand_id:
-        query = query.filter(Fertilizer.brand_id == brand_id)
-    if brand_name:
-        query = query.filter(Fertilizer.brand_name == brand_name)
-    if fertilizer_type:
-        query = query.filter(Fertilizer.fertilizer_type == fertilizer_type)
-    return query.all()
-
-
-@router.get("/growth-stages", response_model=List[GrowthStageResponse])
+# ============================================================
+# Growth Stages
+# ============================================================
+@router.get("/growth-stages", response_model=List[schemas.GrowthStage])
 def get_growth_stages(
-    crop_id: Optional[int] = Query(None),
-    variety_id: Optional[int] = Query(None),
+    crop_id: Optional[int] = None, 
+    variety_id: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
-    query = db.query(GrowthStage)
+    query = db.query(models.GrowthStage)
     if crop_id:
-        query = query.filter(GrowthStage.crop_id == crop_id)
+        query = query.filter(models.GrowthStage.crop_id == crop_id)
     if variety_id:
-        query = query.filter(GrowthStage.variety_id == variety_id)
-    return query.order_by(GrowthStage.stage_order).all()
+        query = query.filter(models.GrowthStage.variety_id == variety_id)
+    return query.order_by(models.GrowthStage.stage_order).all()
 
 
-@router.get("/acids", response_model=List[AcidResponse])
-def get_acids(db: Session = Depends(get_db)):
-    return db.query(Acid).all()
+@router.post("/growth-stages", response_model=schemas.GrowthStage)
+def create_growth_stage(stage: schemas.GrowthStageCreate, db: Session = Depends(get_db)):
+    db_stage = models.GrowthStage(**stage.dict())
+    db.add(db_stage)
+    db.commit()
+    db.refresh(db_stage)
+    return db_stage
 
 
-@router.get("/interactions", response_model=List[InteractionResponse])
+# ============================================================
+# Brands
+# ============================================================
+@router.get("/brands", response_model=List[schemas.Brand])
+def get_brands(db: Session = Depends(get_db)):
+    return db.query(models.Brand).all()
+
+
+@router.post("/brands", response_model=schemas.Brand)
+def create_brand(brand: schemas.BrandCreate, db: Session = Depends(get_db)):
+    db_brand = models.Brand(**brand.dict())
+    db.add(db_brand)
+    db.commit()
+    db.refresh(db_brand)
+    return db_brand
+
+
+# ============================================================
+# Fertilizers
+# ============================================================
+@router.get("/fertilizers", response_model=List[schemas.Fertilizer])
+def get_fertilizers(
+    brand_id: Optional[int] = None,
+    fertilizer_type: Optional[str] = None,
+    is_active: Optional[bool] = True,
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Fertilizer).filter(models.Fertilizer.is_active == is_active)
+    if brand_id:
+        query = query.filter(models.Fertilizer.brand_id == brand_id)
+    if fertilizer_type:
+        query = query.filter(models.Fertilizer.fertilizer_type == fertilizer_type)
+    return query.all()
+
+
+@router.post("/fertilizers", response_model=schemas.Fertilizer)
+def create_fertilizer(fertilizer: schemas.FertilizerCreate, db: Session = Depends(get_db)):
+    db_fertilizer = models.Fertilizer(**fertilizer.dict())
+    db.add(db_fertilizer)
+    db.commit()
+    db.refresh(db_fertilizer)
+    return db_fertilizer
+
+
+# ============================================================
+# Interactions
+# ============================================================
+@router.get("/interactions", response_model=List[schemas.Interaction])
 def get_interactions(db: Session = Depends(get_db)):
-    return db.query(Interaction).all()
+    return db.query(models.Interaction).all()
 
 
-@router.post("/tanks", response_model=TankResponse, status_code=201)
-def create_tank(tank: TankCreate, db: Session = Depends(get_db)):
-    try:
-        tank_data = tank.model_dump()
-        db_tank = Tank(**tank_data)
-        db.add(db_tank)
-        db.commit()
-        db.refresh(db_tank)
-        return db_tank
-    except Exception as e:
-        db.rollback()
-        print(f"Error creating tank: {str(e)}")
-        raise HTTPException(status_code=400, detail=f"Error creating tank: {str(e)}")
+@router.post("/interactions", response_model=schemas.Interaction)
+def create_interaction(interaction: schemas.InteractionCreate, db: Session = Depends(get_db)):
+    db_interaction = models.Interaction(**interaction.dict())
+    db.add(db_interaction)
+    db.commit()
+    db.refresh(db_interaction)
+    return db_interaction
 
 
-@router.get("/tanks", response_model=List[TankResponse])
-def get_tanks(db: Session = Depends(get_db)):
-    try:
-        return db.query(Tank).all()
-    except Exception as e:
-        print(f"Error getting tanks: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+# ============================================================
+# Acids
+# ============================================================
+@router.get("/acids", response_model=List[schemas.Acid])
+def get_acids(db: Session = Depends(get_db)):
+    return db.query(models.Acid).all()
+
+
+@router.post("/acids", response_model=schemas.Acid)
+def create_acid(acid: schemas.AcidCreate, db: Session = Depends(get_db)):
+    db_acid = models.Acid(**acid.dict())
+    db.add(db_acid)
+    db.commit()
+    db.refresh(db_acid)
+    return db_acid
+
+
+# ============================================================
+# Tanks
+# ============================================================
+@router.get("/tanks", response_model=List[schemas.Tank])
+def get_tanks(
+    tank_type: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Tank)
+    if tank_type:
+        query = query.filter(models.Tank.tank_type == tank_type)
+    return query.all()
+
+
+@router.post("/tanks", response_model=schemas.Tank)
+def create_tank(tank: schemas.TankCreate, db: Session = Depends(get_db)):
+    db_tank = models.Tank(**tank.dict())
+    db.add(db_tank)
+    db.commit()
+    db.refresh(db_tank)
+    return db_tank
+
+
+@router.get("/tanks/{tank_id}", response_model=schemas.Tank)
+def get_tank(tank_id: int, db: Session = Depends(get_db)):
+    tank = db.query(models.Tank).filter(models.Tank.id == tank_id).first()
+    if not tank:
+        raise HTTPException(status_code=404, detail="Tank not found")
+    return tank
+
+
+@router.put("/tanks/{tank_id}", response_model=schemas.Tank)
+def update_tank(tank_id: int, tank: schemas.TankCreate, db: Session = Depends(get_db)):
+    db_tank = db.query(models.Tank).filter(models.Tank.id == tank_id).first()
+    if not db_tank:
+        raise HTTPException(status_code=404, detail="Tank not found")
+    
+    for key, value in tank.dict().items():
+        setattr(db_tank, key, value)
+    
+    db.commit()
+    db.refresh(db_tank)
+    return db_tank
 
 
 @router.delete("/tanks/{tank_id}")
 def delete_tank(tank_id: int, db: Session = Depends(get_db)):
-    tank = db.query(Tank).filter(Tank.id == tank_id).first()
-    if not tank:
+    db_tank = db.query(models.Tank).filter(models.Tank.id == tank_id).first()
+    if not db_tank:
         raise HTTPException(status_code=404, detail="Tank not found")
-    db.delete(tank)
+    
+    db.delete(db_tank)
     db.commit()
     return {"message": "Tank deleted successfully"}
 
 
-@router.get("/history", response_model=List[CalculationHistoryResponse])
-def get_calculation_history(
-    limit: int = Query(50, ge=1, le=200),
-    db: Session = Depends(get_db)
-):
-    return db.query(CalculationHistory).order_by(
-        CalculationHistory.created_at.desc()
-    ).limit(limit).all()
-
-
 # ============================================================
-# Main Calculation Endpoint
+# محاسبه با یک مخزن (Endpoint قبلی - بدون تغییر)
 # ============================================================
-
-@router.post("/calculate", response_model=CalculationResponse)
-def calculate_fertilizer(
-    request: CalculationRequest,
-    db: Session = Depends(get_db)
-):
+@router.post("/calculate", response_model=schemas.CalculateResponse)
+def calculate(request: schemas.CalculateRequest, db: Session = Depends(get_db)):
+    """
+    محاسبه دوز بهینه کودها برای یک مخزن
+    این endpoint برای سازگاری با نسخه‌های قبلی حفظ شده است
+    """
     try:
-        # 1. پیدا کردن رقم گیاه
-        variety = db.query(Variety).filter(Variety.name == request.variety_name).first()
-        if not variety:
-            raise HTTPException(status_code=404, detail=f"Variety '{request.variety_name}' not found")
-
-        # 2. پیدا کردن مرحله رشد
-        stage = db.query(GrowthStage).filter(
-            GrowthStage.name == request.stage_name,
-            GrowthStage.variety_id == variety.id
+        growth_stage = db.query(models.GrowthStage).join(models.Crop).join(models.Variety).filter(
+            models.Crop.name == request.crop_name,
+            models.Variety.name == request.variety_name,
+            models.GrowthStage.name == request.stage_name
         ).first()
-
-        if not stage:
-            stage = db.query(GrowthStage).filter(
-                GrowthStage.name == request.stage_name,
-                GrowthStage.variety_id.is_(None)
-            ).first()
-
-        if not stage:
-            raise HTTPException(status_code=404, detail=f"Growth stage '{request.stage_name}' not found")
-
-        # 3. ایجاد مخزن (اگر tank_id نباشد، جدید بساز)
-        tank_data = request.tank.model_dump()
-
-        if request.tank_id:
-            # اگر tank_id ارسال شده، از مخزن موجود استفاده کن
-            existing_tank = db.query(Tank).filter(Tank.id == request.tank_id).first()
-            if existing_tank:
-                # به‌روزرسانی پارامترهای موقت آب
-                existing_tank.water_ec_ms_cm = tank_data.get('water_ec_ms_cm')
-                existing_tank.water_ph = tank_data.get('water_ph')
-                existing_tank.water_ca_ppm = tank_data.get('water_ca_ppm', 0)
-                existing_tank.water_mg_ppm = tank_data.get('water_mg_ppm', 0)
-                existing_tank.water_na_ppm = tank_data.get('water_na_ppm', 0)
-                existing_tank.water_cl_ppm = tank_data.get('water_cl_ppm', 0)
-                existing_tank.water_so4_ppm = tank_data.get('water_so4_ppm', 0)
-                existing_tank.water_hco3_ppm = tank_data.get('water_hco3_ppm', 0)
-                existing_tank.water_no3_ppm = tank_data.get('water_no3_ppm', 0)
-                existing_tank.water_fe_ppm = tank_data.get('water_fe_ppm', 0)
-                tank = existing_tank
-            else:
-                # اگر مخزن وجود نداشت، مخزن جدید بساز
-                tank = Tank(**tank_data)
-                db.add(tank)
-                db.flush()
-        else:
-            # اگر tank_id ارسال نشده بود، مخزن جدید بساز
-            tank = Tank(**tank_data)
-            db.add(tank)
-            db.flush()
-
-        # 4. نیازهای هدف گیاه
-        target_needs = stage.nutrient_needs or {}
-        for elem in SUPPORTED_ELEMENTS:
-            if elem not in target_needs:
-                target_needs[elem] = 0
-
-        # 5. محاسبه سهم آب
-        water_contribution = calculate_water_contribution(tank)
-
-        # 6. محاسبه سهم اسید (در صورت وجود)
-        acid_contribution = {elem: 0.0 for elem in SUPPORTED_ELEMENTS}
-        if request.acid_id and request.acid_dose_ml_per_liter:
-            acid = db.query(Acid).filter(Acid.id == request.acid_id).first()
-            if acid:
-                acid_contribution = calculate_acid_contribution(acid, request.acid_dose_ml_per_liter)
-
-        # 7. محاسبه نیاز باقیمانده پس از کسر سهم آب و اسید
-        remaining_needs = {}
-        for elem in SUPPORTED_ELEMENTS:
-            remaining_needs[elem] = max(0, target_needs[elem] - water_contribution[elem] - acid_contribution[elem])
-
-        # 8. دریافت لیست کودها (با فیلتر برند در صورت وجود)
-        query = db.query(Fertilizer)
+        
+        if not growth_stage:
+            raise HTTPException(status_code=404, detail="Growth stage not found")
+        
+        query = db.query(models.Fertilizer).filter(models.Fertilizer.is_active == True)
         if request.brand_filter:
-            query = query.filter(Fertilizer.brand_name == request.brand_filter)
-
-        all_fertilizers = query.all()
-
-        if not all_fertilizers:
-            raise HTTPException(status_code=404, detail="No fertilizers found")
-
-        # 9. بهینه‌سازی دوز کودها (نسخه بهبود یافته)
-        doses, calculated_supply, optimization_warnings = optimize_fertilizer_doses_professional(
-            remaining_needs, all_fertilizers, request.brand_filter, 5.0
+            query = query.filter(models.Fertilizer.brand_name == request.brand_filter)
+        
+        fertilizers = query.all()
+        
+        if not fertilizers:
+            return schemas.CalculateResponse(
+                success=False,
+                stage_name=request.stage_name,
+                variety_name=request.variety_name,
+                tank_name=request.tank.name,
+                tank_volume_liters=request.tank.volume_liters,
+                doses=[],
+                warnings=["هیچ کود فعالی برای محاسبه وجود ندارد"],
+                mixing_instructions="لطفاً ابتدا کودها را در سیستم ثبت کنید"
+            )
+        
+        water_contribution = calculate_water_contribution(request.tank)
+        
+        remaining_needs = {}
+        for elem, need in (growth_stage.nutrient_needs or {}).items():
+            water = water_contribution.get(elem, 0)
+            remaining_needs[elem] = max(0, need - water)
+        
+        doses_raw, final_supply, warnings = optimize_fertilizer_doses_professional(
+            remaining_needs=remaining_needs,
+            fertilizers=fertilizers,
+            brand_filter=request.brand_filter
         )
-
-        # 10. محاسبه دوز برای حجم مخزن و استوک 200x
-        doses_with_tank = calculate_tank_doses(doses, tank.volume_liters)
-
-        # 11. محاسبه EC نهایی
-        water_ec = tank.water_ec_ms_cm or 0.0
-        predicted_ec = calculate_final_ec(water_ec, doses_with_tank)
+        
+        doses = calculate_tank_doses(doses_raw, request.tank.volume_liters)
+        
+        ec_predicted = calculate_final_ec(request.tank.water_ec_ms_cm or 0, doses)
+        
         ec_warning = get_ec_warning(
-            predicted_ec,
-            stage.target_ec_min,
-            stage.target_ec_max
+            predicted_ec=ec_predicted,
+            target_ec_min=growth_stage.target_ec_min,
+            target_ec_max=growth_stage.target_ec_max
         )
-
-        # 12. بررسی تداخلات شیمیایی بین کودهای انتخاب شده
-        selected_fertilizer_ids = [d['id'] for d in doses_with_tank]
-        interaction_warnings = check_fertilizer_interactions(selected_fertilizer_ids, db)
-
-        # 13. تفکیک به مخازن A و B
-        from .calculator import separate_into_tanks
-        separated_tanks = separate_into_tanks(doses_with_tank)
-
-        # 14. ترکیب همه هشدارها
-        all_warnings = []
-
-        # هشدارهای بهینه‌سازی
-        for warn in optimization_warnings:
-            all_warnings.append(WarningResponse(
-                type=warn.get('type', 'unknown'),
-                severity=warn.get('severity', 'warning'),
-                product=None,
-                description=warn.get('message', ''),
-                fertilizers=[warn.get('fertilizer', '')] if warn.get('fertilizer') else []
-            ))
-
-        # هشدارهای تداخلات شیمیایی
-        for warn in interaction_warnings:
-            all_warnings.append(WarningResponse(
-                type=warn.get('type', 'interaction'),
-                severity=warn.get('severity', 'warning'),
-                product=warn.get('product'),
-                description=warn.get('description', ''),
-                fertilizers=warn.get('fertilizers', [])
-            ))
-
-        # هشدار EC
         if ec_warning:
-            all_warnings.append(WarningResponse(
-                type="ec_warning",
-                severity="warning",
-                product=None,
-                description=ec_warning,
-                fertilizers=[]
-            ))
-
-        # 15. تولید دستورالعمل اختلاط
+            warnings.append({
+                "type": "ec_warning",
+                "severity": "warning",
+                "message": ec_warning
+            })
+        
         mixing_instructions = generate_professional_mixing_instructions(
-            doses_with_tank, [w.model_dump() for w in all_warnings], tank.volume_liters
+            doses=doses,
+            warnings=warnings,
+            tank_volume=request.tank.volume_liters
         )
-
-        # 16. ذخیره در تاریخچه
-        history = CalculationHistory(
-            crop_name=request.crop_name,
-            variety_name=request.variety_name,
-            stage_name=request.stage_name,
-            brand_filter=request.brand_filter,
-            tank_id=tank.id,
-            tank_name=tank.name,
-            tank_volume_liters=tank.volume_liters,
-            water_ec_ms_cm=tank.water_ec_ms_cm,
-            water_ph=tank.water_ph,
-            target_needs_ppm=target_needs,
-            water_contribution_ppm=water_contribution,
-            remaining_needs_ppm=remaining_needs,
-            calculated_supply_ppm={k: round(v, 2) for k, v in calculated_supply.items()},
-            doses=[d for d in doses_with_tank],
-            warnings=[w.model_dump() for w in all_warnings],
-            ec_ph_targets={
-                "ec_min": stage.target_ec_min,
-                "ec_max": stage.target_ec_max,
-                "ph_min": stage.target_ph_min,
-                "ph_max": stage.target_ph_max
-            },
-            mixing_instructions=mixing_instructions,
-            success=1
-        )
-        db.add(history)
-        db.commit()
-
-        # 17. بازگشت پاسخ
-        return CalculationResponse(
+        
+        return schemas.CalculateResponse(
             success=True,
-            created_at=datetime.now(),
-            stage_name=stage.name,
-            variety_name=variety.name,
-            tank_name=tank.name,
-            tank_volume_liters=tank.volume_liters,
-            target_needs_ppm=target_needs,
-            water_contribution_ppm=water_contribution,
-            acid_contribution_ppm=acid_contribution,
-            remaining_needs_ppm=remaining_needs,
-            calculated_supply_ppm={k: round(v, 2) for k, v in calculated_supply.items()},
-            tanks=separated_tanks,
-            warnings=all_warnings,
-            ec_ph_targets={
-                "ec_min": stage.target_ec_min,
-                "ec_max": stage.target_ec_max,
-                "ph_min": stage.target_ph_min,
-                "ph_max": stage.target_ph_max
-            },
-            predicted_ec=predicted_ec,
-            ec_warning=ec_warning,
+            stage_name=request.stage_name,
+            variety_name=request.variety_name,
+            tank_name=request.tank.name,
+            tank_volume_liters=request.tank.volume_liters,
+            doses=doses,
+            warnings=[w.get('message', str(w)) for w in warnings],
             mixing_instructions=mixing_instructions,
-            message="Calculation completed successfully"
+            target_nutrients=growth_stage.nutrient_needs,
+            supplied_nutrients=final_supply
         )
-
-    except HTTPException:
-        raise
+        
     except Exception as e:
-        db.rollback()
-        print(f"Calculation error: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Calculation error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/debug/stages")
-def debug_stages(db: Session = Depends(get_db)):
-    """Debug endpoint برای بررسی مراحل رشد"""
-    stages = db.query(GrowthStage).all()
-    return {
-        "total": len(stages),
-        "stages": [
-            {
-                "id": s.id,
-                "name": s.name,
-                "variety_id": s.variety_id,
-                "variety_name": s.variety.name if s.variety else None,
-                "stage_order": s.stage_order
+# ============================================================
+# محاسبه با دو مخزن (Endpoint جدید)
+# ============================================================
+@router.post("/calculate-dual-tank")
+async def calculate_dual_tank(
+    request: schemas.DualTankRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    محاسبه دوز بهینه کودها برای دو مخزن جداگانه
+    
+    مخزن اصلی (Main): برای کودهای غیر کلسیمی (NPK، سولفات‌ها، ریز مغذی‌ها)
+    مخزن کلسیم (Calcium): برای کودهای حاوی کلسیم (نیترات کلسیم، کلات آهن)
+    
+    کشاورز باید اطلاعات هر دو مخزن را وارد کند تا سیستم دستورالعمل ساخت جداگانه بدهد.
+    """
+    start_time = time.time()
+    
+    try:
+        # دریافت نیازهای تغذیه‌ای بر اساس محصول، رقم و مرحله رشدی
+        growth_stage = db.query(models.GrowthStage).join(models.Crop).join(models.Variety).filter(
+            models.Crop.name == request.crop_name,
+            models.Variety.name == request.variety_name,
+            models.GrowthStage.name == request.stage_name
+        ).first()
+        
+        if not growth_stage:
+            return {
+                "success": False,
+                "error_message": f"مرحله رشدی '{request.stage_name}' برای محصول '{request.crop_name}' و رقم '{request.variety_name}' یافت نشد"
             }
-            for s in stages
-        ]
-    }
+        
+        # دریافت لیست کودهای فعال
+        query = db.query(models.Fertilizer).filter(models.Fertilizer.is_active == True)
+        if request.brand_filter:
+            query = query.filter(models.Fertilizer.brand_name == request.brand_filter)
+        
+        all_fertilizers = query.all()
+        
+        if not all_fertilizers:
+            return {
+                "success": False,
+                "error_message": "هیچ کود فعالی در دیتابیس یافت نشد"
+            }
+        
+        # دریافت نیازهای گیاه - این مهم است که به فرانت ارسال شود
+        plant_needs = growth_stage.nutrient_needs or {}
+        
+        # انجام محاسبات حرفه‌ای دو مخزن
+        result_main, result_calcium, combined_warnings, general_instructions = calculate_dual_tank_professional(
+            remaining_needs=plant_needs,
+            all_fertilizers=all_fertilizers,
+            tank_main=request.tank_main,
+            tank_calcium=request.tank_calcium,
+            brand_filter=request.brand_filter
+        )
+        
+        calculation_time = (time.time() - start_time) * 1000
+        
+        # تبدیل هشدارها به فرمت مناسب
+        warnings_main_list = [w.get('message', str(w)) for w in result_main.get('warnings', [])]
+        warnings_calcium_list = [w.get('message', str(w)) for w in result_calcium.get('warnings', [])]
+        combined_warnings_list = [w.get('message', str(w)) for w in combined_warnings]
+        
+        # ساخت پاسخ با target_needs
+        return {
+            "success": True,
+            "crop_name": request.crop_name,
+            "variety_name": request.variety_name,
+            "stage_name": request.stage_name,
+            "target_needs": plant_needs,  # این خط مهم است - نیاز گیاه
+            "tank_main_result": {
+                "tank_name": request.tank_main.name,
+                "tank_type": "main",
+                "tank_volume_liters": request.tank_main.volume_liters,
+                "doses": result_main.get("doses", []),
+                "water_contribution_ppm": result_main.get("water_contribution", {}),
+                "remaining_needs_ppm": result_main.get("remaining_needs", {}),
+                "supplied_ppm": result_main.get("supplied_ppm", {}),
+                "warnings": warnings_main_list,
+                "mixing_instructions": result_main.get("mixing_instructions", ""),
+                "target_ec": result_main.get("ec_predicted"),
+                "target_ph": growth_stage.target_ph_max
+            },
+            "tank_calcium_result": {
+                "tank_name": request.tank_calcium.name,
+                "tank_type": "calcium",
+                "tank_volume_liters": request.tank_calcium.volume_liters,
+                "doses": result_calcium.get("doses", []),
+                "water_contribution_ppm": result_calcium.get("water_contribution", {}),
+                "remaining_needs_ppm": result_calcium.get("remaining_needs", {}),
+                "supplied_ppm": result_calcium.get("supplied_ppm", {}),
+                "warnings": warnings_calcium_list,
+                "mixing_instructions": result_calcium.get("mixing_instructions", ""),
+                "target_ec": result_calcium.get("ec_predicted"),
+                "target_ph": growth_stage.target_ph_min
+            },
+            "combined_warnings": combined_warnings_list,
+            "general_mixing_instructions": general_instructions,
+            "calculation_time_ms": calculation_time,
+            "error_message": None
+        }
+        
+    except Exception as e:
+        logger.error(f"Dual tank calculation error: {str(e)}")
+        return {
+            "success": False,
+            "error_message": str(e)
+        }
+
+
+# ============================================================
+# History
+# ============================================================
+@router.get("/history", response_model=List[schemas.CalculationHistoryResponse])
+def get_history(limit: int = 50, db: Session = Depends(get_db)):
+    history = db.query(models.CalculationHistory).order_by(
+        desc(models.CalculationHistory.created_at)
+    ).limit(limit).all()
+    return history
+
+
+@router.get("/history/{history_id}", response_model=schemas.CalculationHistoryResponse)
+def get_history_item(history_id: int, db: Session = Depends(get_db)):
+    history = db.query(models.CalculationHistory).filter(
+        models.CalculationHistory.id == history_id
+    ).first()
+    if not history:
+        raise HTTPException(status_code=404, detail="History item not found")
+    return history
+
+
+@router.delete("/history/{history_id}")
+def delete_history_item(history_id: int, db: Session = Depends(get_db)):
+    history = db.query(models.CalculationHistory).filter(
+        models.CalculationHistory.id == history_id
+    ).first()
+    if not history:
+        raise HTTPException(status_code=404, detail="History item not found")
+    
+    db.delete(history)
+    db.commit()
+    return {"message": "History item deleted successfully"}

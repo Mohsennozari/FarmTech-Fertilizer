@@ -562,7 +562,7 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ## License
 
-This project is licensed under the **MIT License**.
+This project is private and not open source. All rights reserved.
 
 ---
 
@@ -575,4 +575,6 @@ For issues, bug reports, or feature requests, please use the GitHub Issues secti
 **Built with 🌱 for sustainable agriculture**
 
 
-
+برای سید کردن مجدد دیتا بیس
+cd backend
+python -c "from app.seed import init_db; init_db()"

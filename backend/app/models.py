@@ -1,6 +1,6 @@
 # Platform-v3\backend\app\models.py
 
-from sqlalchemy import Column, Integer, String, Float, JSON, ForeignKey, Table, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, Float, JSON, ForeignKey, Table, DateTime, Boolean, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
@@ -23,7 +23,7 @@ class Brand(Base):
     name = Column(String, unique=True, nullable=False)
     country = Column(String, nullable=True)
     website = Column(String, nullable=True)
-    notes = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
 
     fertilizers = relationship("Fertilizer", back_populates="brand", lazy="select")
 
@@ -46,7 +46,7 @@ class Variety(Base):
     id = Column(Integer, primary_key=True, index=True)
     crop_id = Column(Integer, ForeignKey("crops.id"), nullable=False)
     name = Column(String, nullable=False)
-    description = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
     growth_days = Column(Integer, nullable=True)
     yield_potential = Column(String, nullable=True)
 
@@ -62,17 +62,25 @@ class Fertilizer(Base):
     brand_id = Column(Integer, ForeignKey("brands.id"), nullable=True)
     brand_name = Column(String, nullable=True)
 
+    # اطلاعات پایه کود
     fertilizer_form = Column(String, default="powder")
     chemical_formula = Column(String, nullable=True)
     molecular_weight = Column(Float, nullable=True)
     purity_percent = Column(Float, default=100.0)
     fertilizer_type = Column(String, nullable=True)
-
+    
+    # کد ثبت و اطلاعات شناسایی
+    registration_code = Column(String, nullable=True)
+    product_code = Column(String, nullable=True)
+    color = Column(String, nullable=True)
+    
+    # دوز مصرف
     max_dose_g_per_liter = Column(Float, nullable=True)
     max_dose_ml_per_liter = Column(Float, nullable=True)
     min_dose_g_per_liter = Column(Float, nullable=True, default=0.01)
     density_g_per_ml = Column(Float, nullable=True)
-
+    
+    # عناصر ماکرو (درصد)
     n_percent = Column(Float, default=0)
     p_percent = Column(Float, default=0)
     k_percent = Column(Float, default=0)
@@ -80,6 +88,7 @@ class Fertilizer(Base):
     mg_percent = Column(Float, default=0)
     s_percent = Column(Float, default=0)
 
+    # عناصر میکرو (درصد)
     fe_percent = Column(Float, default=0)
     zn_percent = Column(Float, default=0)
     mn_percent = Column(Float, default=0)
@@ -88,12 +97,19 @@ class Fertilizer(Base):
     mo_percent = Column(Float, default=0)
     cl_percent = Column(Float, default=0)
 
+    # خواص فیزیکی و شیمیایی
     solubility_g_per_l = Column(Float, nullable=True)
     ph_effect = Column(String, nullable=True)
-    notes = Column(String, nullable=True)
+    
+    # توضیحات و اطلاعات اضافی
+    description = Column(Text, nullable=True)
+    benefits = Column(Text, nullable=True)
+    usage_instructions = Column(Text, nullable=True)
+    notes = Column(Text, nullable=True)
+    
+    # وضعیت
     is_active = Column(Boolean, default=True)
 
-    # روابط
     brand = relationship("Brand", back_populates="fertilizers", lazy="select")
     growth_stages = relationship("GrowthStage", secondary=growth_stage_fertilizer, back_populates="fertilizers", lazy="select")
 
@@ -106,7 +122,7 @@ class GrowthStage(Base):
     variety_id = Column(Integer, ForeignKey("varieties.id"), nullable=True)
     name = Column(String, nullable=False)
     stage_order = Column(Integer, nullable=False)
-    description = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
     nutrient_needs = Column(JSON, nullable=True)
     target_ec_min = Column(Float, nullable=True)
     target_ec_max = Column(Float, nullable=True)
@@ -114,7 +130,6 @@ class GrowthStage(Base):
     target_ph_max = Column(Float, nullable=True)
     priority = Column(String, nullable=True)
 
-    # روابط
     crop = relationship("Crop", back_populates="growth_stages", lazy="select")
     variety = relationship("Variety", back_populates="growth_stages", lazy="select")
     fertilizers = relationship("Fertilizer", secondary=growth_stage_fertilizer, back_populates="growth_stages", lazy="select")
@@ -129,7 +144,7 @@ class Interaction(Base):
     reaction_type = Column(String, nullable=False)
     severity = Column(String, nullable=False)
     precipitate_product = Column(String, nullable=True)
-    description = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
 
     fertilizer_a = relationship("Fertilizer", foreign_keys=[fertilizer_a_id], lazy="select")
     fertilizer_b = relationship("Fertilizer", foreign_keys=[fertilizer_b_id], lazy="select")
@@ -146,7 +161,7 @@ class Acid(Base):
     supplies_element = Column(String, nullable=True)
     element_percent = Column(Float, nullable=True)
     ml_per_1000L_per_ph_point = Column(Float, nullable=True)
-    notes = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
 
 
 class Tank(Base):
@@ -154,6 +169,7 @@ class Tank(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
+    tank_type = Column(String, default="main")
     volume_liters = Column(Float, nullable=False)
     water_ec_ms_cm = Column(Float, nullable=True)
     water_ph = Column(Float, nullable=True)
@@ -165,10 +181,8 @@ class Tank(Base):
     water_hco3_ppm = Column(Float, default=0)
     water_no3_ppm = Column(Float, default=0)
     water_fe_ppm = Column(Float, default=0)
-    notes = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
 
-    # اصلاح: اضافه کردن cascade delete
-    calculations = relationship("CalculationHistory", back_populates="tank", cascade="all, delete-orphan")
 
 class CalculationHistory(Base):
     __tablename__ = "calculation_history"
@@ -179,22 +193,50 @@ class CalculationHistory(Base):
     variety_name = Column(String, nullable=False)
     stage_name = Column(String, nullable=False)
     brand_filter = Column(String, nullable=True)
-    tank_id = Column(Integer, ForeignKey("tanks.id"), nullable=False)
-    tank_name = Column(String, nullable=False)
-    tank_volume_liters = Column(Float, nullable=False)
-    water_ec_ms_cm = Column(Float, nullable=True)
-    water_ph = Column(Float, nullable=True)
-    water_hco3_ppm = Column(Float, default=0)
-    target_needs_ppm = Column(JSON, nullable=False)
-    water_contribution_ppm = Column(JSON, nullable=False)
-    remaining_needs_ppm = Column(JSON, nullable=False)
-    calculated_supply_ppm = Column(JSON, nullable=False)
-    doses = Column(JSON, nullable=False)
-    warnings = Column(JSON, nullable=False)
-    ec_ph_targets = Column(JSON, nullable=False)
-    mixing_instructions = Column(String, nullable=True)
-    acid_adjustment = Column(JSON, nullable=True)
-    success = Column(Integer, default=1)
-    error_message = Column(String, nullable=True)
 
-    tank = relationship("Tank", back_populates="calculations", lazy="select")
+    tank_main_name = Column(String, nullable=False)
+    tank_main_volume_liters = Column(Float, nullable=False)
+    tank_main_water_ec_ms_cm = Column(Float, nullable=True)
+    tank_main_water_ph = Column(Float, nullable=True)
+    tank_main_water_hco3_ppm = Column(Float, default=0)
+    tank_main_water_ca_ppm = Column(Float, default=0)
+    tank_main_water_mg_ppm = Column(Float, default=0)
+
+    tank_calcium_name = Column(String, nullable=False)
+    tank_calcium_volume_liters = Column(Float, nullable=False)
+    tank_calcium_water_ec_ms_cm = Column(Float, nullable=True)
+    tank_calcium_water_ph = Column(Float, nullable=True)
+    tank_calcium_water_hco3_ppm = Column(Float, default=0)
+    tank_calcium_water_ca_ppm = Column(Float, default=0)
+    tank_calcium_water_mg_ppm = Column(Float, default=0)
+
+    target_needs_ppm = Column(JSON, nullable=False)
+    water_contribution_main_ppm = Column(JSON, nullable=False)
+    water_contribution_calcium_ppm = Column(JSON, nullable=False)
+    remaining_needs_main_ppm = Column(JSON, nullable=False)
+    remaining_needs_calcium_ppm = Column(JSON, nullable=False)
+
+    calculated_supply_main_ppm = Column(JSON, nullable=False)
+    calculated_supply_calcium_ppm = Column(JSON, nullable=False)
+
+    doses_main = Column(JSON, nullable=False)
+    doses_calcium = Column(JSON, nullable=False)
+
+    warnings_main = Column(JSON, nullable=False)
+    warnings_calcium = Column(JSON, nullable=False)
+    combined_warnings = Column(JSON, nullable=False)
+
+    mixing_instructions_main = Column(Text, nullable=True)
+    mixing_instructions_calcium = Column(Text, nullable=True)
+    general_mixing_instructions = Column(Text, nullable=True)
+
+    acid_adjustment_main = Column(JSON, nullable=True)
+    acid_adjustment_calcium = Column(JSON, nullable=True)
+
+    target_ec_min = Column(Float, nullable=True)
+    target_ec_max = Column(Float, nullable=True)
+    target_ph_min = Column(Float, nullable=True)
+    target_ph_max = Column(Float, nullable=True)
+
+    success = Column(Integer, default=1)
+    error_message = Column(Text, nullable=True)
