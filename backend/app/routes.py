@@ -1,3 +1,5 @@
+# backend/app/routes.py
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -16,9 +18,6 @@ from app.calculator import (
     generate_professional_mixing_instructions,
     separate_into_tanks,
     calculate_dual_tank_professional,
-    # ============================================================
-    # توابع جدید نسخه 3.3.0
-    # ============================================================
     calculate_dose_kg_for_stock,
     calculate_stock_consumption,
     get_injector_explanation,
@@ -39,7 +38,14 @@ router = APIRouter(prefix="/api/v1", tags=["FarmTech API"])
 # ============================================================
 @router.get("/health")
 def health_check():
-    return {"status": "ok", "version": "3.3.0", "dual_tank_support": True, "stock_system": True}
+    return {
+        "status": "ok",
+        "version": "3.3.1",
+        "dual_tank_support": True,
+        "stock_system": True,
+        "custom_needs_support": True,
+        "multi_brand_support": True
+    }
 
 
 # ============================================================
@@ -242,182 +248,7 @@ def delete_tank(tank_id: int, db: Session = Depends(get_db)):
 
 # ============================================================
 # ============================================================
-# محاسبه با یک مخزن - نسخه 3.3.0 با پشتیبانی از سیستم استوک
-# ============================================================
-# ============================================================
-@router.post("/calculate", response_model=schemas.CalculationResponse)
-def calculate(request: schemas.CalculationRequest, db: Session = Depends(get_db)):
-    """
-    محاسبه دوز بهینه کودها برای یک مخزن - نسخه 3.3.0
-    
-    این endpoint با پشتیبانی از سیستم استوک به‌روزرسانی شده است:
-    - محاسبه مقدار کود مورد نیاز برای ساخت استوک (کیلوگرم)
-    - محاسبه مقدار مصرف استوک در مخزن اصلی
-    - توضیح مفهوم نسبت تزریق برای کاربر
-    - دستورالعمل گام به گام ساخت و مصرف استوک
-    """
-    try:
-        # دریافت مرحله رشد
-        growth_stage = db.query(models.GrowthStage).join(models.Crop).join(models.Variety).filter(
-            models.Crop.name == request.crop_name,
-            models.Variety.name == request.variety_name,
-            models.GrowthStage.name == request.stage_name
-        ).first()
-        
-        if not growth_stage:
-            raise HTTPException(status_code=404, detail="Growth stage not found")
-        
-        # دریافت کودها با فیلتر برند
-        query = db.query(models.Fertilizer).filter(models.Fertilizer.is_active == True)
-        if request.brand_filter:
-            query = query.filter(models.Fertilizer.brand_name == request.brand_filter)
-        
-        fertilizers = query.all()
-        
-        if not fertilizers:
-            # ایجاد پاسخ خطا با ساختار کامل StockInstructions
-            empty_stock_instructions = schemas.StockInstructions(
-                stock_tank_volume_liters=request.stock_tank_volume_liters,
-                injector_ratio=request.injector_ratio,
-                main_tank_volume_liters=request.tank.volume_liters,
-                injector_explanation=get_injector_explanation(request.injector_ratio),
-                fertilizers_for_stock=[],
-                mixing_instructions=get_stock_mixing_instructions([]),
-                stock_liters_for_main_tank=0,
-                stock_ml_per_liter=0,
-                usage_instructions=get_stock_usage_instructions(request.injector_ratio),
-                storage_instructions=get_storage_instructions()[0],
-                shelf_life_fridge=get_storage_instructions()[1],
-                shelf_life_room=get_storage_instructions()[2],
-                warning_signs=get_storage_instructions()[3]
-            )
-            
-            return schemas.CalculationResponse(
-                success=False,
-                crop_name=request.crop_name,
-                variety_name=request.variety_name,
-                stage_name=request.stage_name,
-                tank_name=request.tank.name,
-                tank_volume_liters=request.tank.volume_liters,
-                doses=[],
-                stock_instructions=empty_stock_instructions,
-                warnings=["هیچ کود فعالی برای محاسبه وجود ندارد"]
-            )
-        
-        # محاسبه سهم عناصر از آب
-        water_contribution = calculate_water_contribution(request.tank)
-        
-        # محاسبه نیاز باقیمانده پس از کسر سهم آب
-        remaining_needs = {}
-        for elem, need in (growth_stage.nutrient_needs or {}).items():
-            water = water_contribution.get(elem, 0)
-            remaining_needs[elem] = max(0, need - water)
-        
-        # بهینه‌سازی دوز کودها
-        doses_raw, final_supply, warnings = optimize_fertilizer_doses_professional(
-            remaining_needs=remaining_needs,
-            fertilizers=fertilizers,
-            brand_filter=request.brand_filter
-        )
-        
-        # محاسبه دوز برای کل مخزن
-        doses = calculate_tank_doses(doses_raw, request.tank.volume_liters)
-        
-        # ============================================================
-        # بخش جدید: اضافه کردن محاسبات استوک به دوزها
-        # ============================================================
-        doses_with_stock = add_stock_calculations_to_doses(
-            doses=doses,
-            tank_volume_liters=request.tank.volume_liters,
-            injector_ratio=request.injector_ratio,
-            stock_tank_volume_liters=request.stock_tank_volume_liters
-        )
-        
-        # محاسبه مصرف استوک در مخزن اصلی
-        stock_liters_for_main_tank, stock_ml_per_liter = calculate_stock_consumption(
-            injector_ratio=request.injector_ratio,
-            main_tank_volume_liters=request.tank.volume_liters
-        )
-        
-        # آماده سازی لیست کودها برای دستورالعمل ساخت استوک
-        fertilizers_for_stock = []
-        for dose in doses_with_stock:
-            fertilizers_for_stock.append({
-                "name": dose.get("name", ""),
-                "kg": dose.get("dose_kg_for_stock", 0),
-                "g_alternative": dose.get("dose_g_for_stock_alternative")
-            })
-        
-        # دریافت دستورالعمل‌های استوک
-        fertilizer_names = [d.get("name", "") for d in doses_with_stock]
-        mixing_instructions = get_stock_mixing_instructions(fertilizer_names)
-        usage_instructions = get_stock_usage_instructions(request.injector_ratio)
-        storage_instructions, shelf_life_fridge, shelf_life_room, warning_signs = get_storage_instructions()
-        injector_explanation = get_injector_explanation(request.injector_ratio)
-        
-        # ساخت دستورالعمل استوک کامل
-        stock_instructions = schemas.StockInstructions(
-            stock_tank_volume_liters=request.stock_tank_volume_liters,
-            injector_ratio=request.injector_ratio,
-            main_tank_volume_liters=request.tank.volume_liters,
-            injector_explanation=injector_explanation,
-            fertilizers_for_stock=fertilizers_for_stock,
-            mixing_instructions=mixing_instructions,
-            stock_liters_for_main_tank=stock_liters_for_main_tank,
-            stock_ml_per_liter=stock_ml_per_liter,
-            usage_instructions=usage_instructions,
-            storage_instructions=storage_instructions,
-            shelf_life_fridge=shelf_life_fridge,
-            shelf_life_room=shelf_life_room,
-            warning_signs=warning_signs
-        )
-        
-        # محاسبه EC پیش‌بینی شده
-        ec_predicted = calculate_final_ec(request.tank.water_ec_ms_cm or 0, doses)
-        
-        # هشدار EC
-        ec_warning = get_ec_warning(
-            predicted_ec=ec_predicted,
-            target_ec_min=growth_stage.target_ec_min,
-            target_ec_max=growth_stage.target_ec_max
-        )
-        if ec_warning:
-            warnings.append({
-                "type": "ec_warning",
-                "severity": "warning",
-                "message": ec_warning
-            })
-        
-        # تبدیل هشدارها به لیست رشته‌ها
-        warnings_list = [w.get('message', str(w)) for w in warnings]
-        
-        # ساخت پاسخ نهایی
-        return schemas.CalculationResponse(
-            success=True,
-            crop_name=request.crop_name,
-            variety_name=request.variety_name,
-            stage_name=request.stage_name,
-            tank_name=request.tank.name,
-            tank_volume_liters=request.tank.volume_liters,
-            doses=doses_with_stock,
-            stock_instructions=stock_instructions,
-            warnings=warnings_list,
-            interactions=[],
-            nutrient_comparison=None,
-            target_ec=growth_stage.target_ec_max,
-            target_ph=growth_stage.target_ph_max
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Calculation error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# ============================================================
-# ============================================================
-# محاسبه با دو مخزن (Endpoint نسخه 3.3.0)
+# محاسبه با دو مخزن (نسخه 3.3.1)
 # ============================================================
 # ============================================================
 @router.post("/calculate-dual-tank")
@@ -426,17 +257,23 @@ async def calculate_dual_tank(
     db: Session = Depends(get_db)
 ):
     """
-    محاسبه دوز بهینه کودها برای دو مخزن جداگانه - نسخه 3.3.0
+    محاسبه دوز بهینه کودها برای دو مخزن جداگانه - نسخه 3.3.1
+    
+    قابلیت‌های جدید:
+    - پشتیبانی از انتخاب چند برند همزمان (Multi Brand Filter)
+    - پشتیبانی از نیازهای سفارشی کاربر (Custom Nutrient Needs)
+    - محاسبه دقیق مقدار استوک (کیلوگرم) بر اساس نسبت تزریق
     
     مخزن اصلی (Main): برای کودهای غیر کلسیمی (NPK، سولفات‌ها، ریز مغذی‌ها)
     مخزن کلسیم (Calcium): برای کودهای حاوی کلسیم (نیترات کلسیم، کلات آهن)
-    
-    کشاورز باید اطلاعات هر دو مخزن را وارد کند تا سیستم دستورالعمل ساخت جداگانه بدهد.
     """
     start_time = time.time()
     
     try:
-        # دریافت نیازهای تغذیه‌ای بر اساس محصول، رقم و مرحله رشدی
+        # ============================================================
+        # مرحله 1: دریافت اطلاعات اولیه
+        # ============================================================
+        
         growth_stage = db.query(models.GrowthStage).join(models.Crop).join(models.Variety).filter(
             models.Crop.name == request.crop_name,
             models.Variety.name == request.variety_name,
@@ -449,10 +286,31 @@ async def calculate_dual_tank(
                 "error_message": f"مرحله رشدی '{request.stage_name}' برای محصول '{request.crop_name}' و رقم '{request.variety_name}' یافت نشد"
             }
         
-        # دریافت لیست کودهای فعال
+        # ============================================================
+        # مرحله 2: اولویت با نیازهای سفارشی کاربر (Custom Nutrient Needs)
+        # ============================================================
+        
+        if request.custom_nutrient_needs and len(request.custom_nutrient_needs) > 0:
+            plant_needs = request.custom_nutrient_needs
+            logger.info(f"Using custom nutrient needs: {plant_needs}")
+            needs_source = "custom"
+        else:
+            plant_needs = growth_stage.nutrient_needs or {}
+            logger.info(f"Using default nutrient needs from database: {plant_needs}")
+            needs_source = "database"
+        
+        # ============================================================
+        # مرحله 3: فیلتر برند (Multi Brand Filter - پشتیبانی از لیست)
+        # ============================================================
+        
         query = db.query(models.Fertilizer).filter(models.Fertilizer.is_active == True)
-        if request.brand_filter:
-            query = query.filter(models.Fertilizer.brand_name == request.brand_filter)
+        
+        if request.brand_filter and len(request.brand_filter) > 0:
+            query = query.filter(models.Fertilizer.brand_name.in_(request.brand_filter))
+            logger.info(f"Filtering brands: {request.brand_filter}")
+            brand_filter_str = ",".join(request.brand_filter)
+        else:
+            brand_filter_str = None
         
         all_fertilizers = query.all()
         
@@ -462,32 +320,84 @@ async def calculate_dual_tank(
                 "error_message": "هیچ کود فعالی در دیتابیس یافت نشد"
             }
         
-        # دریافت نیازهای گیاه - این مهم است که به فرانت ارسال شود
-        plant_needs = growth_stage.nutrient_needs or {}
+        # ============================================================
+        # مرحله 4: انجام محاسبات حرفه‌ای دو مخزن
+        # ============================================================
         
-        # انجام محاسبات حرفه‌ای دو مخزن
         result_main, result_calcium, combined_warnings, general_instructions = calculate_dual_tank_professional(
             remaining_needs=plant_needs,
             all_fertilizers=all_fertilizers,
             tank_main=request.tank_main,
             tank_calcium=request.tank_calcium,
-            brand_filter=request.brand_filter
+            brand_filter=brand_filter_str
         )
+        
+        # ============================================================
+        # مرحله 5: اضافه کردن محاسبات استوک به دوزها
+        # ============================================================
+        
+        if result_main.get("doses"):
+            result_main["doses"] = add_stock_calculations_to_doses(
+                doses=result_main["doses"],
+                tank_volume_liters=request.tank_main.volume_liters,
+                injector_ratio=request.injector_ratio,
+                stock_tank_volume_liters=request.stock_tank_volume_liters
+            )
+        
+        if result_calcium.get("doses"):
+            result_calcium["doses"] = add_stock_calculations_to_doses(
+                doses=result_calcium["doses"],
+                tank_volume_liters=request.tank_calcium.volume_liters,
+                injector_ratio=request.injector_ratio,
+                stock_tank_volume_liters=request.stock_tank_volume_liters
+            )
+        
+        # ============================================================
+        # مرحله 6: محاسبه مصرف استوک
+        # ============================================================
+        
+        stock_liters_for_main_tank, stock_ml_per_liter = calculate_stock_consumption(
+            injector_ratio=request.injector_ratio,
+            main_tank_volume_liters=request.tank_main.volume_liters
+        )
+        
+        stock_liters_for_calcium_tank, stock_ml_per_liter_calcium = calculate_stock_consumption(
+            injector_ratio=request.injector_ratio,
+            main_tank_volume_liters=request.tank_calcium.volume_liters
+        )
+        
+        # ============================================================
+        # مرحله 7: ساخت دستورالعمل استوک
+        # ============================================================
+        
+        injector_explanation = get_injector_explanation(request.injector_ratio)
+        usage_instructions = get_stock_usage_instructions(request.injector_ratio)
+        storage_instructions, shelf_life_fridge, shelf_life_room, warning_signs = get_storage_instructions()
+        
+        main_fertilizer_names = [d.get("name", "") for d in result_main.get("doses", [])]
+        main_mixing_instructions = get_stock_mixing_instructions(main_fertilizer_names)
+        
+        calcium_fertilizer_names = [d.get("name", "") for d in result_calcium.get("doses", [])]
+        calcium_mixing_instructions = get_stock_mixing_instructions(calcium_fertilizer_names)
+        
+        # ============================================================
+        # مرحله 8: محاسبه زمان و آماده‌سازی پاسخ
+        # ============================================================
         
         calculation_time = (time.time() - start_time) * 1000
         
-        # تبدیل هشدارها به فرمت مناسب
         warnings_main_list = [w.get('message', str(w)) for w in result_main.get('warnings', [])]
         warnings_calcium_list = [w.get('message', str(w)) for w in result_calcium.get('warnings', [])]
         combined_warnings_list = [w.get('message', str(w)) for w in combined_warnings]
         
-        # ساخت پاسخ با target_needs
         return {
             "success": True,
             "crop_name": request.crop_name,
             "variety_name": request.variety_name,
             "stage_name": request.stage_name,
-            "target_needs": plant_needs,
+            "target_needs": growth_stage.nutrient_needs or {},
+            "custom_needs": plant_needs if needs_source == "custom" else None,
+            "needs_source": needs_source,
             "tank_main_result": {
                 "tank_name": request.tank_main.name,
                 "tank_type": "main",
@@ -499,7 +409,16 @@ async def calculate_dual_tank(
                 "warnings": warnings_main_list,
                 "mixing_instructions": result_main.get("mixing_instructions", ""),
                 "target_ec": result_main.get("ec_predicted"),
-                "target_ph": growth_stage.target_ph_max
+                "target_ph": growth_stage.target_ph_max,
+                "stock_instructions": {
+                    "stock_tank_volume_liters": request.stock_tank_volume_liters,
+                    "injector_ratio": request.injector_ratio,
+                    "injector_explanation": injector_explanation,
+                    "mixing_instructions": main_mixing_instructions,
+                    "stock_liters_for_tank": stock_liters_for_main_tank,
+                    "stock_ml_per_liter": stock_ml_per_liter,
+                    "usage_instructions": usage_instructions
+                }
             },
             "tank_calcium_result": {
                 "tank_name": request.tank_calcium.name,
@@ -512,10 +431,23 @@ async def calculate_dual_tank(
                 "warnings": warnings_calcium_list,
                 "mixing_instructions": result_calcium.get("mixing_instructions", ""),
                 "target_ec": result_calcium.get("ec_predicted"),
-                "target_ph": growth_stage.target_ph_min
+                "target_ph": growth_stage.target_ph_min,
+                "stock_instructions": {
+                    "stock_tank_volume_liters": request.stock_tank_volume_liters,
+                    "injector_ratio": request.injector_ratio,
+                    "injector_explanation": injector_explanation,
+                    "mixing_instructions": calcium_mixing_instructions,
+                    "stock_liters_for_tank": stock_liters_for_calcium_tank,
+                    "stock_ml_per_liter": stock_ml_per_liter_calcium,
+                    "usage_instructions": usage_instructions
+                }
             },
             "combined_warnings": combined_warnings_list,
             "general_mixing_instructions": general_instructions,
+            "storage_instructions": storage_instructions,
+            "shelf_life_fridge": shelf_life_fridge,
+            "shelf_life_room": shelf_life_room,
+            "warning_signs": warning_signs,
             "calculation_time_ms": calculation_time,
             "error_message": None
         }

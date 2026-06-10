@@ -526,7 +526,9 @@ const getElementName = (element: string) => {
 
 const nutrientComparison = computed(() => {
   const elements = ['N', 'P', 'K', 'Ca', 'Mg', 'Fe', 'Zn', 'Mn', 'B']
-  const needs = props.result.target_needs || {}
+  
+  const needs = props.result.custom_needs || props.result.target_needs || {}
+  
   const suppliedMain = props.result.tank_main_result?.supplied_ppm || {}
   const suppliedCalcium = props.result.tank_calcium_result?.supplied_ppm || {}
   

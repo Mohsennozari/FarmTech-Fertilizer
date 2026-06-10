@@ -1,4 +1,4 @@
-# Platform-v3\backend\app\main.py
+# backend/app/main.py
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="FarmTech API",
     description="سیستم هوشمند نسخه‌دهی کود دیجیتال",
-    version="3.1.0",
+    version="3.3.1",
     docs_url="/docs",
     redoc_url="/redoc"
 )
@@ -40,7 +40,7 @@ app.include_router(router)
 def root():
     return {
         "message": "FarmTech API is running",
-        "version": "3.1.0",
+        "version": "3.3.1",
         "docs": "/docs",
         "api": "/api/v1"
     }

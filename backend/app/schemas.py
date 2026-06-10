@@ -1,3 +1,5 @@
+# backend/app/schemas.py
+
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
@@ -9,12 +11,12 @@ from datetime import datetime
 class TankBase(BaseModel):
     name: str
     volume_liters: float = Field(..., gt=0, description="حجم مخزن به لیتر")
-    water_ec_ms_cm: Optional[float] = Field(None, ge=0, le=10, description="EC آب به میلی‌زیمنس بر سانتی‌متر")
-    water_ph: Optional[float] = Field(None, ge=0, le=14, description="pH آب")
-    water_ca_ppm: float = Field(0, ge=0, description="کلسیم آب به ppm")
-    water_mg_ppm: float = Field(0, ge=0, description="منیزیم آب به ppm")
-    water_hco3_ppm: float = Field(0, ge=0, description="بیکربنات آب به ppm")
-    water_cl_ppm: float = Field(0, ge=0, description="کلر آب به ppm")
+    water_ec_ms_cm: Optional[float] = Field(0.4, ge=0, le=10, description="EC آب به میلی‌زیمنس بر سانتی‌متر - بازه ایده‌آل: 0.2-0.8")
+    water_ph: Optional[float] = Field(7.0, ge=0, le=14, description="pH آب - بازه ایده‌آل: 6.0-7.0")
+    water_ca_ppm: float = Field(50, ge=0, description="کلسیم آب به ppm - بازه ایده‌آل: 40-80")
+    water_mg_ppm: float = Field(20, ge=0, description="منیزیم آب به ppm - بازه ایده‌آل: 15-30")
+    water_hco3_ppm: float = Field(0, ge=0, description="بیکربنات آب به ppm - بازه ایده‌آل: 0-100")
+    water_cl_ppm: float = Field(0, ge=0, description="کلر آب به ppm - بازه ایده‌آل: 0-50")
     water_na_ppm: float = Field(0, ge=0, description="سدیم آب به ppm")
     water_so4_ppm: float = Field(0, ge=0, description="سولفات آب به ppm")
     water_no3_ppm: float = Field(0, ge=0, description="نیترات آب به ppm")
@@ -80,10 +82,10 @@ class CalculationRequest(BaseModel):
                 "tank": {
                     "name": "مخزن A",
                     "volume_liters": 1000,
-                    "water_ec_ms_cm": 0.8,
+                    "water_ec_ms_cm": 0.4,
                     "water_ph": 7.0,
-                    "water_ca_ppm": 40,
-                    "water_mg_ppm": 15
+                    "water_ca_ppm": 50,
+                    "water_mg_ppm": 20
                 },
                 "stock_tank_volume_liters": 20,
                 "injector_ratio": 200
@@ -188,6 +190,11 @@ class CalculationResponse(BaseModel):
     
     nutrient_comparison: Optional[List[NutrientComparison]] = Field(None, description="مقایسه عناصر")
     
+    # ============================================================
+    # فیلدهای جدید نسخه 3.3.1 - نیازهای سفارشی کاربر
+    # ============================================================
+    custom_needs: Optional[Dict[str, float]] = Field(None, description="نیازهای سفارشی وارد شده توسط کاربر")
+    
     target_ec: Optional[float] = Field(None, description="EC هدف")
     target_ph: Optional[float] = Field(None, description="pH هدف")
     calculation_time: datetime = Field(default_factory=datetime.now, description="زمان محاسبه")
@@ -285,11 +292,16 @@ class DualTankRequest(BaseModel):
     crop_name: str
     variety_name: str
     stage_name: str
-    brand_filter: Optional[str] = None
+    brand_filter: Optional[List[str]] = Field(None, description="لیست برندهای انتخاب شده - در صورت خالی بودن یعنی همه برندها")
     tank_main: TankCreate
     tank_calcium: TankCreate
     stock_tank_volume_liters: float = 20.0
     injector_ratio: float = 200.0
+    
+    # ============================================================
+    # فیلدهای جدید نسخه 3.3.1 - نیازهای سفارشی کاربر
+    # ============================================================
+    custom_nutrient_needs: Optional[Dict[str, float]] = Field(None, description="نیازهای تغذیه‌ای سفارشی وارد شده توسط کاربر")
 
 
 # ============================================================
