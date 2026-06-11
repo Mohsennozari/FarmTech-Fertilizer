@@ -55,6 +55,88 @@ INCOMPATIBILITY_MATRIX = {
 }
 
 
+# ============================================================
+# مرحله 4: ضریب پویای تقسیم نیتروژن
+# ============================================================
+
+# جدول ضرایب تقسیم نیتروژن بین مخزن کلسیم و اصلی
+# بر اساس نوع گیاه و مرحله رشد
+NITROGEN_SPLIT_RATIOS = {
+    # گیاهان گلخانه‌ای رایج
+    "tomato": {
+        "vegetative": 0.45,      # مرحله رویشی: نیاز N بالا
+        "flowering": 0.35,       # مرحله گلدهی: نیاز N متوسط
+        "fruiting": 0.30,        # مرحله میوه‌دهی: نیاز N کمتر
+        "ripening": 0.25         # مرحله رسیدگی: نیاز N کم
+    },
+    "cucumber": {
+        "vegetative": 0.50,
+        "flowering": 0.40,
+        "fruiting": 0.35,
+        "ripening": 0.30
+    },
+    "pepper": {
+        "vegetative": 0.45,
+        "flowering": 0.38,
+        "fruiting": 0.32,
+        "ripening": 0.28
+    },
+    "strawberry": {
+        "vegetative": 0.40,
+        "flowering": 0.35,
+        "fruiting": 0.30,
+        "ripening": 0.25
+    },
+    "lettuce": {
+        "vegetative": 0.55,       # کاهو همیشه نیاز N بالایی دارد
+        "harvest": 0.50
+    },
+    "eggplant": {
+        "vegetative": 0.45,
+        "flowering": 0.38,
+        "fruiting": 0.32,
+        "ripening": 0.28
+    },
+    "bean": {
+        "vegetative": 0.35,       # لوبیا N کمتری نیاز دارد (تثبیت نیتروژن)
+        "flowering": 0.30,
+        "fruiting": 0.25
+    },
+    # گیاهان زینتی
+    "rose": {
+        "vegetative": 0.50,
+        "flowering": 0.40,
+        "dormant": 0.30
+    },
+    "gerbera": {
+        "vegetative": 0.45,
+        "flowering": 0.38,
+        "dormant": 0.30
+    },
+    # پیش‌فرض برای گیاهان دیگر
+    "default": {
+        "vegetative": 0.40,
+        "flowering": 0.35,
+        "fruiting": 0.30,
+        "ripening": 0.25,
+        "default": 0.35
+    }
+}
+
+# مترادف‌های نام گیاهان برای تطابق بهتر
+CROP_SYNONYMS = {
+    "tomato": ["tomato", "گوجه", "گوجه فرنگی", "گوجه‌فرنگی", "solanum lycopersicum"],
+    "cucumber": ["cucumber", "خیار", "cucumis sativus"],
+    "pepper": ["pepper", "فلفل", "capsicum", "فلفل دلمه‌ای"],
+    "strawberry": ["strawberry", "توت فرنگی", "توت‌فرنگی", "fragaria"],
+    "lettuce": ["lettuce", "کاهو", "lactuca sativa"],
+    "eggplant": ["eggplant", "بادمجان", "aubergine", "solanum melongena"],
+    "bean": ["bean", "لوبیا", "phaseolus"],
+    "rose": ["rose", "رز", "گل رز", "rosa"],
+    "gerbera": ["gerbera", "ژربرا", "gerbera jamesonii"]
+}
+
+
 def get_fertilizer_group(fertilizer) -> str:
     """
     تشخیص گروه یک کود بر اساس نام و ترکیبات
@@ -172,6 +254,113 @@ def check_incompatibility(fertilizers: List) -> List[Dict]:
     return unique_warnings
 
 
+def get_crop_type(crop_name: str) -> str:
+    """
+    تشخیص نوع گیاه از روی نام وارد شده
+
+    Args:
+        crop_name: نام گیاه (می‌تواند فارسی یا انگلیسی باشد)
+
+    Returns:
+        کلید استاندارد گیاه (مثل tomato, cucumber, ...)
+    """
+    if not crop_name:
+        return "default"
+
+    crop_lower = crop_name.lower().strip()
+
+    for standard_name, synonyms in CROP_SYNONYMS.items():
+        if crop_lower in synonyms or any(syn in crop_lower for syn in synonyms):
+            return standard_name
+
+    return "default"
+
+
+def get_growth_stage(stage_name: str) -> str:
+    """
+    تشخیص مرحله رشد از روی نام وارد شده
+
+    Args:
+        stage_name: نام مرحله رشد
+
+    Returns:
+        کلید استاندارد مرحله (vegetative, flowering, fruiting, ripening, dormant, harvest)
+    """
+    if not stage_name:
+        return "default"
+
+    stage_lower = stage_name.lower().strip()
+
+    # نگاشت مراحل مختلف به کلیدهای استاندارد
+    stage_mapping = {
+        "vegetative": ["vegetative", "رویشی", "رشد رویشی", "vegetation", "growth"],
+        "flowering": ["flowering", "گلدهی", "شکوفه", "bloom", "flower"],
+        "fruiting": ["fruiting", "میوه‌دهی", "تشکیل میوه", "fruit", "fruit set"],
+        "ripening": ["ripening", "رسیدگی", "رسیدن", "ripe", "maturation"],
+        "dormant": ["dormant", "خواب", "استراحت", "dormancy"],
+        "harvest": ["harvest", "برداشت", "harvesting", "ready"]
+    }
+
+    for standard_stage, synonyms in stage_mapping.items():
+        if stage_lower in synonyms or any(syn in stage_lower for syn in synonyms):
+            return standard_stage
+
+    return "default"
+
+
+def get_nitrogen_split_ratio(crop_type: str = None, growth_stage: str = None) -> float:
+    """
+    محاسبه ضریب تقسیم نیتروژن بر اساس نوع گیاه و مرحله رشد
+
+    Args:
+        crop_type: نوع گیاه (مثال: tomato, cucumber, گوجه, خیار)
+        growth_stage: مرحله رشد (مثال: vegetative, flowering, رویشی, گلدهی)
+
+    Returns:
+        ضریب تقسیم نیتروژن (بین 0.2 تا 0.6)
+    """
+    # تشخیص نوع گیاه
+    crop_key = get_crop_type(crop_type) if crop_type else "default"
+
+    # تشخیص مرحله رشد
+    stage_key = get_growth_stage(growth_stage) if growth_stage else "default"
+
+    # دریافت ضرایب برای این گیاه
+    crop_ratios = NITROGEN_SPLIT_RATIOS.get(crop_key, NITROGEN_SPLIT_RATIOS["default"])
+
+    # دریافت ضریب برای این مرحله
+    ratio = crop_ratios.get(stage_key, crop_ratios.get("default", 0.35))
+
+    # محدودیت منطقی (بین 0.2 و 0.6)
+    ratio = max(0.20, min(0.60, ratio))
+
+    return ratio
+
+
+def get_split_ratio_explanation(crop_type: str = None, growth_stage: str = None) -> str:
+    """
+    تولید توضیح برای ضریب تقسیم نیتروژن انتخاب شده
+    """
+    ratio = get_nitrogen_split_ratio(crop_type, growth_stage)
+
+    crop_display = crop_type if crop_type else "نامشخص"
+    stage_display = growth_stage if growth_stage else "نامشخص"
+
+    explanation = f"""📊 ضریب تقسیم نیتروژن: {ratio:.0%}
+
+🧫 بر اساس:
+   • نوع گیاه: {crop_display}
+   • مرحله رشد: {stage_display}
+
+📌 معنی این ضریب:
+   {ratio:.0%} از نیتروژن مورد نیاز گیاه توسط مخزن کلسیم (نیترات کلسیم) تأمین می‌شود.
+   بقیه نیتروژن ({1-ratio:.0%}) توسط مخزن اصلی (کودهای NPK) تأمین می‌شود.
+
+💡 نکته: این تقسیم‌بندی از رسوب کلسیم با سولفات و فسفات جلوگیری می‌کند."""
+
+    return explanation
+
+
 def separate_into_tanks_professional(doses: List[Dict]) -> List[Dict]:
     """
     تفکیک کودها به دو مخزن بر اساس استاندارد جهانی هیدروپونیک
@@ -218,13 +407,8 @@ def separate_into_tanks_professional(doses: List[Dict]) -> List[Dict]:
         else:
             tank_b["doses"].append(dose)
 
-    # ============================================================
-    # بررسی تداخلات شیمیایی (جدید در مرحله 3)
-    # ============================================================
-
-    # بررسی تداخل در مخزن A
+    # بررسی تداخلات شیمیایی در مخازن
     if tank_a["doses"]:
-        # ساخت لیست کودهای مخزن A (برای بررسی تداخل)
         class DummyFertilizer:
             def __init__(self, name, ca_percent=0, p_percent=0, s_percent=0, fe_percent=0):
                 self.name = name
@@ -235,7 +419,6 @@ def separate_into_tanks_professional(doses: List[Dict]) -> List[Dict]:
 
         tank_a_ferts = []
         for dose in tank_a["doses"]:
-            # تخمین ترکیبات از روی نام (ساده شده)
             ca = 19 if 'calcium' in dose['name'].lower() or 'کلسیم' in dose['name'] else 0
             fert = DummyFertilizer(dose['name'], ca_percent=ca)
             tank_a_ferts.append(fert)
@@ -245,7 +428,6 @@ def separate_into_tanks_professional(doses: List[Dict]) -> List[Dict]:
             warn["tank"] = "A (کلسیم)"
             incompatibility_warnings.append(warn)
 
-    # بررسی تداخل در مخزن B
     if tank_b["doses"]:
         class DummyFertilizer:
             def __init__(self, name, ca_percent=0, p_percent=0, s_percent=0, fe_percent=0):
@@ -314,11 +496,13 @@ def calculate_dual_tank_professional(
     tank_main,
     tank_calcium,
     brand_filter: Optional[str] = None,
-    max_total_dose: float = 5.0
+    max_total_dose: float = 5.0,
+    crop_type: Optional[str] = None,        # پارامتر جدید مرحله 4
+    growth_stage: Optional[str] = None      # پارامتر جدید مرحله 4
 ) -> Tuple[Dict, Dict, List[Dict], str]:
     """
     محاسبه دوز بهینه برای دو مخزن با استفاده از الگوریتم لایه‌به‌لایه حرفه‌ای
-    با در نظر گرفتن تداخلات شیمیایی
+    با در نظر گرفتن تداخلات شیمیایی و ضریب پویای تقسیم نیتروژن
     """
 
     if brand_filter:
@@ -335,7 +519,14 @@ def calculate_dual_tank_professional(
         return empty_result, empty_result, [], ""
 
     # ============================================================
-    # تفکیک هوشمند کودها با در نظر گرفتن تداخلات (بهبود یافته در مرحله 3)
+    # محاسبه ضریب پویای تقسیم نیتروژن (مرحله 4)
+    # ============================================================
+
+    nitrogen_split_ratio = get_nitrogen_split_ratio(crop_type, growth_stage)
+    split_explanation = get_split_ratio_explanation(crop_type, growth_stage)
+
+    # ============================================================
+    # تفکیک هوشمند کودها با در نظر گرفتن تداخلات
     # ============================================================
 
     fertilizers_for_calcium = []
@@ -352,7 +543,6 @@ def calculate_dual_tank_professional(
         name_lower = (fert.name or "").lower()
         fert_type = (fert.fertilizer_type or "").lower()
 
-        # تشخیص کود کلسیمی
         is_calcium_fertilizer = (
             (fert.ca_percent or 0) > 0 or
             any(keyword in name_lower for keyword in calcium_keywords) or
@@ -364,35 +554,28 @@ def calculate_dual_tank_professional(
         else:
             fertilizers_for_main.append(fert)
 
-    # ============================================================
-    # بررسی تداخلات بین کودهای انتخاب شده (جدید در مرحله 3)
-    # ============================================================
-
-    # بررسی تداخل در مخزن کلسیم
+    # بررسی تداخلات در مخازن
     if fertilizers_for_calcium:
         ca_warnings = check_incompatibility(fertilizers_for_calcium)
         for warn in ca_warnings:
             warn["tank"] = "مخزن کلسیم"
             incompatibility_warnings.append(warn)
 
-    # بررسی تداخل در مخزن اصلی
     if fertilizers_for_main:
         main_warnings = check_incompatibility(fertilizers_for_main)
         for warn in main_warnings:
             warn["tank"] = "مخزن اصلی"
             incompatibility_warnings.append(warn)
 
-    # بررسی تداخل بین مخزن A و B (نباید با هم مخلوط شوند)
-    # این بررسی قبلاً در توضیحات مخازن وجود دارد
-
-    # تقسیم نیازها
+    # تقسیم نیازها با ضریب پویا
     water_calcium = calculate_water_contribution(tank_calcium)
     water_main = calculate_water_contribution(tank_main)
 
+    # استفاده از ضریب پویا به جای 35% ثابت
     needs_calcium = {
         'Ca': max(0, remaining_needs.get('Ca', 0) - water_calcium.get('Ca', 0)),
         'Fe': max(0, remaining_needs.get('Fe', 0) - water_calcium.get('Fe', 0)),
-        'N': max(0, remaining_needs.get('N', 0) * 0.35),
+        'N': max(0, remaining_needs.get('N', 0) * nitrogen_split_ratio),
     }
 
     needs_main = copy.deepcopy(remaining_needs)
@@ -411,7 +594,14 @@ def calculate_dual_tank_professional(
     doses_calcium = calculate_tank_doses(doses_calcium_raw, tank_calcium.volume_liters)
     ec_calcium = calculate_final_ec(tank_calcium.water_ec_ms_cm or 0, doses_calcium)
 
-    # اضافه کردن هشدارهای تداخل به warnings_calcium
+    # اضافه کردن توضیح ضریب تقسیم به هشدارها
+    warnings_calcium.append({
+        "type": "nitrogen_split_info",
+        "severity": "info",
+        "message": split_explanation
+    })
+
+    # اضافه کردن هشدارهای تداخل
     for warn in incompatibility_warnings:
         if warn.get("tank") == "مخزن کلسیم":
             warnings_calcium.append({
@@ -465,7 +655,7 @@ def calculate_dual_tank_professional(
     combined_warnings.extend(warnings_calcium)
     combined_warnings.extend(warnings_main)
 
-    # اضافه کردن هشدارهای تداخل بحرانی به combined_warnings
+    # اضافه کردن هشدارهای تداخل بحرانی
     critical_incompat = [w for w in incompatibility_warnings if w.get('severity') == 'critical']
     for warn in critical_incompat:
         combined_warnings.append({
@@ -505,7 +695,8 @@ def calculate_dual_tank_professional(
         "warnings": warnings_main,
         "mixing_instructions": mixing_main,
         "ec_predicted": ec_main,
-        "water_contribution": water_main
+        "water_contribution": water_main,
+        "nitrogen_split_ratio": nitrogen_split_ratio
     }
 
     result_calcium = {
@@ -514,7 +705,8 @@ def calculate_dual_tank_professional(
         "warnings": warnings_calcium,
         "mixing_instructions": mixing_calcium,
         "ec_predicted": ec_calcium,
-        "water_contribution": water_calcium
+        "water_contribution": water_calcium,
+        "nitrogen_split_ratio": nitrogen_split_ratio
     }
 
     return result_main, result_calcium, combined_warnings, general_instructions
