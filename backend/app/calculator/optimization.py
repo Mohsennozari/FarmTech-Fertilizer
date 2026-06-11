@@ -24,55 +24,54 @@ def generate_combinations(fertilizers, max_fertilizers=3):
     from itertools import combinations
 
     all_combinations = []
-
-    for fert in fertilizers:
-        all_combinations.append([fert])
-
-    for fert1, fert2 in combinations(fertilizers, 2):
-        all_combinations.append([fert1, fert2])
-
-    if max_fertilizers >= 3:
-        for fert1, fert2, fert3 in combinations(fertilizers, 3):
-            all_combinations.append([fert1, fert2, fert3])
+    for r in range(1, min(max_fertilizers, len(fertilizers)) + 1):
+        for combo in combinations(fertilizers, r):
+            all_combinations.append(list(combo))
 
     return all_combinations
 
 
 def brute_force_optimization(fertilizers, needs, bounds, steps=10):
-    """جستجوی网格 برای ترکیب‌های کوچک (2-3 کود)"""
+    """
+    جستجوی شبکه‌ای برای ترکیب‌های کوچک (2-3 کود).
+
+    برای 3 کود تعداد گام‌ها مستقل از حالت 2 کود تنظیم می‌شود
+    تا دقت کافی حفظ شود.
+    """
     best_doses = None
     best_error = float('inf')
 
-    if len(fertilizers) == 2:
-        min1, max1 = bounds[0]
-        min2, max2 = bounds[1]
+    n = len(fertilizers)
+
+    if n == 2:
+        (min1, max1), (min2, max2) = bounds
 
         for i in range(steps + 1):
             dose1 = min1 + (max1 - min1) * i / steps
             for j in range(steps + 1):
                 dose2 = min2 + (max2 - min2) * j / steps
 
-                n = (dose1 * (fertilizers[0].n_percent or 0) +
-                     dose2 * (fertilizers[1].n_percent or 0)) * 10
-                p = (dose1 * (fertilizers[0].p_percent or 0) +
-                     dose2 * (fertilizers[1].p_percent or 0)) * 10
-                k = (dose1 * (fertilizers[0].k_percent or 0) +
-                     dose2 * (fertilizers[1].k_percent or 0)) * 10
+                n_val = (dose1 * (fertilizers[0].n_percent or 0) +
+                         dose2 * (fertilizers[1].n_percent or 0)) * 10
+                p_val = (dose1 * (fertilizers[0].p_percent or 0) +
+                         dose2 * (fertilizers[1].p_percent or 0)) * 10
+                k_val = (dose1 * (fertilizers[0].k_percent or 0) +
+                         dose2 * (fertilizers[1].k_percent or 0)) * 10
 
-                error = ((needs.get('N', 0) - n) ** 2 +
-                        (needs.get('P', 0) - p) ** 2 +
-                        (needs.get('K', 0) - k) ** 2)
+                error = ((needs.get('N', 0) - n_val) ** 2 +
+                         (needs.get('P', 0) - p_val) ** 2 +
+                         (needs.get('K', 0) - k_val) ** 2)
 
                 if error < best_error:
                     best_error = error
                     best_doses = [dose1, dose2]
 
-    elif len(fertilizers) == 3:
-        min1, max1 = bounds[0]
-        min2, max2 = bounds[1]
-        min3, max3 = bounds[2]
+    elif n == 3:
+        (min1, max1), (min2, max2), (min3, max3) = bounds
 
-        steps_3d = max(5, steps // 2)
+        # از تعداد گام مستقل استفاده می‌کنیم (نه نصف steps)
+        # تا دقت قابل قبول داشته باشیم
+        steps_3d = steps
 
         for i in range(steps_3d + 1):
             dose1 = min1 + (max1 - min1) * i / steps_3d
@@ -81,19 +80,19 @@ def brute_force_optimization(fertilizers, needs, bounds, steps=10):
                 for k_idx in range(steps_3d + 1):
                     dose3 = min3 + (max3 - min3) * k_idx / steps_3d
 
-                    n = (dose1 * (fertilizers[0].n_percent or 0) +
-                         dose2 * (fertilizers[1].n_percent or 0) +
-                         dose3 * (fertilizers[2].n_percent or 0)) * 10
-                    p = (dose1 * (fertilizers[0].p_percent or 0) +
-                         dose2 * (fertilizers[1].p_percent or 0) +
-                         dose3 * (fertilizers[2].p_percent or 0)) * 10
-                    k = (dose1 * (fertilizers[0].k_percent or 0) +
-                         dose2 * (fertilizers[1].k_percent or 0) +
-                         dose3 * (fertilizers[2].k_percent or 0)) * 10
+                    n_val = (dose1 * (fertilizers[0].n_percent or 0) +
+                             dose2 * (fertilizers[1].n_percent or 0) +
+                             dose3 * (fertilizers[2].n_percent or 0)) * 10
+                    p_val = (dose1 * (fertilizers[0].p_percent or 0) +
+                             dose2 * (fertilizers[1].p_percent or 0) +
+                             dose3 * (fertilizers[2].p_percent or 0)) * 10
+                    k_val = (dose1 * (fertilizers[0].k_percent or 0) +
+                             dose2 * (fertilizers[1].k_percent or 0) +
+                             dose3 * (fertilizers[2].k_percent or 0)) * 10
 
-                    error = ((needs.get('N', 0) - n) ** 2 +
-                            (needs.get('P', 0) - p) ** 2 +
-                            (needs.get('K', 0) - k) ** 2)
+                    error = ((needs.get('N', 0) - n_val) ** 2 +
+                             (needs.get('P', 0) - p_val) ** 2 +
+                             (needs.get('K', 0) - k_val) ** 2)
 
                     if error < best_error:
                         best_error = error
@@ -134,39 +133,64 @@ def build_combination_result(fertilizers, doses, needs):
 # توابع بررسی حلالیت (مرحله 2)
 # ============================================================
 
+# ضریب حساسیت دمایی واقعی (Δحلالیت به ازای هر درجه سانتیگراد، نسبی)
+# منبع: داده‌های تجربی کودهای رایج در هیدروپونیک
+_SOLUBILITY_TEMP_COEFFICIENTS = {
+    'calcium_nitrate':    0.010,   # حساسیت متوسط به دما
+    'potassium_sulfate':  0.003,   # حساسیت پایین
+    'magnesium_sulfate':  0.007,   # حساسیت متوسط
+    'mkp':                0.005,   # حساسیت متوسط
+    'potassium_nitrate':  0.013,   # حساسیت نسبتاً بالا
+    'ammonium_nitrate':   0.020,   # حساسیت بالا
+    'default':            0.005,
+}
+
+_DEFAULT_SOLUBILITY = {
+    'calcium_nitrate':    1200,
+    'potassium_sulfate':  120,
+    'magnesium_sulfate':  350,
+    'mkp':                230,
+    'potassium_nitrate':  320,
+    'ammonium_nitrate':   2000,
+    'default':            400,
+}
+
+
+def _identify_fertilizer_key(fertilizer) -> str:
+    """تشخیص کلید داخلی کود برای جداول پیش‌فرض"""
+    name = (fertilizer.name or "").lower()
+    if 'calcium' in name or 'نیترات کلسیم' in name:
+        return 'calcium_nitrate'
+    if 'potassium sulfate' in name or 'سولفات پتاسیم' in name:
+        return 'potassium_sulfate'
+    if 'magnesium sulfate' in name or 'سولفات منیزیم' in name:
+        return 'magnesium_sulfate'
+    if 'mkp' in name or 'monopotassium' in name:
+        return 'mkp'
+    if 'potassium nitrate' in name or 'نیترات پتاسیم' in name:
+        return 'potassium_nitrate'
+    if 'ammonium nitrate' in name or 'نیترات آمونیوم' in name:
+        return 'ammonium_nitrate'
+    return 'default'
+
+
 def get_solubility_limit(fertilizer, temperature_c: float = 20.0) -> float:
     """
-    برگرداندن حد حلالیت کود بر حسب g/L در دمای مشخص
+    برگرداندن حد حلالیت کود بر حسب g/L در دمای مشخص.
+
+    اصلاح: هر نوع کود ضریب دمایی مخصوص خود را دارد
+    (به جای یک ضریب ثابت ۰.۰۰۵ برای همه).
     """
     if hasattr(fertilizer, 'solubility_g_per_l') and fertilizer.solubility_g_per_l:
         base_solubility = fertilizer.solubility_g_per_l
     else:
-        default_solubility = {
-            'calcium_nitrate': 1200,
-            'potassium_sulfate': 120,
-            'magnesium_sulfate': 350,
-            'mkp': 230,
-            'potassium_nitrate': 320,
-            'ammonium_nitrate': 2000,
-            'default': 400
-        }
-
-        fert_name = (fertilizer.name or "").lower()
-        if 'calcium' in fert_name or 'نیترات کلسیم' in fert_name:
-            base_solubility = default_solubility['calcium_nitrate']
-        elif 'potassium sulfate' in fert_name or 'سولفات پتاسیم' in fert_name:
-            base_solubility = default_solubility['potassium_sulfate']
-        elif 'magnesium sulfate' in fert_name or 'سولفات منیزیم' in fert_name:
-            base_solubility = default_solubility['magnesium_sulfate']
-        elif 'mkp' in fert_name or 'monopotassium' in fert_name:
-            base_solubility = default_solubility['mkp']
-        elif 'potassium nitrate' in fert_name or 'نیترات پتاسیم' in fert_name:
-            base_solubility = default_solubility['potassium_nitrate']
-        else:
-            base_solubility = default_solubility['default']
+        key = _identify_fertilizer_key(fertilizer)
+        base_solubility = _DEFAULT_SOLUBILITY[key]
 
     if temperature_c != 20.0:
-        temp_factor = 1 + (temperature_c - 20.0) * 0.005
+        key = _identify_fertilizer_key(fertilizer)
+        coef = _SOLUBILITY_TEMP_COEFFICIENTS[key]
+        temp_factor = 1 + (temperature_c - 20.0) * coef
         base_solubility = base_solubility * temp_factor
 
     return base_solubility
@@ -232,32 +256,40 @@ def enforce_solubility_limit(doses: List[Dict], fertilizers: List, temperature_c
 # ============================================================
 
 def optimize_single_fertilizer(fertilizer, needs, max_dose=3.0, temperature_c=20.0):
-    """روش ساده برای یک کود با در نظر گرفتن حلالیت"""
-    doses = []
-    for elem in ['N', 'P', 'K']:
-        need = needs.get(elem, 0)
-        elem_percent = getattr(fertilizer, f"{elem.lower()}_percent", 0) or 0
-        if elem_percent > 0 and need > 0:
-            dose = need / (elem_percent * 10)
-            doses.append(dose)
+    """
+    محاسبه دوز بهینه برای یک کود با حداقل‌سازی خطای least squares.
 
-    if not doses:
-        return [0.1], float('inf')
+    اصلاح: به جای میانگین‌گیری ساده دوزها (که منطق نادرستی دارد)،
+    از حل least squares استفاده می‌شود تا بهترین دوز واحد پیدا شود.
+    """
+    # ساخت بردار ضرایب برای N, P, K
+    coeffs = np.array([
+        (fertilizer.n_percent or 0) * 10,
+        (fertilizer.p_percent or 0) * 10,
+        (fertilizer.k_percent or 0) * 10,
+    ])
 
-    proposed_dose = sum(doses) / len(doses)
+    targets = np.array([
+        needs.get('N', 0),
+        needs.get('P', 0),
+        needs.get('K', 0),
+    ])
+
+    norm_sq = np.dot(coeffs, coeffs)
+    if norm_sq < 1e-9:
+        # کود هیچ عنصر NPK ندارد
+        return [0.01], float('inf')
+
+    # دوز بهینه از حل least squares یک متغیره: dose = (c·t) / (c·c)
+    proposed_dose = float(np.dot(coeffs, targets) / norm_sq)
 
     solubility_limit = get_solubility_limit(fertilizer, temperature_c)
     max_limit = min(fertilizer.max_dose_g_per_liter or 5.0, max_dose, solubility_limit)
     min_limit = fertilizer.min_dose_g_per_liter or 0.01
     final_dose = max(min_limit, min(proposed_dose, max_limit))
 
-    n_supply = final_dose * (fertilizer.n_percent or 0) * 10
-    p_supply = final_dose * (fertilizer.p_percent or 0) * 10
-    k_supply = final_dose * (fertilizer.k_percent or 0) * 10
-
-    error = ((needs.get('N', 0) - n_supply) ** 2 +
-             (needs.get('P', 0) - p_supply) ** 2 +
-             (needs.get('K', 0) - k_supply) ** 2)
+    supply = coeffs * final_dose
+    error = float(np.sum((targets - supply) ** 2))
 
     return [final_dose], error
 
@@ -273,54 +305,51 @@ def optimize_combination(fertilizers, needs, max_total_dose=3.0, temperature_c=2
         n_fert = len(fertilizers)
 
         def cost_function(doses):
-            total_n = 0
-            total_p = 0
-            total_k = 0
+            total_n = sum(doses[i] * (fertilizers[i].n_percent or 0) * 10 for i in range(n_fert))
+            total_p = sum(doses[i] * (fertilizers[i].p_percent or 0) * 10 for i in range(n_fert))
+            total_k = sum(doses[i] * (fertilizers[i].k_percent or 0) * 10 for i in range(n_fert))
 
-            for i, fert in enumerate(fertilizers):
-                dose = doses[i]
-                total_n += dose * (fert.n_percent or 0) * 10
-                total_p += dose * (fert.p_percent or 0) * 10
-                total_k += dose * (fert.k_percent or 0) * 10
+            penalty = sum(
+                max(0, doses[i] - get_solubility_limit(fertilizers[i], temperature_c)) * 1000
+                for i in range(n_fert)
+            )
 
-            penalty = 0
-            for i, fert in enumerate(fertilizers):
-                solubility_limit = get_solubility_limit(fert, temperature_c)
-                if doses[i] > solubility_limit:
-                    penalty += (doses[i] - solubility_limit) * 1000
-
-            error_n = (needs.get('N', 0) - total_n) ** 2
-            error_p = (needs.get('P', 0) - total_p) ** 2
-            error_k = (needs.get('K', 0) - total_k) ** 2
-
-            return error_n + error_p + error_k + penalty
+            return (
+                (needs.get('N', 0) - total_n) ** 2 +
+                (needs.get('P', 0) - total_p) ** 2 +
+                (needs.get('K', 0) - total_k) ** 2 +
+                penalty
+            )
 
         bounds = []
         for fert in fertilizers:
             min_dose = fert.min_dose_g_per_liter or 0.01
             solubility_limit = get_solubility_limit(fert, temperature_c)
             max_dose = min(fert.max_dose_g_per_liter or 5.0, max_total_dose, solubility_limit)
-            bounds.append((min_dose, max_dose))
+            bounds.append((min_dose, max(min_dose, max_dose)))
 
         initial_doses = [0.5] * n_fert
         result = minimize(cost_function, initial_doses, bounds=bounds, method='L-BFGS-B')
 
         if result.success:
-            doses = result.x
-            error = result.fun
+            return list(result.x), result.fun
         else:
-            doses, error = brute_force_optimization(fertilizers, needs, bounds)
+            bounds_for_brute = []
+            for fert in fertilizers:
+                min_dose = fert.min_dose_g_per_liter or 0.01
+                sol = get_solubility_limit(fert, temperature_c)
+                max_dose = min(fert.max_dose_g_per_liter or 5.0, max_total_dose, sol)
+                bounds_for_brute.append((min_dose, max(min_dose, max_dose)))
+            return brute_force_optimization(fertilizers, needs, bounds_for_brute)
 
     except ImportError:
         bounds = []
         for fert in fertilizers:
             min_dose = fert.min_dose_g_per_liter or 0.01
-            solubility_limit = get_solubility_limit(fert, temperature_c)
-            max_dose = min(fert.max_dose_g_per_liter or 5.0, max_total_dose, solubility_limit)
-            bounds.append((min_dose, max_dose))
-        doses, error = brute_force_optimization(fertilizers, needs, bounds)
-
-    return doses, error
+            sol = get_solubility_limit(fert, temperature_c)
+            max_dose = min(fert.max_dose_g_per_liter or 5.0, max_total_dose, sol)
+            bounds.append((min_dose, max(min_dose, max_dose)))
+        return brute_force_optimization(fertilizers, needs, bounds)
 
 
 def solve_macro_layer_combined(needs: Dict[str, float], macro_fertilizers: List, max_total_dose: float = 3.0, temperature_c: float = 20.0) -> Tuple[List[Dict], Dict[str, float]]:
@@ -400,39 +429,31 @@ def score_micro_fertilizer(fertilizer, needs, growth_stage: str = None) -> float
 
         total_need += need * weight
 
-        # درصد عنصر در کود
         elem_percent = getattr(fertilizer, f"{elem.lower()}_percent", 0) or 0
 
         if elem_percent > 0:
-            # حداکثر دوز قابل استفاده (با محدودیت حلالیت)
             max_dose = min(fertilizer.max_dose_g_per_liter or 0.5, 0.5)
-
-            # حداکثر تأمین ممکن از این کود
             max_supply = max_dose * elem_percent * 10
 
             if max_supply >= need:
-                # کود می‌تواند نیاز را به طور کامل تأمین کند
                 contribution = need * weight
             else:
-                # کود فقط بخشی از نیاز را تأمین می‌کند
                 contribution = max_supply * weight
 
             total_score += contribution
 
-    # امتیاز نهایی (نرمالایز شده)
     if total_need > 0:
         final_score = total_score / total_need
     else:
-        final_score = 0.5  # اگر نیازی نباشد، امتیاز متوسط
+        final_score = 0.5
 
-    # پنالتی برای کودهایی که عناصر اضافی دارند (ایجاد عدم توازن)
+    # پنالتی برای عناصری که نیاز نیست اما در کود موجودند
     penalty = 0
     for elem in weights.keys():
         elem_percent = getattr(fertilizer, f"{elem.lower()}_percent", 0) or 0
         need = needs.get(elem, 0)
 
         if need <= 0 and elem_percent > 0.1:
-            # عنصری که نیاز نیست اما در کود وجود دارد
             penalty += 0.1
 
     final_score = max(0, min(1, final_score - penalty))
@@ -461,10 +482,8 @@ def select_best_micro_fertilizer(needs: Dict[str, float], micro_fertilizers: Lis
     best_score = -1
 
     for fert in micro_fertilizers:
-        # محاسبه امتیاز کود
         score = score_micro_fertilizer(fert, needs, growth_stage)
 
-        # محاسبه دوز مورد نیاز
         required_dose = 0
         for elem in ['Fe', 'Zn', 'Mn', 'Cu', 'B', 'Mo', 'Cl']:
             need = needs.get(elem, 0)
@@ -474,15 +493,12 @@ def select_best_micro_fertilizer(needs: Dict[str, float], micro_fertilizers: Lis
                     dose_for_elem = need / (elem_percent * 10)
                     required_dose = max(required_dose, dose_for_elem)
 
-        # اعمال محدودیت دوز
         max_dose = min(fert.max_dose_g_per_liter or 0.5, 0.5)
         min_dose = fert.min_dose_g_per_liter or 0.01
         final_dose = max(min_dose, min(required_dose, max_dose))
 
-        # محاسبه تأمین واقعی
         supply = calculate_element_ppm(fert, final_dose)
 
-        # اگر امتیاز بهتر است، انتخاب کن
         if score > best_score:
             best_score = score
             best_fert = fert
@@ -494,24 +510,21 @@ def select_best_micro_fertilizer(needs: Dict[str, float], micro_fertilizers: Lis
 
 def select_multiple_micro_fertilizers(needs: Dict[str, float], micro_fertilizers: List, growth_stage: str = None) -> List[Tuple[object, float, Dict]]:
     """
-    انتخاب ترکیبی از چند کود ریز مغذی برای پوشش بهتر نیازها
+    انتخاب ترکیبی از چند کود ریز مغذی برای پوشش بهتر نیازها.
 
     در صورت وجود کودهای تخصصی (مثل کود فقط آهن، فقط روی) از ترکیب آنها استفاده می‌کند.
     """
     if not micro_fertilizers:
         return []
 
-    # جدا کردن کودهای تخصصی از کودهای کامل
     specialized = []
     complete = []
 
     for fert in micro_fertilizers:
-        # شمارش تعداد عناصر موجود در کود
-        element_count = 0
-        for elem in ['Fe', 'Zn', 'Mn', 'Cu', 'B', 'Mo', 'Cl']:
-            if getattr(fert, f"{elem.lower()}_percent", 0) > 0:
-                element_count += 1
-
+        element_count = sum(
+            1 for elem in ['Fe', 'Zn', 'Mn', 'Cu', 'B', 'Mo', 'Cl']
+            if (getattr(fert, f"{elem.lower()}_percent", 0) or 0) > 0
+        )
         if element_count <= 2:
             specialized.append(fert)
         else:
@@ -520,7 +533,6 @@ def select_multiple_micro_fertilizers(needs: Dict[str, float], micro_fertilizers
     results = []
     remaining_needs = needs.copy()
 
-    # ابتدا از کودهای تخصصی استفاده کن
     for fert in specialized:
         for elem in ['Fe', 'Zn', 'Mn', 'Cu', 'B', 'Mo', 'Cl']:
             need = remaining_needs.get(elem, 0)
@@ -538,18 +550,17 @@ def select_multiple_micro_fertilizers(needs: Dict[str, float], micro_fertilizers
                     supply = calculate_element_ppm(fert, final_dose)
                     results.append((fert, final_dose, supply))
 
-                    # به‌روزرسانی نیاز باقیمانده
                     for e, val in supply.items():
                         remaining_needs[e] = max(0, remaining_needs.get(e, 0) - val)
 
-    # اگر هنوز نیازی باقی مانده، از کود کامل استفاده کن
     if any(remaining_needs.get(e, 0) > 0.1 for e in ['Fe', 'Zn', 'Mn', 'Cu', 'B', 'Mo', 'Cl']):
         if complete:
-            best_fert, best_dose, best_supply, score = select_best_micro_fertilizer(remaining_needs, complete, growth_stage)
+            best_fert, best_dose, best_supply, score = select_best_micro_fertilizer(
+                remaining_needs, complete, growth_stage
+            )
             if best_fert:
                 results.append((best_fert, best_dose, best_supply))
 
-    # حذف دوزهای خیلی کم
     results = [(f, d, s) for f, d, s in results if d >= 0.005]
 
     return results
@@ -560,36 +571,33 @@ def select_multiple_micro_fertilizers(needs: Dict[str, float], micro_fertilizers
 # ============================================================
 
 def select_best_fertilizer_for_macro(needs: Dict[str, float], fertilizers: List) -> Tuple[object, float, Dict]:
-    """نسخه قدیمی - حفظ شده برای سازگاری"""
+    """نسخه قدیمی - حفظ شده برای سازگاری (fallback)"""
     best_fertilizer = None
     best_score = float('inf')
     best_dose = 0
     best_supply = {}
 
     for fert in fertilizers:
-        doses = []
-        for elem in ['N', 'P', 'K']:
-            need = needs.get(elem, 0)
-            elem_percent = getattr(fert, f"{elem.lower()}_percent", 0) or 0
-            if elem_percent > 0 and need > 0:
-                dose_for_elem = need / (elem_percent * 10)
-                doses.append(dose_for_elem)
+        # استفاده از least squares یک متغیره (مشابه optimize_single_fertilizer)
+        coeffs = np.array([
+            (fert.n_percent or 0) * 10,
+            (fert.p_percent or 0) * 10,
+            (fert.k_percent or 0) * 10,
+        ])
+        targets = np.array([needs.get('N', 0), needs.get('P', 0), needs.get('K', 0)])
+        norm_sq = float(np.dot(coeffs, coeffs))
 
-        if not doses:
+        if norm_sq < 1e-9:
             continue
 
-        proposed_dose = sum(doses) / len(doses)
+        proposed_dose = float(np.dot(coeffs, targets) / norm_sq)
         max_dose = fert.max_dose_g_per_liter or 5.0
         min_dose = fert.min_dose_g_per_liter or 0.01
         proposed_dose = max(min_dose, min(proposed_dose, max_dose))
 
         supply = calculate_element_ppm(fert, proposed_dose)
 
-        error = 0
-        for elem in ['N', 'P', 'K']:
-            need = needs.get(elem, 0)
-            sup = supply.get(elem, 0)
-            error += (need - sup) ** 2
+        error = sum((needs.get(e, 0) - supply.get(e, 0)) ** 2 for e in ['N', 'P', 'K'])
 
         if error < best_score:
             best_score = error
@@ -601,6 +609,12 @@ def select_best_fertilizer_for_macro(needs: Dict[str, float], fertilizers: List)
 
 
 def select_best_fertilizer_for_secondary(needs: Dict[str, float], fertilizers: List) -> List[Tuple[object, float, Dict]]:
+    """
+    انتخاب بهترین کود برای هر عنصر ثانویه (Ca, Mg, S).
+
+    اصلاح: تأمین عناصر جانبی (مثل N در نیترات کلسیم) هم در supply
+    ثبت می‌شود تا از دوبل‌شماری در لایه بالاتر جلوگیری شود.
+    """
     results = []
 
     for elem in ['Ca', 'Mg', 'S']:
@@ -623,15 +637,16 @@ def select_best_fertilizer_for_secondary(needs: Dict[str, float], fertilizers: L
             min_dose = fert.min_dose_g_per_liter or 0.01
             final_dose = max(min_dose, min(required_dose, max_dose))
 
-            supply = calculate_element_ppm(fert, final_dose)
-            supplied = supply.get(elem, 0)
+            # همه عناصر تأمین‌شده توسط این کود را ثبت کن (نه فقط elem)
+            full_supply = calculate_element_ppm(fert, final_dose)
+            supplied = full_supply.get(elem, 0)
             error = abs(need - supplied)
 
             if error < best_error:
                 best_error = error
                 best_fert = fert
                 best_dose = final_dose
-                best_supply = {elem: supplied}
+                best_supply = full_supply   # ← تمام عناصر، نه فقط elem
 
         if best_fert:
             results.append((best_fert, best_dose, best_supply))
@@ -649,15 +664,7 @@ def solve_macro_layer(
     macro_elements = ['N', 'P', 'K']
     warnings = []
 
-    macro_fertilizers = []
-    for f in fertilizers:
-        if is_npk_fertilizer(f):
-            macro_fertilizers.append(f)
-
-    if not macro_fertilizers:
-        for f in fertilizers:
-            if (f.n_percent or 0) > 0 and (f.p_percent or 0) > 0 and (f.k_percent or 0) > 0:
-                macro_fertilizers.append(f)
+    macro_fertilizers = [f for f in fertilizers if is_npk_fertilizer(f)]
 
     if not macro_fertilizers:
         for f in fertilizers:
@@ -678,14 +685,16 @@ def solve_macro_layer(
             needs, macro_fertilizers, max_total_dose, temperature_c
         )
 
-        result_doses, solubility_warnings = enforce_solubility_limit(result_doses, macro_fertilizers, temperature_c)
+        result_doses, solubility_warnings = enforce_solubility_limit(
+            result_doses, macro_fertilizers, temperature_c
+        )
         warnings.extend(solubility_warnings)
 
         if len(result_doses) > 1:
             warnings.append({
                 "type": "combination_used",
                 "severity": "info",
-                "message": f"از ترکیب {len(result_doses)} کود NPK برای تأمین دقیق تر استفاده شده است."
+                "message": f"از ترکیب {len(result_doses)} کود NPK برای تأمین دقیق‌تر استفاده شده است."
             })
 
         for elem in macro_elements:
@@ -695,7 +704,7 @@ def solve_macro_layer(
                 warnings.append({
                     "type": "high_error",
                     "severity": "warning",
-                    "message": f"خطای تأمین {elem}: نیاز {need} ppm، تأمین {supply} ppm (خطای {abs(need-supply):.0f} ppm)"
+                    "message": f"خطای تأمین {elem}: نیاز {need} ppm، تأمین {supply} ppm (خطای {abs(need - supply):.0f} ppm)"
                 })
 
         return result_doses, total_supply, warnings
@@ -741,10 +750,24 @@ def solve_secondary_layer(
     fertilizers: List,
     max_total_dose: float = 2.0
 ) -> Tuple[List[Dict], Dict[str, float], List[Dict]]:
+    """
+    حل لایه عناصر ثانویه (Ca, Mg, S).
+
+    اصلاح: فیلتر نوع کود گسترش یافته تا انواع رایج کودهای Ca/Mg/S
+    (مثل 'ثانویه'، 'کلات'، 'تک عنصری') شامل شوند.
+    """
     secondary_elements = ['Ca', 'Mg', 'S']
     warnings = []
 
-    secondary_fertilizers = [f for f in fertilizers if f.fertilizer_type in ['تک عنصری', 'NPK']]
+    # انواع کودهایی که ممکن است Ca, Mg, S داشته باشند
+    valid_types = {'تک عنصری', 'NPK', 'ثانویه', 'کلات', 'secondary', 'single'}
+    secondary_fertilizers = [
+        f for f in fertilizers
+        if (f.fertilizer_type or '') in valid_types
+        or (f.ca_percent or 0) > 0
+        or (f.mg_percent or 0) > 0
+        or (f.s_percent or 0) > 0
+    ]
 
     if not secondary_fertilizers:
         warnings.append({
@@ -768,8 +791,9 @@ def solve_secondary_layer(
             "chemical_formula": fert.chemical_formula,
             "layer": "secondary"
         })
-        for elem, val in supply.items():
-            if elem in final_supply:
+        for elem in secondary_elements:
+            val = supply.get(elem, 0)
+            if val:
                 final_supply[elem] += val
 
     return result_doses, final_supply, warnings
@@ -786,7 +810,7 @@ def solve_micro_layer(
     growth_stage: str = None
 ) -> Tuple[List[Dict], Dict[str, float], List[Dict]]:
     """
-    حل لایه ریز مغذی با انتخاب هوشمند (جایگزینی اولین کود)
+    حل لایه ریز مغذی با انتخاب هوشمند.
 
     Args:
         needs: نیازهای عناصر ریز مغذی
@@ -797,7 +821,6 @@ def solve_micro_layer(
     micro_elements = ['Fe', 'Zn', 'Mn', 'Cu', 'B', 'Mo', 'Cl']
     warnings = []
 
-    # پیدا کردن کودهای ریز مغذی
     micro_fertilizers = [f for f in fertilizers if f.fertilizer_type == 'ریزمغذی']
 
     if not micro_fertilizers:
@@ -808,13 +831,13 @@ def solve_micro_layer(
         })
         return [], {e: 0.0 for e in micro_elements}, warnings
 
-    # ✅ انتخاب هوشمند (جایگزینی micro_fertilizers[0])
     selected_fertilizers = select_multiple_micro_fertilizers(needs, micro_fertilizers, growth_stage)
 
     result_doses = []
     final_supply = {e: 0.0 for e in micro_elements}
 
     for fert, dose, supply in selected_fertilizers:
+        # اصلاح: روش انتخاب صرفاً بر اساس مسیر واقعی تعیین می‌شود
         result_doses.append({
             "id": fert.id,
             "name": fert.name,
@@ -822,16 +845,15 @@ def solve_micro_layer(
             "dose_g_per_liter": round(dose, 3),
             "chemical_formula": fert.chemical_formula,
             "layer": "micro",
-            "selection_method": "smart" if len(selected_fertilizers) > 0 else "fallback"
+            "selection_method": "smart"
         })
 
         for elem, val in supply.items():
             if elem in final_supply:
                 final_supply[elem] += val
 
-    # اگر هیچ کودی انتخاب نشد، از روش قبلی استفاده کن (fallback)
+    # fallback اگر هیچ کودی انتخاب نشد
     if not result_doses and micro_fertilizers:
-        # fallback به اولین کود (برای سازگاری)
         micro_fert = micro_fertilizers[0]
 
         required_dose = 0
@@ -843,9 +865,7 @@ def solve_micro_layer(
                     dose_for_elem = need / (elem_percent * 10)
                     required_dose = max(required_dose, dose_for_elem)
 
-        dose = min(required_dose, max_dose)
-        if dose < 0.01:
-            dose = 0.01
+        dose = max(0.01, min(required_dose, max_dose))
 
         content = calculate_element_ppm(micro_fert, dose)
         final_supply = {e: content.get(e, 0.0) for e in micro_elements}
@@ -866,7 +886,6 @@ def solve_micro_layer(
             "message": f"از روش انتخاب سنتی برای کود {micro_fert.name} استفاده شد."
         })
 
-    # اضافه کردن هشدار برای روش انتخاب هوشمند
     if len(selected_fertilizers) > 1:
         warnings.append({
             "type": "micro_combination",
@@ -874,13 +893,10 @@ def solve_micro_layer(
             "message": f"از ترکیب {len(selected_fertilizers)} کود ریز مغذی برای پوشش بهتر نیازها استفاده شده است."
         })
 
-    # بررسی عناصر پوشش داده نشده
-    uncovered = []
-    for elem in micro_elements:
-        need = needs.get(elem, 0)
-        supply = final_supply.get(elem, 0)
-        if need > 0.1 and supply < need * 0.5:
-            uncovered.append(elem)
+    uncovered = [
+        elem for elem in micro_elements
+        if needs.get(elem, 0) > 0.1 and final_supply.get(elem, 0) < needs.get(elem, 0) * 0.5
+    ]
 
     if uncovered:
         warnings.append({
@@ -899,7 +915,7 @@ def optimize_fertilizer_doses_professional(
     brand_filter: Optional[str] = None,
     max_total_dose: float = 5.0,
     temperature_c: float = 20.0,
-    growth_stage: str = None  # پارامتر جدید برای مرحله 5
+    growth_stage: str = None
 ) -> Tuple[List[Dict], Dict[str, float], List[Dict]]:
     """الگوریتم لایه‌به‌لایه - NPK → Secondary → Micro با پشتیبانی از دما و مرحله رشد"""
 
@@ -922,55 +938,53 @@ def optimize_fertilizer_doses_professional(
 
     # مرحله 1: NPK
     macro_needs = {elem: remaining_needs.get(elem, 0) for elem in ['N', 'P', 'K']}
-    macro_doses, macro_supply, macro_warnings = solve_macro_layer(macro_needs, fertilizers, 3.0, temperature_c)
+    macro_doses, macro_supply, macro_warnings = solve_macro_layer(
+        macro_needs, fertilizers, 3.0, temperature_c
+    )
     all_doses.extend(macro_doses)
     all_warnings.extend(macro_warnings)
 
     for elem, value in macro_supply.items():
-        if elem in final_supply:
-            final_supply[elem] += value
-        else:
-            final_supply[elem] = value
+        final_supply[elem] = final_supply.get(elem, 0.0) + value
 
-    remaining = {}
-    for elem in SUPPORTED_ELEMENTS:
-        remaining[elem] = max(0, remaining_needs.get(elem, 0) - final_supply.get(elem, 0))
+    remaining = {
+        elem: max(0, remaining_needs.get(elem, 0) - final_supply.get(elem, 0))
+        for elem in SUPPORTED_ELEMENTS
+    }
 
     # مرحله 2: Ca, Mg, S
     secondary_needs = {elem: remaining.get(elem, 0) for elem in ['Ca', 'Mg', 'S']}
-    secondary_doses, secondary_supply, secondary_warnings = solve_secondary_layer(secondary_needs, fertilizers, 2.0)
+    secondary_doses, secondary_supply, secondary_warnings = solve_secondary_layer(
+        secondary_needs, fertilizers, 2.0
+    )
     all_doses.extend(secondary_doses)
     all_warnings.extend(secondary_warnings)
 
     for elem, value in secondary_supply.items():
-        if elem in final_supply:
-            final_supply[elem] += value
-        else:
-            final_supply[elem] = value
+        final_supply[elem] = final_supply.get(elem, 0.0) + value
 
-    for elem in ['Ca', 'Mg', 'S']:
+    for elem in SUPPORTED_ELEMENTS:
         remaining[elem] = max(0, remaining.get(elem, 0) - secondary_supply.get(elem, 0))
 
-    # مرحله 3: ریز مغذی‌ها (با انتخاب هوشمند - مرحله 5)
+    # مرحله 3: ریز مغذی‌ها
     micro_needs = {elem: remaining.get(elem, 0) for elem in ['Fe', 'Zn', 'Mn', 'Cu', 'B', 'Mo', 'Cl']}
-    micro_doses, micro_supply, micro_warnings = solve_micro_layer(micro_needs, fertilizers, 0.5, growth_stage)
+    micro_doses, micro_supply, micro_warnings = solve_micro_layer(
+        micro_needs, fertilizers, 0.5, growth_stage
+    )
     all_doses.extend(micro_doses)
     all_warnings.extend(micro_warnings)
 
     for elem, value in micro_supply.items():
-        if elem in final_supply:
-            final_supply[elem] += value
-        else:
-            final_supply[elem] = value
+        final_supply[elem] = final_supply.get(elem, 0.0) + value
 
-    # حذف دوزهای تکراری
-    unique_doses = {}
+    # ادغام دوزهای تکراری (بر اساس id کود)
+    unique_doses: Dict[str, Dict] = {}
     for dose in all_doses:
-        name = dose['name']
-        if name in unique_doses:
-            unique_doses[name]['dose_g_per_liter'] += dose['dose_g_per_liter']
+        key = dose.get('id') or dose['name']
+        if key in unique_doses:
+            unique_doses[key]['dose_g_per_liter'] += dose['dose_g_per_liter']
         else:
-            unique_doses[name] = dose
+            unique_doses[key] = dose.copy()
 
     result_doses = list(unique_doses.values())
     result_doses.sort(key=lambda x: x['dose_g_per_liter'], reverse=True)
@@ -978,12 +992,12 @@ def optimize_fertilizer_doses_professional(
     for dose in result_doses:
         dose['dose_g_per_liter'] = round(dose['dose_g_per_liter'], 3)
 
-    uncovered = []
-    for elem in SUPPORTED_ELEMENTS:
-        need = remaining_needs.get(elem, 0)
-        supply = final_supply.get(elem, 0)
-        if elem in ['N', 'P', 'K', 'Ca', 'Mg'] and need > 10.0 and supply < need * 0.5:
-            uncovered.append(elem)
+    uncovered = [
+        elem for elem in SUPPORTED_ELEMENTS
+        if elem in ['N', 'P', 'K', 'Ca', 'Mg']
+        and remaining_needs.get(elem, 0) > 10.0
+        and final_supply.get(elem, 0) < remaining_needs.get(elem, 0) * 0.5
+    ]
 
     if uncovered:
         all_warnings.append({
