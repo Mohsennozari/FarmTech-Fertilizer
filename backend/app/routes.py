@@ -26,6 +26,17 @@ from app.calculator import (
     get_storage_instructions,
     add_stock_calculations_to_doses
 )
+
+# ============================================================
+# 🆕 Import جدید برای آنالیز آب و پساب ترکیبی (نسخه 3.4.0)
+# ============================================================
+from app.calculator.water_analysis import (
+    calculate_complete_water_contribution,
+    validate_water_percentages,
+    get_water_analysis_keys,
+    get_remaining_needs
+)
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -40,11 +51,12 @@ router = APIRouter(prefix="/api/v1", tags=["FarmTech API"])
 def health_check():
     return {
         "status": "ok",
-        "version": "3.3.1",
+        "version": "3.4.0",
         "dual_tank_support": True,
         "stock_system": True,
         "custom_needs_support": True,
-        "multi_brand_support": True
+        "multi_brand_support": True,
+        "water_analysis_support": True  # 🆕 نسخه 3.4.0
     }
 
 
@@ -91,7 +103,7 @@ def create_variety(variety: schemas.VarietyCreate, db: Session = Depends(get_db)
 # ============================================================
 @router.get("/growth-stages", response_model=List[schemas.GrowthStageResponse])
 def get_growth_stages(
-    crop_id: Optional[int] = None, 
+    crop_id: Optional[int] = None,
     variety_id: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
@@ -226,10 +238,10 @@ def update_tank(tank_id: int, tank: schemas.TankCreate, db: Session = Depends(ge
     db_tank = db.query(models.Tank).filter(models.Tank.id == tank_id).first()
     if not db_tank:
         raise HTTPException(status_code=404, detail="Tank not found")
-    
+
     for key, value in tank.dict().items():
         setattr(db_tank, key, value)
-    
+
     db.commit()
     db.refresh(db_tank)
     return db_tank
@@ -240,7 +252,7 @@ def delete_tank(tank_id: int, db: Session = Depends(get_db)):
     db_tank = db.query(models.Tank).filter(models.Tank.id == tank_id).first()
     if not db_tank:
         raise HTTPException(status_code=404, detail="Tank not found")
-    
+
     db.delete(db_tank)
     db.commit()
     return {"message": "Tank deleted successfully"}
@@ -248,7 +260,7 @@ def delete_tank(tank_id: int, db: Session = Depends(get_db)):
 
 # ============================================================
 # ============================================================
-# محاسبه با دو مخزن (نسخه 3.3.1)
+# محاسبه با دو مخزن (نسخه 3.4.0 با پشتیبانی از آنالیز آب و پساب)
 # ============================================================
 # ============================================================
 @router.post("/calculate-dual-tank")
@@ -257,39 +269,64 @@ async def calculate_dual_tank(
     db: Session = Depends(get_db)
 ):
     """
-    محاسبه دوز بهینه کودها برای دو مخزن جداگانه - نسخه 3.3.1
-    
+    محاسبه دوز بهینه کودها برای دو مخزن جداگانه - نسخه 3.4.0
+
     قابلیت‌های جدید:
+    - پشتیبانی از آنالیز آب و پساب ترکیبی (Water + Wastewater Analysis)
+    - محاسبه تامینی آب و پساب با درصد دلخواه
+    - کسر مقادیر تامینی از نیازهای گیاه
     - پشتیبانی از انتخاب چند برند همزمان (Multi Brand Filter)
     - پشتیبانی از نیازهای سفارشی کاربر (Custom Nutrient Needs)
     - محاسبه دقیق مقدار استوک (کیلوگرم) بر اساس نسبت تزریق
-    
+
     مخزن اصلی (Main): برای کودهای غیر کلسیمی (NPK، سولفات‌ها، ریز مغذی‌ها)
     مخزن کلسیم (Calcium): برای کودهای حاوی کلسیم (نیترات کلسیم، کلات آهن)
     """
     start_time = time.time()
-    
+
     try:
         # ============================================================
         # مرحله 1: دریافت اطلاعات اولیه
         # ============================================================
-        
+
         growth_stage = db.query(models.GrowthStage).join(models.Crop).join(models.Variety).filter(
             models.Crop.name == request.crop_name,
             models.Variety.name == request.variety_name,
             models.GrowthStage.name == request.stage_name
         ).first()
-        
+
         if not growth_stage:
             return {
                 "success": False,
                 "error_message": f"مرحله رشدی '{request.stage_name}' برای محصول '{request.crop_name}' و رقم '{request.variety_name}' یافت نشد"
             }
-        
+
         # ============================================================
-        # مرحله 2: اولویت با نیازهای سفارشی کاربر (Custom Nutrient Needs)
+        # 🆕 مرحله 2: محاسبه تامینی آب و پساب (نسخه 3.4.0)
         # ============================================================
-        
+
+        water_analysis_result = calculate_complete_water_contribution(
+            water_percent=request.water_percent,
+            wastewater_percent=request.wastewater_percent,
+            water_analysis=request.water_analysis,
+            wastewater_analysis=request.wastewater_analysis,
+            target_needs={}  # موقتاً خالی، بعداً پر می‌شود
+        )
+
+        # بررسی خطاهای آنالیز آب
+        if not water_analysis_result["success"]:
+            return {
+                "success": False,
+                "error_message": "خطا در آنالیز آب و پساب",
+                "details": water_analysis_result["errors"]
+            }
+
+        combined_water = water_analysis_result["combined_water"]
+
+        # ============================================================
+        # مرحله 3: تعیین نیازهای گیاه (اولویت با سفارشی کاربر)
+        # ============================================================
+
         if request.custom_nutrient_needs and len(request.custom_nutrient_needs) > 0:
             plant_needs = request.custom_nutrient_needs
             logger.info(f"Using custom nutrient needs: {plant_needs}")
@@ -298,44 +335,59 @@ async def calculate_dual_tank(
             plant_needs = growth_stage.nutrient_needs or {}
             logger.info(f"Using default nutrient needs from database: {plant_needs}")
             needs_source = "database"
-        
+
         # ============================================================
-        # مرحله 3: فیلتر برند (Multi Brand Filter - پشتیبانی از لیست)
+        # 🆕 مرحله 4: محاسبه نیاز باقیمانده پس از کسر آب و پساب
         # ============================================================
-        
+
+        # محاسبه کمبود عناصر با در نظر گرفتن آب و پساب
+        remaining_needs = get_remaining_needs(plant_needs, combined_water)
+
+        # استفاده از remaining_needs به جای plant_needs برای محاسبه کود
+        # (آب و پساب قبلاً از نیازها کسر شده‌اند)
+        adjusted_needs = remaining_needs
+
+        logger.info(f"Original needs: {plant_needs}")
+        logger.info(f"Combined water contribution: {combined_water}")
+        logger.info(f"Remaining needs after water: {remaining_needs}")
+
+        # ============================================================
+        # مرحله 5: فیلتر برند (Multi Brand Filter - پشتیبانی از لیست)
+        # ============================================================
+
         query = db.query(models.Fertilizer).filter(models.Fertilizer.is_active == True)
-        
+
         if request.brand_filter and len(request.brand_filter) > 0:
             query = query.filter(models.Fertilizer.brand_name.in_(request.brand_filter))
             logger.info(f"Filtering brands: {request.brand_filter}")
             brand_filter_str = ",".join(request.brand_filter)
         else:
             brand_filter_str = None
-        
+
         all_fertilizers = query.all()
-        
+
         if not all_fertilizers:
             return {
                 "success": False,
                 "error_message": "هیچ کود فعالی در دیتابیس یافت نشد"
             }
-        
+
         # ============================================================
-        # مرحله 4: انجام محاسبات حرفه‌ای دو مخزن
+        # مرحله 6: انجام محاسبات حرفه‌ای دو مخزن (با نیازهای تعدیل شده)
         # ============================================================
-        
+
         result_main, result_calcium, combined_warnings, general_instructions = calculate_dual_tank_professional(
-            remaining_needs=plant_needs,
+            remaining_needs=adjusted_needs,  # استفاده از نیازهای باقیمانده
             all_fertilizers=all_fertilizers,
             tank_main=request.tank_main,
             tank_calcium=request.tank_calcium,
             brand_filter=brand_filter_str
         )
-        
+
         # ============================================================
-        # مرحله 5: اضافه کردن محاسبات استوک به دوزها
+        # مرحله 7: اضافه کردن محاسبات استوک به دوزها
         # ============================================================
-        
+
         if result_main.get("doses"):
             result_main["doses"] = add_stock_calculations_to_doses(
                 doses=result_main["doses"],
@@ -343,7 +395,7 @@ async def calculate_dual_tank(
                 injector_ratio=request.injector_ratio,
                 stock_tank_volume_liters=request.stock_tank_volume_liters
             )
-        
+
         if result_calcium.get("doses"):
             result_calcium["doses"] = add_stock_calculations_to_doses(
                 doses=result_calcium["doses"],
@@ -351,45 +403,45 @@ async def calculate_dual_tank(
                 injector_ratio=request.injector_ratio,
                 stock_tank_volume_liters=request.stock_tank_volume_liters
             )
-        
+
         # ============================================================
-        # مرحله 6: محاسبه مصرف استوک
+        # مرحله 8: محاسبه مصرف استوک
         # ============================================================
-        
+
         stock_liters_for_main_tank, stock_ml_per_liter = calculate_stock_consumption(
             injector_ratio=request.injector_ratio,
             main_tank_volume_liters=request.tank_main.volume_liters
         )
-        
+
         stock_liters_for_calcium_tank, stock_ml_per_liter_calcium = calculate_stock_consumption(
             injector_ratio=request.injector_ratio,
             main_tank_volume_liters=request.tank_calcium.volume_liters
         )
-        
+
         # ============================================================
-        # مرحله 7: ساخت دستورالعمل استوک
+        # مرحله 9: ساخت دستورالعمل‌ها
         # ============================================================
-        
+
         injector_explanation = get_injector_explanation(request.injector_ratio)
         usage_instructions = get_stock_usage_instructions(request.injector_ratio)
         storage_instructions, shelf_life_fridge, shelf_life_room, warning_signs = get_storage_instructions()
-        
+
         main_fertilizer_names = [d.get("name", "") for d in result_main.get("doses", [])]
         main_mixing_instructions = get_stock_mixing_instructions(main_fertilizer_names)
-        
+
         calcium_fertilizer_names = [d.get("name", "") for d in result_calcium.get("doses", [])]
         calcium_mixing_instructions = get_stock_mixing_instructions(calcium_fertilizer_names)
-        
+
         # ============================================================
-        # مرحله 8: محاسبه زمان و آماده‌سازی پاسخ
+        # مرحله 10: آماده‌سازی پاسخ
         # ============================================================
-        
+
         calculation_time = (time.time() - start_time) * 1000
-        
+
         warnings_main_list = [w.get('message', str(w)) for w in result_main.get('warnings', [])]
         warnings_calcium_list = [w.get('message', str(w)) for w in result_calcium.get('warnings', [])]
         combined_warnings_list = [w.get('message', str(w)) for w in combined_warnings]
-        
+
         return {
             "success": True,
             "crop_name": request.crop_name,
@@ -398,6 +450,16 @@ async def calculate_dual_tank(
             "target_needs": growth_stage.nutrient_needs or {},
             "custom_needs": plant_needs if needs_source == "custom" else None,
             "needs_source": needs_source,
+
+            # 🆕 اطلاعات آب و پساب ترکیبی (نسخه 3.4.0)
+            "water_analysis": {
+                "water_percent": request.water_percent,
+                "wastewater_percent": request.wastewater_percent,
+                "combined_water": combined_water,
+                "deficit": water_analysis_result["deficit"],
+                "remaining_needs": adjusted_needs
+            },
+
             "tank_main_result": {
                 "tank_name": request.tank_main.name,
                 "tank_type": "main",
@@ -451,7 +513,7 @@ async def calculate_dual_tank(
             "calculation_time_ms": calculation_time,
             "error_message": None
         }
-        
+
     except Exception as e:
         logger.error(f"Dual tank calculation error: {str(e)}")
         return {
@@ -488,7 +550,7 @@ def delete_history_item(history_id: int, db: Session = Depends(get_db)):
     ).first()
     if not history:
         raise HTTPException(status_code=404, detail="History item not found")
-    
+
     db.delete(history)
     db.commit()
     return {"message": "History item deleted successfully"}
