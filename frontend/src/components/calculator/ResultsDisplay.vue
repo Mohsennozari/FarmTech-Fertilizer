@@ -26,7 +26,7 @@
       </p>
     </div>
 
-    <!-- بخش 1: تنظیمات شما -->
+    <!-- تنظیمات شما -->
     <div
       class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200"
     >
@@ -47,32 +47,10 @@
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-green-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-            />
-          </svg>
           <div class="text-xs text-gray-500">مرحله رشد</div>
           <div class="font-bold text-gray-800">{{ result.stage_name }}</div>
         </div>
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-blue-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M4 20h16a2 2 0 002-2V8a2 2 0 00-2-2h-7.93a2 2 0 01-1.66-.9l-.82-1.2A2 2 0 007.93 3H4a2 2 0 00-2 2v13a2 2 0 002 2z"
-            />
-          </svg>
           <div class="text-xs text-gray-500">حجم مخزن اصلی</div>
           <div class="font-bold text-gray-800">
             {{ formatNumber(result.tank_main_result?.tank_volume_liters || 0) }}
@@ -80,17 +58,6 @@
           </div>
         </div>
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-amber-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-            />
-          </svg>
           <div class="text-xs text-gray-500">حجم مخزن کلسیم</div>
           <div class="font-bold text-gray-800">
             {{
@@ -100,59 +67,9 @@
           </div>
         </div>
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-purple-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-            />
-          </svg>
-          <div class="text-xs text-gray-500">حجم مخزن استوک</div>
-          <div class="font-bold text-gray-800">
-            {{ props.stockTankVolume || 20 }}
-            <span class="text-sm font-normal">لیتر</span>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-indigo-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
           <div class="text-xs text-gray-500">نسبت تزریق</div>
           <div class="font-bold text-gray-800">
             1:{{ props.injectorRatio || 200 }}
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-gray-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
-          </svg>
-          <div class="text-xs text-gray-500">حجم کل محلول نهایی</div>
-          <div class="font-bold text-gray-800">
-            {{
-              (
-                (result.tank_main_result?.tank_volume_liters || 0) +
-                (result.tank_calcium_result?.tank_volume_liters || 0)
-              ).toLocaleString()
-            }}
-            <span class="text-sm font-normal">لیتر</span>
           </div>
         </div>
       </div>
@@ -182,7 +99,7 @@
       </div>
     </div>
 
-    <!-- جدول نیاز گیاه و عناصر تامین شده -->
+    <!-- جدول مقایسه نیاز گیاه -->
     <div
       class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden"
     >
@@ -258,7 +175,9 @@
       </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- مخزن اصلی -->
+    <!-- ============================================================ -->
     <div
       class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden"
     >
@@ -301,7 +220,6 @@
                 <th class="border border-gray-300 px-3 py-2 text-center">
                   مقدار برای استوک
                 </th>
-                <th class="border border-gray-300 px-3 py-2 text-center"></th>
               </tr>
             </thead>
             <tbody>
@@ -336,25 +254,6 @@
                     میلی‌گرم</span
                   >
                 </td>
-                <td class="border border-gray-300 px-3 py-2 text-center">
-                  <button
-                    @click="showFertilizerDetail(dose.name)"
-                    class="text-blue-600 hover:text-blue-800 transition"
-                    title="مشاهده اطلاعات کامل کود"
-                  >
-                    <svg
-                      class="w-5 h-5 inline"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 16v-4M12 8h.01" />
-                    </svg>
-                    اطلاعات
-                  </button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -375,6 +274,7 @@
           </div>
         </div>
 
+        <!-- مرحله 1: ساخت استوک -->
         <div class="bg-purple-50 rounded-lg p-3 mb-3">
           <h4 class="font-medium text-purple-800 mb-2 flex items-center gap-1">
             <svg
@@ -419,6 +319,7 @@
           </div>
         </div>
 
+        <!-- مرحله 2: مصرف استوک -->
         <div class="bg-green-50 rounded-lg p-3 mb-3">
           <h4 class="font-medium text-green-800 mb-2 flex items-center gap-1">
             <svg
@@ -459,35 +360,12 @@
             </div>
           </div>
         </div>
-
-        <details class="mt-3">
-          <summary
-            class="cursor-pointer text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            مشاهده دستورالعمل اختلاط مستقیم (بدون استوک)
-          </summary>
-          <div
-            class="mt-3 p-4 bg-gray-100 rounded-lg text-sm whitespace-pre-line font-mono"
-            v-html="
-              formatInstructions(result.tank_main_result.mixing_instructions)
-            "
-          ></div>
-        </details>
       </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- مخزن کلسیم -->
+    <!-- ============================================================ -->
     <div
       class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden"
     >
@@ -530,7 +408,6 @@
                 <th class="border border-gray-300 px-3 py-2 text-center">
                   مقدار برای استوک
                 </th>
-                <th class="border border-gray-300 px-3 py-2 text-center"></th>
               </tr>
             </thead>
             <tbody>
@@ -565,25 +442,6 @@
                     میلی‌گرم</span
                   >
                 </td>
-                <td class="border border-gray-300 px-3 py-2 text-center">
-                  <button
-                    @click="showFertilizerDetail(dose.name)"
-                    class="text-amber-600 hover:text-amber-800 transition"
-                    title="مشاهده اطلاعات کامل کود"
-                  >
-                    <svg
-                      class="w-5 h-5 inline"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 16v-4M12 8h.01" />
-                    </svg>
-                    اطلاعات
-                  </button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -604,6 +462,7 @@
           </div>
         </div>
 
+        <!-- مرحله 1: ساخت استوک کلسیم -->
         <div class="bg-purple-50 rounded-lg p-3 mb-3">
           <h4 class="font-medium text-purple-800 mb-2 flex items-center gap-1">
             <svg
@@ -648,6 +507,7 @@
           </div>
         </div>
 
+        <!-- مرحله 2: مصرف استوک کلسیم -->
         <div class="bg-green-50 rounded-lg p-3 mb-3">
           <h4 class="font-medium text-green-800 mb-2 flex items-center gap-1">
             <svg
@@ -691,6 +551,7 @@
           </div>
         </div>
 
+        <!-- هشدار مهم -->
         <div class="bg-red-50 rounded-lg p-3 mb-3">
           <p class="text-sm text-red-700 flex items-center gap-2">
             <svg
@@ -708,35 +569,12 @@
             اصلی مخلوط نکنید!
           </p>
         </div>
-
-        <details class="mt-3">
-          <summary
-            class="cursor-pointer text-amber-600 hover:text-amber-700 font-medium text-sm inline-flex items-center gap-1"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            مشاهده دستورالعمل اختلاط مستقیم (بدون استوک) - مخزن کلسیم
-          </summary>
-          <div
-            class="mt-3 p-4 bg-gray-100 rounded-lg text-sm whitespace-pre-line font-mono"
-            v-html="
-              formatInstructions(result.tank_calcium_result.mixing_instructions)
-            "
-          ></div>
-        </details>
       </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- نکات نگهداری و ایمنی استوک -->
+    <!-- ============================================================ -->
     <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
       <h3 class="font-semibold text-yellow-800 mb-3 flex items-center gap-2">
         <svg
@@ -754,203 +592,19 @@
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
         <div class="bg-white rounded-lg p-2">
-          <span class="font-bold">ماندگاری در یخچال:</span> 7 روز (دمای 4 درجه)
+          <span class="font-bold">ماندگاری در یخچال:</span>
+          {{ result.shelf_life_fridge || "7 روز" }}
         </div>
         <div class="bg-white rounded-lg p-2">
-          <span class="font-bold">ماندگاری در دمای محیط:</span> 3 روز (دمای زیر
-          25 درجه)
+          <span class="font-bold">ماندگاری در دمای محیط:</span>
+          {{ result.shelf_life_room || "3 روز" }}
         </div>
         <div class="bg-white rounded-lg p-2 col-span-2">
-          <span class="font-bold">نشانه‌های خرابی:</span> رسوب سفید رنگ، تغییر
-          رنگ، بوی نامطبوع، باد کردگی ظرف
-        </div>
-      </div>
-    </div>
-
-    <!-- مودال اطلاعات کامل کود -->
-    <div
-      v-if="selectedFertilizer"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      @click.self="selectedFertilizer = null"
-    >
-      <div
-        class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-xl"
-      >
-        <div
-          class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-green-600 to-teal-600"
-        >
-          <h3 class="text-lg font-semibold text-white">اطلاعات کامل کود</h3>
-          <button
-            @click="selectedFertilizer = null"
-            class="text-white hover:text-gray-200 text-xl"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="p-6 overflow-y-auto max-h-[calc(85vh-70px)]">
-          <div v-if="isLoadingFertilizerDetail" class="text-center py-8">
-            <div
-              class="inline-block w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"
-            ></div>
-            <p class="mt-2 text-gray-500">در حال بارگذاری...</p>
-          </div>
-          <div v-else-if="fertilizerDetail" class="space-y-4">
-            <div>
-              <h4 class="font-bold text-gray-800 text-lg">
-                {{ fertilizerDetail.persian_name || fertilizerDetail.name }}
-              </h4>
-              <div class="flex gap-2 mt-1">
-                <span
-                  class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
-                  >{{ fertilizerDetail.brand_name }}</span
-                >
-                <span
-                  class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full"
-                  >{{ fertilizerDetail.fertilizer_type }}</span
-                >
-              </div>
-            </div>
-
-            <div class="border-t pt-3">
-              <h5 class="font-semibold text-gray-700 mb-2">توضیحات</h5>
-              <p class="text-sm text-gray-600 whitespace-pre-line">
-                {{
-                  fertilizerDetail.description ||
-                  "توضیحاتی برای این کود ثبت نشده است"
-                }}
-              </p>
-            </div>
-
-            <div class="border-t pt-3">
-              <h5 class="font-semibold text-gray-700 mb-2">ترکیبات شیمیایی</h5>
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                <div v-if="fertilizerDetail.n_percent">
-                  N:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.n_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.p_percent">
-                  P:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.p_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.k_percent">
-                  K:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.k_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.ca_percent">
-                  Ca:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.ca_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.mg_percent">
-                  Mg:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.mg_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.s_percent">
-                  S:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.s_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.fe_percent">
-                  Fe:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.fe_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.zn_percent">
-                  Zn:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.zn_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.mn_percent">
-                  Mn:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.mn_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.cu_percent">
-                  Cu:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.cu_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.b_percent">
-                  B:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.b_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.mo_percent">
-                  Mo:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.mo_percent }}%</span
-                  >
-                </div>
-              </div>
-            </div>
-
-            <div class="border-t pt-3">
-              <h5 class="font-semibold text-gray-700 mb-2">اطلاعات مصرف</h5>
-              <div class="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  حداقل دوز:
-                  <span class="font-medium"
-                    >{{
-                      fertilizerDetail.min_dose_g_per_liter || "نامشخص"
-                    }}
-                    g/L</span
-                  >
-                </div>
-                <div>
-                  حداکثر دوز:
-                  <span class="font-medium"
-                    >{{
-                      fertilizerDetail.max_dose_g_per_liter || "نامشخص"
-                    }}
-                    g/L</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.solubility_g_per_l">
-                  حلالیت:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.solubility_g_per_l }} g/L</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.ph_effect">
-                  اثر بر pH:
-                  <span class="font-medium">{{
-                    fertilizerDetail.ph_effect
-                  }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              v-if="fertilizerDetail.registration_code"
-              class="border-t pt-3"
-            >
-              <h5 class="font-semibold text-gray-700 mb-2">اطلاعات ثبتی</h5>
-              <div class="text-sm">
-                کد ثبت:
-                <span class="font-mono">{{
-                  fertilizerDetail.registration_code
-                }}</span>
-              </div>
-            </div>
-          </div>
-          <div v-else class="text-center py-8 text-gray-500">
-            اطلاعاتی برای این کود یافت نشد
-          </div>
+          <span class="font-bold">نشانه‌های خرابی:</span>
+          {{
+            result.warning_signs ||
+            "رسوب سفید رنگ، تغییر رنگ، بوی نامطبوع، باد کردگی ظرف"
+          }}
         </div>
       </div>
     </div>
@@ -975,8 +629,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import axios from "axios";
+import { computed } from "vue";
 
 const props = defineProps<{
   result: any;
@@ -984,57 +637,20 @@ const props = defineProps<{
   injectorRatio?: number;
 }>();
 
-const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
-
-const selectedFertilizer = ref<any>(null);
-const fertilizerDetail = ref<any>(null);
-const isLoadingFertilizerDetail = ref(false);
-const allFertilizers = ref<any[]>([]);
-
-const fetchAllFertilizers = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/fertilizers`);
-    allFertilizers.value = response.data;
-  } catch (err) {
-    console.error("Error fetching fertilizers:", err);
-  }
-};
-
-const showFertilizerDetail = async (fertilizerName: string) => {
-  isLoadingFertilizerDetail.value = true;
-  selectedFertilizer.value = { name: fertilizerName };
-  fertilizerDetail.value = null;
-
-  try {
-    const found = allFertilizers.value.find(
-      (f: any) => f.name === fertilizerName,
-    );
-    if (found) {
-      fertilizerDetail.value = found;
-    }
-  } catch (err) {
-    console.error("Error fetching fertilizer detail:", err);
-  } finally {
-    isLoadingFertilizerDetail.value = false;
-  }
-};
+// ============================================================
+// Helper Functions
+// ============================================================
 
 const getStockAmount = (dose: any) => {
   const doseGpl = dose.dose_g_per_liter || 0;
   const injectorRatio = props.injectorRatio || 200;
   const stockVolume = props.stockTankVolume || 20;
-  const amountGram = doseGpl * injectorRatio * stockVolume;
-  return amountGram;
+  return doseGpl * injectorRatio * stockVolume;
 };
 
 const formatNumber = (num: number) => {
   if (!num && num !== 0) return "0";
   return new Intl.NumberFormat("fa-IR").format(Math.round(num));
-};
-
-const formatInstructions = (text: string) => {
-  if (!text) return "";
-  return text.replace(/\n/g, "<br>").replace(/\*/g, "•");
 };
 
 const getElementName = (element: string) => {
@@ -1055,6 +671,10 @@ const getElementName = (element: string) => {
   };
   return names[element] || element;
 };
+
+// ============================================================
+// Computed - Nutrient Comparison
+// ============================================================
 
 const nutrientComparison = computed(() => {
   const elements = ["N", "P", "K", "Ca", "Mg", "Fe", "Zn", "Mn", "B"];
@@ -1077,51 +697,13 @@ const nutrientComparison = computed(() => {
     return { element: elem, need, supplied, status };
   });
 });
-
-onMounted(() => {
-  fetchAllFertilizers();
-});
 </script>
 
 <style scoped>
-details summary {
-  list-style: none;
-  cursor: pointer;
-}
-
-details summary::-webkit-details-marker {
-  display: none;
-}
-
-details summary::before {
-  content: "📂 ";
-  font-size: 14px;
-}
-
-details[open] summary::before {
-  content: "📁 ";
-}
-
 @media print {
   .bg-white {
     break-inside: avoid;
     page-break-inside: avoid;
-  }
-
-  details {
-    display: block !important;
-  }
-
-  details summary {
-    display: block !important;
-  }
-
-  details[open] summary::before {
-    content: "📁 ";
-  }
-
-  .fixed {
-    display: none !important;
   }
 }
 </style>

@@ -1,7 +1,7 @@
 
 # 🌱 FarmTech - سیستم هوشمند نسخه‌دهی کود دیجیتال
 
-**Version:** 3.3.1
+**Version:** 3.4.0
 **Release Date:** 1405/03/26
 **Status:** ✅ Production Ready
 
@@ -17,7 +17,7 @@
 - [Installation Guide](#installation-guide)
 - [API Documentation](#api-documentation)
 - [Database Models](#database-models)
-- [Version 3.3.1 Improvements](#version-331-improvements)
+- [Version 3.4.0 Improvements](#version-340-improvements)
 - [Seeding Database](#seeding-database)
 - [Troubleshooting](#troubleshooting)
 - [Development](#development)
@@ -32,6 +32,7 @@
 - ✅ **Crop growth stage** nutritional requirements
 - ✅ **Available fertilizers** (auto-selected by the system)
 - ✅ **Water quality analysis** (EC, pH, Calcium, Magnesium, Bicarbonate)
+- ✅ **Combined water & wastewater analysis** (NEW in v3.4.0)
 - ✅ **Chemical interactions** (precipitation warnings)
 - ✅ **Multi-brand filtering** (select multiple manufacturers)
 - ✅ **Custom nutrient needs** (manual override)
@@ -54,6 +55,7 @@
 | **Stock Solution** | Injector ratio (1:X) calculations |
 | **Interaction Detection** | Automatic precipitation and antagonism warnings |
 | **Dynamic N Split** | Nitrogen distribution based on crop & growth stage |
+| **💧 Water & Wastewater Analysis** | Combined contribution calculation with percentage mixing |
 
 ### 🗄️ Database Management
 
@@ -75,6 +77,8 @@
 | **Responsive** | Mobile, tablet, and desktop ready |
 | **Persian Fonts** | Vazirmatn, Sahel, Samim |
 | **Print Ready** | Optimized print layout |
+| **💧 Water Analysis UI** | Interactive tables for water/wastewater input |
+| **Clean Results** | Focus on essential data (doses, EC, pH, stock calculations) |
 
 ---
 
@@ -242,20 +246,10 @@ FarmTech-Fertilizer/
 │   │   │   ├── instructions.py   # Mixing instructions
 │   │   │   ├── optimization.py   # SLSQP optimizer
 │   │   │   ├── stock.py          # Stock solution
-│   │   │   └── tank.py           # Tank calculations
+│   │   │   ├── tank.py           # Tank calculations
+│   │   │   └── water_analysis.py # 🆕 Water & wastewater analysis
 │   │   │
 │   │   └── seed/                 # Database seed data
-│   │       ├── __init__.py
-│   │       ├── base.py           # Base utilities
-│   │       ├── brands.py         # Brand data
-│   │       ├── crops.py          # Crop & stage data
-│   │       ├── gol_sam.py        # گل سم گرگان
-│   │       ├── razak_shimi.py    # رازاک شیمی
-│   │       ├── atlas.py          # اطلس
-│   │       ├── redsa.py          # ردسا
-│   │       ├── interactions.py   # Chemical interactions
-│   │       ├── acids.py          # pH adjustment acids
-│   │       └── run_seed.py       # Seed runner
 │   │
 │   ├── requirements.txt
 │   ├── .env
@@ -263,26 +257,21 @@ FarmTech-Fertilizer/
 │   └── farmtech.db
 │
 ├── frontend/
-│   ├── public/
-│   │   └── fonts/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── calculator/
-│   │   │   │   └── ResultsDisplay.vue
+│   │   │   │   └── ResultsDisplay.vue  # Clean results view
 │   │   │   ├── common/
 │   │   │   │   ├── InputField.vue
 │   │   │   │   └── ThemeToggle.vue
 │   │   │   └── admin/
-│   │   │       └── FertilizerList.vue
 │   │   ├── views/
 │   │   │   └── CalculatorView.vue
 │   │   ├── router/
-│   │   │   └── index.ts
 │   │   ├── App.vue
 │   │   ├── main.ts
 │   │   └── style.css
 │   │
-│   ├── index.html
 │   ├── package.json
 │   ├── vite.config.ts
 │   └── tailwind.config.js
@@ -347,7 +336,21 @@ POST /api/v1/calculate-dual-tank
     "water_hco3_ppm": 0
   },
   "stock_tank_volume_liters": 20,
-  "injector_ratio": 200
+  "injector_ratio": 200,
+  "water_percent": 80,
+  "wastewater_percent": 20,
+  "water_analysis": {
+    "n_no3": 10, "p": 2, "s": 5, "n_nh4": 0,
+    "k": 8, "ca": 50, "mg": 20, "na": 5, "cl": 5,
+    "fe": 0.5, "mn": 0.1, "zn": 0.05, "b": 0.2, "cu": 0.02, "mo": 0.01,
+    "ec": 0.4, "ph": 7.0
+  },
+  "wastewater_analysis": {
+    "n_no3": 25, "p": 5, "s": 10, "n_nh4": 2,
+    "k": 15, "ca": 80, "mg": 30, "na": 10, "cl": 15,
+    "fe": 1.0, "mn": 0.3, "zn": 0.1, "b": 0.5, "cu": 0.05, "mo": 0.02,
+    "ec": 1.2, "ph": 6.5
+  }
 }
 ```
 
@@ -359,6 +362,16 @@ POST /api/v1/calculate-dual-tank
   "crop_name": "توت‌فرنگی",
   "variety_name": "سن اندرسا",
   "stage_name": "رشد رویشی",
+  "water_analysis": {
+    "water_percent": 80,
+    "wastewater_percent": 20,
+    "combined_water": {
+      "n_no3": 13, "p": 2.6, "s": 6, "k": 9.4,
+      "ca": 56, "mg": 22, "fe": 0.6, "mn": 0.14,
+      "zn": 0.06, "b": 0.26, "cu": 0.026, "mo": 0.012
+    },
+    "deficit": { "N": 107, "P": 47.4, "K": 110.6, "Ca": 49 }
+  },
   "tank_main_result": {
     "tank_name": "مخزن اصلی",
     "tank_volume_liters": 1000,
@@ -367,13 +380,11 @@ POST /api/v1/calculate-dual-tank
         "name": "NPK 20-20-20 گرین استار",
         "dose_g_per_liter": 1.85,
         "dose_g_for_tank": 1850,
-        "dose_kg_for_stock": 7.4,
-        "dose_g_for_stock_alternative": null
+        "dose_kg_for_stock": 7.4
       }
     ],
-    "supplied_ppm": {"N": 120, "P": 50, "K": 120},
-    "target_ec": 1.8,
-    "warnings": []
+    "supplied_ppm": { "N": 120, "P": 50, "K": 120 },
+    "target_ec": 1.8
   },
   "tank_calcium_result": {
     "tank_name": "مخزن کلسیم",
@@ -386,9 +397,8 @@ POST /api/v1/calculate-dual-tank
         "dose_kg_for_stock": 3.4
       }
     ],
-    "supplied_ppm": {"Ca": 105, "N": 45},
-    "target_ec": 1.2,
-    "warnings": []
+    "supplied_ppm": { "Ca": 105, "N": 45 },
+    "target_ec": 1.2
   },
   "calculation_time_ms": 45.2
 }
@@ -409,6 +419,44 @@ POST /api/v1/calculate-dual-tank
 | **Acid** | Acids for pH adjustment (H3PO4, HNO3, H2SO4) |
 | **Tank** | Nutrient solution tanks |
 | **CalculationHistory** | Full audit trail of all calculations |
+
+---
+
+## Version 3.4.0 Improvements
+
+### 🆕 New Features
+
+| Feature | Description |
+|---------|-------------|
+| **💧 Combined Water & Wastewater Analysis** | Account for existing nutrients in irrigation water and wastewater |
+| **Percentage Mixing** | Adjustable water/wastewater ratio |
+| **17-Element Analysis** | Full water quality profile including EC and pH |
+| **Automatic Deficit Calculation** | System subtracts water contribution from plant needs |
+| **Interactive UI** | Dedicated section for water analysis input |
+
+### 🧪 Algorithm Improvements
+
+| Improvement | Description |
+|-------------|-------------|
+| **Water Contribution** | Weighted average of water and wastewater nutrients |
+| **Deficit Calculation** | Remaining needs after water subtraction |
+| **Validation** | Automatic validation of water analysis data |
+
+### 🗄️ Database Updates
+
+| Update | Description |
+|--------|-------------|
+| **DualTankRequest** | Added water_percent, wastewater_percent, water_analysis, wastewater_analysis fields |
+| **Health Check** | Added water_analysis_support flag |
+
+### 🎨 UI Updates
+
+| Update | Description |
+|--------|-------------|
+| **Water Analysis Section** | Dedicated collapsible section with percentage inputs |
+| **Water Analysis Tables** | Two tables for water and wastewater input |
+| **Clean Results View** | Focused on essential data: doses, EC, pH, stock calculations |
+| **Simplified Display** | Removed detailed mixing instructions and warnings from results |
 
 ---
 
@@ -462,44 +510,6 @@ python -c "from app.seed import init_db; init_db()"
 
 ---
 
-## Version 3.3.1 Improvements
-
-### 🆕 New Features
-
-| Feature | Description |
-|---------|-------------|
-| **Multi-Brand Filter** | Select multiple brands simultaneously |
-| **Custom Nutrient Needs** | Manual override of plant requirements |
-| **Dual Tank System** | Separate calcium and main tanks |
-| **Stock Solution System** | Injector ratio (1:X) with kg calculations |
-| **Dynamic N Split** | Nitrogen distribution based on crop & growth stage |
-| **Solubility Check** | Automatic solubility limit enforcement |
-| **Dark Mode** | Full dark/light theme support |
-
-### 🧪 Algorithm Improvements
-
-| Improvement | Description |
-|-------------|-------------|
-| **Layer-by-Layer** | NPK → Secondary → Micro optimization |
-| **SLSQP Algorithm** | Constrained optimization with physical limits |
-| **Dose Bounds** | Min/max dose per fertilizer enforced |
-| **Total Dose Limit** | Maximum 5 g/L to prevent precipitation |
-| **Numerical Stability** | Ignore elements with < 0.5 ppm requirement |
-| **EC Prediction** | Accurate EC calculation with coefficients |
-
-### 🗄️ Database Updates
-
-| Update | Description |
-|--------|-------------|
-| **6 Brands** | گل سم گرگان, رازاک شیمی, گرین استار, زاگرا استار, اطلس, ردسا |
-| **50+ Fertilizers** | Complete NPK, single elements, micronutrients |
-| **5 Growth Stages** | استقرار نشاء, ریشه‌زایی, رشد رویشی, گلدهی, میوه‌دهی |
-| **2 Varieties** | سن اندرسا, کاماروسا |
-| **3 Acids** | اسید فسفریک, اسید نیتریک, اسید سولفوریک |
-| **Interactions** | Chemical precipitation warnings |
-
----
-
 ## Troubleshooting
 
 ### Error: "No module named 'scipy'"
@@ -528,15 +538,6 @@ rm farmtech.db          # Linux/macOS
 del farmtech.db         # Windows
 
 # Re-initialize
-python -c "from app.seed import init_db; init_db()"
-```
-
-### Error: Seed already exists
-
-```bash
-# Skip duplicate entries (run_seed.py handles this automatically)
-# Or reset and re-seed
-python -c "from app.database import Base, engine; Base.metadata.drop_all(bind=engine)"
 python -c "from app.seed import init_db; init_db()"
 ```
 
@@ -577,30 +578,12 @@ python -c "from app.seed import init_db; init_db()"
 2. Create new seed file for the brand
 3. Import and call in `backend/app/seed/__init__.py`
 
-### Adding a Chemical Interaction
-
-```python
-interaction = Interaction(
-    fertilizer_a_id=fertilizer_a.id,
-    fertilizer_b_id=fertilizer_b.id,
-    reaction_type="precipitation",
-    severity="critical",
-    precipitate_product="Calcium Phosphate",
-    description="Do not mix these fertilizers!"
-)
-db.add(interaction)
-db.commit()
-```
-
 ### Running Tests
 
 ```bash
 # Comprehensive test
 cd backend
 python test_comprehensive.py
-
-# Individual tests
-python -c "from app.database import SessionLocal; from app.test_comprehensive import test_database_connection; with SessionLocal() as db: test_database_connection(db)"
 ```
 
 ---
@@ -636,18 +619,6 @@ npm run build
 # Output in 'dist' folder - serve with nginx, caddy, or Vercel
 ```
 
-### Docker (optional)
-
-```dockerfile
-# Backend Dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY backend/requirements.txt .
-RUN pip install -r requirements.txt
-COPY backend/ .
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
 ---
 
 ## 📦 Supported Brands
@@ -672,20 +643,22 @@ This project is private and not open source. All rights reserved.
 **Built with 🌱 for sustainable agriculture**
 ```
 
-## 🔄 تغییرات اصلی:
+---
 
-1. **نسخه به‌روز شد** - v3.1.0 → v3.3.1
-2. **تاریخ به‌روز شد** - 1405/03/26
-3. **ساختار پروژه به‌روز شد** - اضافه شدن ماژول‌های calculator و seed
-4. **قابلیت‌های جدید اضافه شد**:
-   - Multi-brand filter
-   - Custom nutrient needs
-   - Dual tank system
-   - Stock solution system
-   - Dynamic N split
-   - Solubility check
-   - Dark mode
-5. **بخش Seed اضافه شد** - راهنمای کامل سید کردن
-6. **برندهای پشتیبانی شده** - لیست کامل ۶ برند
-7. **نمونه درخواست API** - به‌روز شده برای dual-tank
-8. **رفع خطاهای کوچک**
+## خلاصه تغییرات README:
+
+| بخش | تغییر |
+|------|--------|
+| **Key Features > UI** | اضافه شدن `Clean Results` و `Simplified Display` |
+| **Version 3.4.0 > UI Updates** | اضافه شدن `Clean Results View` و `Simplified Display` |
+| **سایر بخش‌ها** | بدون تغییر |
+
+---
+
+**این فایل را کامیت کنید:**
+
+```bash
+git add README.md
+git commit -m "docs: update README for v3.4.0 with clean results view"
+git push origin mohsen-dev
+```
