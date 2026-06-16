@@ -1,5 +1,11 @@
-/* Platform-v3\frontend\src\style.css */
+/* ============================================
+   Platform-v3\frontend\src\style.css
+   نرم‌افزار تغذیه سبز - Green Nutrition Software
+   ============================================ */
 
+/* ============================================
+   Tailwind Directives
+   ============================================ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -57,6 +63,26 @@
 }
 
 /* ============================================
+   Dark/Light Theme Variables
+   ============================================ */
+
+:root {
+  --bg-primary: #f8fafc;
+  --bg-card: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --border: #e2e8f0;
+}
+
+.dark {
+  --bg-primary: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: #334155;
+}
+
+/* ============================================
    Global Styles
    ============================================ */
 
@@ -72,13 +98,26 @@ html {
 
 body {
   font-family: 'Vazirmatn', 'Sahel', 'Samim', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f9fafb;
+  background: var(--bg-primary);
   direction: rtl;
-  color: #1f2937;
+  color: var(--text-primary);
   line-height: 1.5;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-/* Custom Scrollbar */
+/* ============================================
+   Force Dark Mode
+   ============================================ */
+
+html.dark,
+html.dark body {
+  background-color: #0f172a !important;
+}
+
+/* ============================================
+   Custom Scrollbar
+   ============================================ */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -98,7 +137,10 @@ body {
   background: #94a3b8;
 }
 
-/* Animations */
+/* ============================================
+   Animations
+   ============================================ */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -124,7 +166,10 @@ body {
   animation: spin 0.8s linear infinite;
 }
 
-/* Form Elements */
+/* ============================================
+   Form Elements
+   ============================================ */
+
 input, select, textarea {
   transition: all 0.2s ease;
 }
@@ -135,24 +180,151 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
 }
 
-/* RTL Number Input */
+/* ============================================
+   Dark Mode - General Text
+   ============================================ */
+
+html.dark,
+html.dark * {
+  color: #f1f5f9 !important;
+}
+
+html.dark .text-gray-500,
+html.dark .text-gray-600,
+html.dark .text-gray-700,
+html.dark .text-gray-800,
+html.dark .text-gray-900 {
+  color: #cbd5e1 !important;
+}
+
+/* ============================================
+   Dark Mode - Form Elements
+   ============================================ */
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* ============================================
+   Dark Mode - Buttons
+   ============================================ */
+
+html.dark button:not(.theme-toggle) {
+  background-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+/* ============================================
+   Dark Mode - Backgrounds
+   ============================================ */
+
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-gray-200 {
+  background-color: #1e293b !important;
+}
+
+/* ============================================
+   Dark Mode - Borders
+   ============================================ */
+
+html.dark .border,
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+  border-color: #475569 !important;
+}
+
+/* ============================================
+   Dark Mode - Tank Headers (مخزن کلسیم و سایر مخازن)
+   ============================================ */
+
+/* پس‌زمینه هدرها */
+html.dark .bg-amber-50,
+html.dark .bg-green-50,
+html.dark .bg-blue-50,
+html.dark .bg-purple-50,
+html.dark .bg-amber-100,
+html.dark .bg-green-100,
+html.dark .bg-blue-100,
+html.dark .bg-purple-100 {
+  background-color: #1e293b !important;
+}
+
+/* رنگ عنوان هدرها */
+html.dark .text-amber-800,
+html.dark .text-green-800,
+html.dark .text-blue-800,
+html.dark .text-purple-800,
+html.dark .text-amber-700,
+html.dark .text-green-700,
+html.dark .text-blue-700,
+html.dark .text-purple-700 {
+  color: #94a3b8 !important;
+}
+
+/* رنگ توضیحات هدرها */
+html.dark .text-amber-600,
+html.dark .text-green-600,
+html.dark .text-blue-600,
+html.dark .text-purple-600 {
+  color: #64748b !important;
+}
+
+/* حاشیه هدرها */
+html.dark .border-amber-200,
+html.dark .border-green-200,
+html.dark .border-blue-200,
+html.dark .border-purple-200,
+html.dark .border-amber-100,
+html.dark .border-green-100,
+html.dark .border-blue-100,
+html.dark .border-purple-100 {
+  border-color: #334155 !important;
+}
+
+/* آیکون هدرها */
+html.dark svg.text-amber-600,
+html.dark svg.text-green-600,
+html.dark svg.text-blue-600,
+html.dark svg.text-purple-600 {
+  color: #64748b !important;
+}
+
+/* ============================================
+   RTL Number Input
+   ============================================ */
+
 input[type="number"] {
   text-align: left;
   direction: ltr;
 }
 
-/* Print Styles */
+/* ============================================
+   Print Styles
+   ============================================ */
+
 @media print {
   body {
     background: white;
     padding: 0;
     margin: 0;
   }
-  
+
   .no-print {
     display: none !important;
   }
-  
+
   .print-friendly {
     box-shadow: none !important;
     border: 1px solid #e5e7eb !important;

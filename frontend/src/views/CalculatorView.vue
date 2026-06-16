@@ -1,7 +1,9 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+ <div class="min-h-screen bg-[var(--bg-primary)]">
+
     <!-- Header -->
-    <header class="bg-white border-b border-gray-100 sticky top-0 z-10 no-print">
+ <header class="bg-[var(--bg-card)] border-b border-gray-100 sticky top-0 z-10 no-print">
+
       <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-3">
@@ -30,6 +32,7 @@
               </svg>
               پرینت
             </button>
+            <ThemeToggle />
           </div>
         </div>
       </div>
@@ -37,7 +40,7 @@
 
     <!-- Modal لیست کودها -->
     <div v-if="showFertilizerList" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showFertilizerList = false">
-      <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-xl">
+      <div class="bg-[var(--bg-card)] rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-xl">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-green-600 to-teal-600">
           <h3 class="text-lg font-semibold text-white">📋 لیست کودهای موجود در دیتابیس</h3>
           <button @click="showFertilizerList = false" class="text-white hover:text-gray-200 text-xl">✕</button>
@@ -81,7 +84,7 @@
     <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <!-- Form Card -->
-      <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
+      <div class="bg-[var(--bg-card)] rounded-2xl shadow-card border border-gray-100 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100">
           <h2 class="text-lg font-semibold text-gray-800">اطلاعات محاسبه</h2>
           <p class="text-sm text-gray-500 mt-0.5">لطفاً اطلاعات مورد نیاز را وارد کنید</p>
@@ -176,7 +179,7 @@
                 </svg>
               </button>
               
-              <div v-if="brandDropdownOpen" class="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+              <div v-if="brandDropdownOpen" class="absolute z-20 mt-1 w-full bg-[var(--bg-card)] border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
                 <div class="p-2">
                   <label class="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
                     <input type="checkbox" v-model="selectAllBrands" @change="toggleAllBrands" class="w-4 h-4 text-green-600 rounded">
@@ -520,7 +523,7 @@
 
       <!-- Loading -->
       <div v-if="isLoading" class="mt-8 flex justify-center">
-        <div class="bg-white rounded-xl shadow-card px-6 py-4 flex items-center gap-3">
+        <div class="bg-[var(--bg-card)] rounded-xl shadow-card px-6 py-4 flex items-center gap-3">
           <div class="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
           <span class="text-gray-600">در حال محاسبه...</span>
         </div>
@@ -543,6 +546,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import ResultsDisplay from '../components/calculator/ResultsDisplay.vue'
 import InputField from '../components/common/InputField.vue'
+import ThemeToggle from '../components/common/ThemeToggle.vue'
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1'
 
