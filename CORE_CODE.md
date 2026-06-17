@@ -1,6 +1,6 @@
 # 🎯 FarmTech Core Algorithm & API Export
 
-**Generated:** 2026-06-16 18:36:37
+**Generated:** 2026-06-17 06:08:59
 **Project:** FarmTech Fertilizer System v3.3.1
 **Core Files:** 23
 
@@ -3709,39 +3709,86 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
 
 ## File 16: `frontend/src/views/CalculatorView.vue`
 
-**Size:** 53.5 KB
+**Size:** 63.1 KB
 
 ```vue
 <template>
   <div class="min-h-screen bg-[var(--bg-primary)]">
-
     <!-- Header -->
-    <header class="bg-[var(--bg-card)] border-b border-gray-100 sticky top-0 z-10 no-print">
+    <header
+      class="bg-[var(--bg-card)] border-b border-gray-100 sticky top-0 z-10 no-print"
+    >
       <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            <div
+              class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                />
               </svg>
             </div>
             <div>
               <h1 class="text-xl font-bold text-gray-800">FarmTech</h1>
-              <p class="text-xs text-gray-500">سیستم هوشمند نسخه‌دهی کود - دو مخزن</p>
+              <p class="text-xs text-gray-500">
+                سیستم هوشمند نسخه‌دهی کود - دو مخزن
+              </p>
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <div :class="['w-2 h-2 rounded-full', connectionStatus === 'connected' ? 'bg-green-500' : 'bg-red-500']"></div>
-            <span class="text-xs text-gray-500">{{ connectionStatus === 'connected' ? 'متصل به سرور' : 'قطع ارتباط با سرور' }}</span>
-            <button @click="showFertilizerList = !showFertilizerList" class="px-3 py-1 text-sm text-gray-600 hover:text-green-600 border border-gray-200 rounded-lg transition">
-              <svg class="w-4 h-4 inline ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div
+              :class="[
+                'w-2 h-2 rounded-full',
+                connectionStatus === 'connected'
+                  ? 'bg-green-500'
+                  : 'bg-red-500',
+              ]"
+            ></div>
+            <span class="text-xs text-gray-500">{{
+              connectionStatus === "connected"
+                ? "متصل به سرور"
+                : "قطع ارتباط با سرور"
+            }}</span>
+            <button
+              @click="showFertilizerList = !showFertilizerList"
+              class="px-3 py-1 text-sm text-gray-600 hover:text-green-600 border border-gray-200 rounded-lg transition"
+            >
+              <svg
+                class="w-4 h-4 inline ml-1"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="M4 6h16M4 12h16M4 18h16" />
               </svg>
               لیست کودها
             </button>
-            <button v-if="result" @click="printResult" class="px-3 py-1 text-sm text-gray-600 hover:text-green-600 border border-gray-200 rounded-lg transition">
-              <svg class="w-4 h-4 inline ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            <button
+              v-if="result"
+              @click="printResult"
+              class="px-3 py-1 text-sm text-gray-600 hover:text-green-600 border border-gray-200 rounded-lg transition"
+            >
+              <svg
+                class="w-4 h-4 inline ml-1"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                />
               </svg>
               پرینت
             </button>
@@ -3752,40 +3799,84 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
     </header>
 
     <!-- Modal لیست کودها -->
-    <div v-if="showFertilizerList" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" @click.self="showFertilizerList = false">
-      <div class="bg-[var(--bg-card)] rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-xl">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-green-600 to-teal-600">
-          <h3 class="text-lg font-semibold text-white">📋 لیست کودهای موجود در دیتابیس</h3>
-          <button @click="showFertilizerList = false" class="text-white hover:text-gray-200 text-xl">✕</button>
+    <div
+      v-if="showFertilizerList"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      @click.self="showFertilizerList = false"
+    >
+      <div
+        class="bg-[var(--bg-card)] rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-xl"
+      >
+        <div
+          class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-green-600 to-teal-600"
+        >
+          <h3 class="text-lg font-semibold text-white">
+            📋 لیست کودهای موجود در دیتابیس
+          </h3>
+          <button
+            @click="showFertilizerList = false"
+            class="text-white hover:text-gray-200 text-xl"
+          >
+            ✕
+          </button>
         </div>
         <div class="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
           <div v-if="isLoadingFertilizers" class="text-center py-8">
-            <div class="inline-block w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+            <div
+              class="inline-block w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"
+            ></div>
             <p class="mt-2 text-gray-500">در حال بارگذاری...</p>
           </div>
-          <div v-else-if="fertilizers.length === 0" class="text-center py-8 text-gray-500">
+          <div
+            v-else-if="fertilizers.length === 0"
+            class="text-center py-8 text-gray-500"
+          >
             هیچ کودی در دیتابیس یافت نشد
           </div>
           <div v-else class="space-y-3">
-            <div v-for="fert in fertilizers" :key="fert.id" class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition">
+            <div
+              v-for="fert in fertilizers"
+              :key="fert.id"
+              class="border border-gray-200 rounded-xl p-4 hover:shadow-md transition"
+            >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center gap-2 flex-wrap">
-                    <h4 class="font-bold text-gray-800">{{ fert.persian_name || fert.name }}</h4>
-                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ fert.brand_name }}</span>
-                    <span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">{{ fert.fertilizer_type }}</span>
+                    <h4 class="font-bold text-gray-800">
+                      {{ fert.persian_name || fert.name }}
+                    </h4>
+                    <span
+                      class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+                      >{{ fert.brand_name }}</span
+                    >
+                    <span
+                      class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full"
+                      >{{ fert.fertilizer_type }}</span
+                    >
                   </div>
-                  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2 text-xs text-gray-500">
+                  <div
+                    class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2 text-xs text-gray-500"
+                  >
                     <span v-if="fert.n_percent">N: {{ fert.n_percent }}%</span>
                     <span v-if="fert.p_percent">P: {{ fert.p_percent }}%</span>
                     <span v-if="fert.k_percent">K: {{ fert.k_percent }}%</span>
-                    <span v-if="fert.ca_percent">Ca: {{ fert.ca_percent }}%</span>
-                    <span v-if="fert.mg_percent">Mg: {{ fert.mg_percent }}%</span>
-                    <span v-if="fert.fe_percent">Fe: {{ fert.fe_percent }}%</span>
-                    <span v-if="fert.zn_percent">Zn: {{ fert.zn_percent }}%</span>
+                    <span v-if="fert.ca_percent"
+                      >Ca: {{ fert.ca_percent }}%</span
+                    >
+                    <span v-if="fert.mg_percent"
+                      >Mg: {{ fert.mg_percent }}%</span
+                    >
+                    <span v-if="fert.fe_percent"
+                      >Fe: {{ fert.fe_percent }}%</span
+                    >
+                    <span v-if="fert.zn_percent"
+                      >Zn: {{ fert.zn_percent }}%</span
+                    >
                     <span v-if="fert.s_percent">S: {{ fert.s_percent }}%</span>
                   </div>
-                  <p class="text-xs text-gray-400 mt-2">{{ getFertilizerDescription(fert.name) }}</p>
+                  <p class="text-xs text-gray-400 mt-2">
+                    {{ getFertilizerDescription(fert.name) }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -3797,10 +3888,14 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
     <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
       <!-- Form Card -->
-      <div class="bg-[var(--bg-card)] rounded-2xl shadow-card border border-gray-100 overflow-hidden">
+      <div
+        class="bg-[var(--bg-card)] rounded-2xl shadow-card border border-gray-100 overflow-hidden"
+      >
         <div class="px-6 py-5 border-b border-gray-100">
           <h2 class="text-lg font-semibold text-gray-800">اطلاعات محاسبه</h2>
-          <p class="text-sm text-gray-500 mt-0.5">لطفاً اطلاعات مورد نیاز را وارد کنید</p>
+          <p class="text-sm text-gray-500 mt-0.5">
+            لطفاً اطلاعات مورد نیاز را وارد کنید
+          </p>
         </div>
 
         <div class="p-6 space-y-6">
@@ -3808,41 +3903,80 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
           <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                <svg class="w-4 h-4 inline ml-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                <svg
+                  class="w-4 h-4 inline ml-1 text-gray-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                  />
                 </svg>
                 محصول
               </label>
-              <select v-model="selectedCrop" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-gray-200 rounded-xl" disabled>
+              <select
+                v-model="selectedCrop"
+                class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-gray-200 rounded-xl"
+                disabled
+              >
                 <option value="توت‌فرنگی">توت‌فرنگی</option>
               </select>
-              <p class="text-xs text-gray-400 mt-1">محصول انتخابی - توت فرنگی</p>
+              <p class="text-xs text-gray-400 mt-1">
+                محصول انتخابی - توت فرنگی
+              </p>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                <svg class="w-4 h-4 inline ml-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM12 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z" />
-                  <path d="M20 12c0-4.418-3.582-8-8-8s-8 3.582-8 8 3.582 8 8 8 8-3.582 8-8z" />
+                <svg
+                  class="w-4 h-4 inline ml-1 text-gray-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM12 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
+                  />
+                  <path
+                    d="M20 12c0-4.418-3.582-8-8-8s-8 3.582-8 8 3.582 8 8 8 8-3.582 8-8z"
+                  />
                 </svg>
                 رقم گیاه
               </label>
-              <select v-model="selectedVariety" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-gray-200 rounded-xl focus:border-green-500 focus:ring-1 focus:ring-green-500 transition">
+              <select
+                v-model="selectedVariety"
+                class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-gray-200 rounded-xl focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
+              >
                 <option value="">انتخاب کنید</option>
                 <option value="سن اندرسا">سن اندرسا</option>
                 <option value="کاماروسا">کاماروسا</option>
               </select>
-              <p class="text-xs text-gray-400 mt-1">رقم مورد نظر خود را انتخاب کنید</p>
+              <p class="text-xs text-gray-400 mt-1">
+                رقم مورد نظر خود را انتخاب کنید
+              </p>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                <svg class="w-4 h-4 inline ml-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg
+                  class="w-4 h-4 inline ml-1 text-gray-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
                 مرحله رشد
               </label>
-              <select v-model="selectedStage" @change="onStageChange" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-gray-200 rounded-xl focus:border-green-500 focus:ring-1 focus:ring-green-500 transition">
+              <select
+                v-model="selectedStage"
+                @change="onStageChange"
+                class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-gray-200 rounded-xl focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
+              >
                 <option value="">انتخاب کنید</option>
                 <option value="استقرار نشاء">استقرار نشاء</option>
                 <option value="ریشه‌زایی">ریشه‌زایی</option>
@@ -3850,34 +3984,55 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                 <option value="گلدهی">گلدهی</option>
                 <option value="میوه‌دهی">میوه‌دهی</option>
               </select>
-              <p class="text-xs text-gray-400 mt-1">مرحله رشدی گیاه را انتخاب کنید</p>
+              <p class="text-xs text-gray-400 mt-1">
+                مرحله رشدی گیاه را انتخاب کنید
+              </p>
             </div>
           </div>
 
-          <!-- Cultivation Type - New Field -->
+          <!-- Cultivation Type -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1.5">
-              <svg class="w-4 h-4 inline ml-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                class="w-4 h-4 inline ml-1 text-gray-500"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               بستر کشت
             </label>
-            <select v-model="cultivationType" class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-gray-200 rounded-xl" disabled>
+            <select
+              v-model="cultivationType"
+              class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-gray-200 rounded-xl"
+              disabled
+            >
               <option value="هیدروپونیک">هیدروپونیک</option>
             </select>
-            <p class="text-xs text-gray-400 mt-1">بستر کشت انتخابی - هیدروپونیک</p>
+            <p class="text-xs text-gray-400 mt-1">
+              بستر کشت انتخابی - هیدروپونیک
+            </p>
           </div>
 
           <!-- Brand Filter - Multi Select -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1.5">
-              <svg class="w-4 h-4 inline ml-1 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                class="w-4 h-4 inline ml-1 text-gray-500"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
               </svg>
               فیلتر برند (اختیاری - چندگانه)
             </label>
 
-            <!-- Multi-select dropdown -->
             <div class="relative">
               <button
                 @click="brandDropdownOpen = !brandDropdownOpen"
@@ -3885,32 +4040,267 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                 class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-gray-200 rounded-xl text-right flex justify-between items-center focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
               >
                 <span class="text-gray-700">
-                  {{ selectedBrands.length === 0 ? 'همه برندها' : selectedBrands.length + ' برند انتخاب شده' }}
+                  {{
+                    selectedBrands.length === 0
+                      ? "همه برندها"
+                      : selectedBrands.length + " برند انتخاب شده"
+                  }}
                 </span>
-                <svg class="w-4 h-4 text-gray-500" :class="{ 'rotate-180': brandDropdownOpen }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg
+                  class="w-4 h-4 text-gray-500"
+                  :class="{ 'rotate-180': brandDropdownOpen }"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <path d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
 
-              <div v-if="brandDropdownOpen" class="absolute z-20 mt-1 w-full bg-[var(--bg-card)] border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+              <div
+                v-if="brandDropdownOpen"
+                class="absolute z-20 mt-1 w-full bg-[var(--bg-card)] border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+              >
                 <div class="p-2">
-                  <label class="flex items-center gap-2 p-2 hover:bg-[var(--bg-primary)] rounded-lg cursor-pointer">
-                    <input type="checkbox" v-model="selectAllBrands" @change="toggleAllBrands" class="w-4 h-4 text-green-600 rounded">
-                    <span class="text-sm font-medium text-gray-700">انتخاب همه برندها</span>
+                  <label
+                    class="flex items-center gap-2 p-2 hover:bg-[var(--bg-primary)] rounded-lg cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      v-model="selectAllBrands"
+                      @change="toggleAllBrands"
+                      class="w-4 h-4 text-green-600 rounded"
+                    />
+                    <span class="text-sm font-medium text-gray-700"
+                      >انتخاب همه برندها</span
+                    >
                   </label>
                   <div class="border-t my-2"></div>
-                  <div v-for="brand in allBrandsList" :key="brand" class="flex items-center gap-2 p-2 hover:bg-[var(--bg-primary)] rounded-lg cursor-pointer">
-                    <input type="checkbox" v-model="selectedBrands" :value="brand" class="w-4 h-4 text-green-600 rounded">
+                  <div
+                    v-for="brand in allBrandsList"
+                    :key="brand"
+                    class="flex items-center gap-2 p-2 hover:bg-[var(--bg-primary)] rounded-lg cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      v-model="selectedBrands"
+                      :value="brand"
+                      class="w-4 h-4 text-green-600 rounded"
+                    />
                     <span class="text-sm text-gray-700">{{ brand }}</span>
                   </div>
                 </div>
               </div>
             </div>
-            <p class="text-xs text-gray-400 mt-1">می‌توانید یک یا چند برند را انتخاب کنید. در صورت عدم انتخاب، همه برندها در نظر گرفته می‌شوند.</p>
+            <p class="text-xs text-gray-400 mt-1">
+              می‌توانید یک یا چند برند را انتخاب کنید. در صورت عدم انتخاب، همه
+              برندها در نظر گرفته می‌شوند.
+            </p>
           </div>
 
           <!-- ============================================================ -->
-          <!-- تنظیمات پیشرفته: ویرایش دستی نیازهای گیاه (منو کشویی) -->
+          <!-- 🆕 بخش آنالیز آب و پساب ترکیبی (نسخه 3.4.0) -->
+          <!-- ============================================================ -->
+          <div class="border border-blue-200 rounded-xl overflow-hidden">
+            <div class="bg-blue-50 px-4 py-3 border-b border-blue-200">
+              <div class="flex items-center gap-2">
+                <svg
+                  class="w-5 h-5 text-blue-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                  />
+                </svg>
+                <h3 class="font-semibold text-blue-800">
+                  💧 آنالیز آب و پساب ترکیبی
+                </h3>
+              </div>
+              <p class="text-xs text-blue-600 mt-1">
+                مقادیر آب تامینی خود را به صورت درصد وارد کنید
+              </p>
+            </div>
+            <div class="p-4">
+              <!-- درصد آب و پساب -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <InputField
+                  v-model.number="waterPercent"
+                  label="درصد آب تامینی"
+                  type="number"
+                  placeholder="80"
+                  icon="M3 10h18M3 14h18M5 18h14M5 6h14"
+                  :step="1"
+                  :min="0"
+                  :max="100"
+                  help-text="مثال: 80% آب و 20% پساب"
+                />
+                <InputField
+                  v-model.number="wastewaterPercent"
+                  label="درصد پساب تامینی"
+                  type="number"
+                  placeholder="20"
+                  icon="M3 10h18M3 14h18M5 18h14M5 6h14"
+                  :step="1"
+                  :min="0"
+                  :max="100"
+                  help-text="مجموع درصدها باید 100 باشد"
+                />
+              </div>
+
+              <!-- هشدار مجموع درصد -->
+              <div
+                v-if="Math.abs(waterPercent + wastewaterPercent - 100) > 0.01"
+                class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4"
+              >
+                <p class="text-sm text-red-700 flex items-center gap-2">
+                  <svg
+                    class="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  ⚠️ مجموع درصد آب و پساب باید 100 باشد. مقدار فعلی:
+                  {{ waterPercent + wastewaterPercent }}%
+                </p>
+              </div>
+
+              <!-- جدول آنالیز آب -->
+              <div
+                class="border border-green-200 rounded-lg overflow-hidden mb-4"
+              >
+                <div class="bg-green-50 px-3 py-2 border-b border-green-200">
+                  <h4 class="text-sm font-semibold text-green-800">
+                    📊 آنالیز آب
+                  </h4>
+                </div>
+                <div class="p-3 overflow-x-auto">
+                  <table class="w-full text-sm border-collapse">
+                    <thead>
+                      <tr class="bg-gray-100">
+                        <th class="border border-gray-300 px-2 py-1 text-right">
+                          عنصر
+                        </th>
+                        <th
+                          class="border border-gray-300 px-2 py-1 text-center"
+                        >
+                          مقدار (ppm)
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="(value, key) in waterAnalysis"
+                        :key="key"
+                        class="hover:bg-[var(--bg-primary)]"
+                      >
+                        <td
+                          class="border border-gray-300 px-2 py-1 font-medium text-gray-700"
+                        >
+                          {{ getElementDisplayName(key) }}
+                        </td>
+                        <td
+                          class="border border-gray-300 px-2 py-1 text-center"
+                        >
+                          <input
+                            type="number"
+                            v-model.number="waterAnalysis[key]"
+                            class="w-24 px-2 py-1 text-center border border-gray-300 rounded focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
+                            step="0.1"
+                            min="0"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- جدول آنالیز پساب -->
+              <div class="border border-amber-200 rounded-lg overflow-hidden">
+                <div class="bg-amber-50 px-3 py-2 border-b border-amber-200">
+                  <h4 class="text-sm font-semibold text-amber-800">
+                    📊 آنالیز پساب
+                  </h4>
+                </div>
+                <div class="p-3 overflow-x-auto">
+                  <table class="w-full text-sm border-collapse">
+                    <thead>
+                      <tr class="bg-gray-100">
+                        <th class="border border-gray-300 px-2 py-1 text-right">
+                          عنصر
+                        </th>
+                        <th
+                          class="border border-gray-300 px-2 py-1 text-center"
+                        >
+                          مقدار (ppm)
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="(value, key) in wastewaterAnalysis"
+                        :key="key"
+                        class="hover:bg-[var(--bg-primary)]"
+                      >
+                        <td
+                          class="border border-gray-300 px-2 py-1 font-medium text-gray-700"
+                        >
+                          {{ getElementDisplayName(key) }}
+                        </td>
+                        <td
+                          class="border border-gray-300 px-2 py-1 text-center"
+                        >
+                          <input
+                            type="number"
+                            v-model.number="wastewaterAnalysis[key]"
+                            class="w-24 px-2 py-1 text-center border border-gray-300 rounded focus:border-amber-500 focus:ring-1 focus:ring-amber-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
+                            step="0.1"
+                            min="0"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- نمایش مقادیر ترکیبی (پیش‌نمایش) -->
+              <div
+                v-if="hasWaterData"
+                class="mt-4 bg-purple-50 border border-purple-200 rounded-lg p-3"
+              >
+                <h4 class="text-sm font-semibold text-purple-800 mb-2">
+                  🔬 مقادیر ترکیبی آب و پساب
+                </h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                  <div
+                    v-for="(value, key) in combinedWaterPreview"
+                    :key="key"
+                    class="bg-white rounded px-2 py-1"
+                  >
+                    <span class="font-medium"
+                      >{{ getElementDisplayName(key) }}:</span
+                    >
+                    <span class="text-gray-700"
+                      >{{ value.toFixed(1) }} ppm</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================================ -->
+          <!-- تنظیمات پیشرفته: ویرایش دستی نیازهای گیاه -->
           <!-- ============================================================ -->
           <div class="border border-gray-300 rounded-xl overflow-hidden">
             <button
@@ -3919,47 +4309,84 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
               class="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 transition flex justify-between items-center text-right"
             >
               <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <svg
+                  class="w-5 h-5 text-gray-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
                   <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span class="font-medium text-gray-700">⚙️ تنظیمات پیشرفته - ویرایش دستی نیازهای گیاه</span>
+                <span class="font-medium text-gray-700"
+                  >⚙️ تنظیمات پیشرفته - ویرایش دستی نیازهای گیاه</span
+                >
               </div>
-              <svg class="w-5 h-5 text-gray-500 transition-transform" :class="{ 'rotate-180': advancedSettingsOpen }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                class="w-5 h-5 text-gray-500 transition-transform"
+                :class="{ 'rotate-180': advancedSettingsOpen }"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
-            <div v-if="advancedSettingsOpen" class="p-5 border-t border-gray-200">
+            <div
+              v-if="advancedSettingsOpen"
+              class="p-5 border-t border-gray-200"
+            >
               <p class="text-sm text-amber-600 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  class="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
-                ⚠️ توجه: تغییر این مقادیر فقط برای محاسبه فعلی اعمال می‌شود و در دیتابیس ذخیره نمی‌شود.
+                ⚠️ توجه: تغییر این مقادیر فقط برای محاسبه فعلی اعمال می‌شود و در
+                دیتابیس ذخیره نمی‌شود.
               </p>
 
               <div class="overflow-x-auto">
                 <table class="w-full text-sm border-collapse">
                   <thead>
                     <tr class="bg-gray-100">
-                      <th class="border border-gray-300 px-3 py-2 text-right">عنصر</th>
-                      <th class="border border-gray-300 px-3 py-2 text-center">نیاز گیاه (ppm)</th>
-                      <th class="border border-gray-300 px-3 py-2 text-center">واحد</th>
+                      <th class="border border-gray-300 px-3 py-2 text-right">
+                        عنصر
+                      </th>
+                      <th class="border border-gray-300 px-3 py-2 text-center">
+                        نیاز گیاه (ppm)
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="nutrient in editableNutrients" :key="nutrient.element" class="hover:bg-[var(--bg-primary)]">
-                      <td class="border border-gray-300 px-3 py-2 font-medium">{{ nutrient.name }} ({{ nutrient.element }})</td>
+                    <tr
+                      v-for="nutrient in editableNutrients"
+                      :key="nutrient.element"
+                      class="hover:bg-[var(--bg-primary)]"
+                    >
+                      <td class="border border-gray-300 px-3 py-2 font-medium">
+                        {{ nutrient.name }} ({{ nutrient.element }})
+                      </td>
                       <td class="border border-gray-300 px-3 py-2 text-center">
                         <input
                           type="number"
                           v-model.number="nutrient.value"
-                          class="w-24 px-2 py-1 text-center border border-gray-300 rounded focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                          class="w-24 px-2 py-1 text-center border border-gray-300 rounded focus:border-green-500 focus:ring-1 focus:ring-green-500 bg-[var(--bg-primary)] text-[var(--text-primary)]"
                           step="1"
                           min="0"
-                        >
+                        />
                       </td>
-                      <td class="border border-gray-300 px-3 py-2 text-center text-gray-500">ppm</td>
                     </tr>
                   </tbody>
                 </table>
@@ -3970,129 +4397,19 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                 type="button"
                 class="mt-4 text-sm text-blue-600 hover:text-blue-800 transition flex items-center gap-1"
               >
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <svg
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
                 </svg>
                 بازنشانی به مقادیر پیش‌فرض مرحله رشد
               </button>
-            </div>
-          </div>
-
-          <!-- ============================================================ -->
-          <!-- 🆕 بخش آنالیز آب و پساب ترکیبی (نسخه 3.4.0) -->
-          <!-- ============================================================ -->
-          <div class="border border-teal-200 rounded-xl overflow-hidden">
-            <button
-              @click="waterAnalysisOpen = !waterAnalysisOpen"
-              type="button"
-              class="w-full px-4 py-3 bg-teal-50 hover:bg-teal-100 transition flex justify-between items-center text-right"
-            >
-              <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                </svg>
-                <span class="font-medium text-teal-700">💧 آنالیز آب و پساب ترکیبی</span>
-                <span class="text-xs text-teal-500">(اختیاری - برای محاسبه دقیق‌تر)</span>
-              </div>
-              <svg class="w-5 h-5 text-teal-500 transition-transform" :class="{ 'rotate-180': waterAnalysisOpen }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            <div v-if="waterAnalysisOpen" class="p-5 border-t border-teal-200">
-              <p class="text-sm text-gray-600 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                مقادیر آب و پساب خود را وارد کنید. نرم‌افزار به‌صورت خودکار مقادیر تامینی را محاسبه و از نیازهای گیاه کسر می‌کند.
-              </p>
-
-              <!-- درصدهای آب و پساب -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                    استفاده از آب (%)
-                  </label>
-                  <div class="flex items-center gap-3">
-                    <input
-                      type="range"
-                      v-model.number="waterPercent"
-                      min="0"
-                      max="100"
-                      class="flex-1 accent-teal-600"
-                    >
-                    <span class="w-16 text-center font-bold text-teal-700">{{ waterPercent }}%</span>
-                  </div>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                    استفاده از پساب (%)
-                  </label>
-                  <div class="flex items-center gap-3">
-                    <input
-                      type="range"
-                      v-model.number="wastewaterPercent"
-                      min="0"
-                      max="100"
-                      class="flex-1 accent-orange-600"
-                    >
-                    <span class="w-16 text-center font-bold text-orange-700">{{ wastewaterPercent }}%</span>
-                  </div>
-                  <p class="text-xs text-gray-400 mt-1">مجموع: {{ waterPercent + wastewaterPercent }}%</p>
-                </div>
-              </div>
-
-              <!-- جداول آنالیز -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- آنالیز آب -->
-                <div class="border border-blue-200 rounded-lg p-4 bg-blue-50/30">
-                  <h4 class="font-semibold text-blue-700 mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
-                    آنالیز آب
-                  </h4>
-                  <div class="grid grid-cols-2 gap-2">
-                    <div v-for="(value, key) in waterAnalysis" :key="key" class="flex items-center gap-2">
-                      <label class="text-xs text-gray-600 w-12">{{ getElementLabel(key) }}</label>
-                      <input
-                        type="number"
-                        v-model.number="waterAnalysis[key]"
-                        class="flex-1 px-2 py-1 text-xs border border-gray-200 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-[var(--bg-primary)]"
-                        step="0.1"
-                        min="0"
-                      >
-                    </div>
-                  </div>
-                </div>
-
-                <!-- آنالیز پساب -->
-                <div class="border border-orange-200 rounded-lg p-4 bg-orange-50/30">
-                  <h4 class="font-semibold text-orange-700 mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
-                    آنالیز پساب
-                  </h4>
-                  <div class="grid grid-cols-2 gap-2">
-                    <div v-for="(value, key) in wastewaterAnalysis" :key="key" class="flex items-center gap-2">
-                      <label class="text-xs text-gray-600 w-12">{{ getElementLabel(key) }}</label>
-                      <input
-                        type="number"
-                        v-model.number="wastewaterAnalysis[key]"
-                        class="flex-1 px-2 py-1 text-xs border border-gray-200 rounded focus:border-orange-500 focus:ring-1 focus:ring-orange-500 bg-[var(--bg-primary)]"
-                        step="0.1"
-                        min="0"
-                      >
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-4 text-xs text-gray-500 bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <span class="font-medium">💡 نکته:</span>
-                عناصر با رنگ {{ waterPercent }}% آب و {{ wastewaterPercent }}% پساب ترکیب می‌شوند و از نیازهای گیاه کسر می‌گردند.
-              </div>
             </div>
           </div>
 
@@ -4102,17 +4419,27 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
           <div class="border border-green-200 rounded-xl overflow-hidden">
             <div class="bg-green-50 px-4 py-3 border-b border-green-200">
               <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                <svg
+                  class="w-5 h-5 text-green-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                  />
                 </svg>
-                <h3 class="font-semibold text-green-800">اطلاعات آب (منبع مشترک)</h3>
+                <h3 class="font-semibold text-green-800">
+                  اطلاعات آب (منبع مشترک)
+                </h3>
               </div>
-              <p class="text-xs text-green-600 mt-1">اطلاعات کیفیت آب - این مقادیر برای هر دو مخزن یکسان خواهد بود</p>
+              <p class="text-xs text-green-600 mt-1">
+                اطلاعات کیفیت آب - این مقادیر برای هر دو مخزن یکسان خواهد بود
+              </p>
             </div>
             <div class="p-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-
-                <!-- EC Water -->
                 <InputField
                   v-model.number="waterSource.water_ec_ms_cm"
                   label="EC آب (mS/cm)"
@@ -4121,10 +4448,8 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                   icon="M13 10V3L4 14h7v7l9-11h-7z"
                   :step="0.1"
                   :min="0"
-                  help-text="بازه ایده‌آل: 0.2 - 0.8 mS/cm - مقدار پیش‌فرض 0.4"
+                  help-text="بازه ایده‌آل: 0.2 - 0.8 mS/cm"
                 />
-
-                <!-- pH Water -->
                 <InputField
                   v-model.number="waterSource.water_ph"
                   label="pH آب"
@@ -4134,10 +4459,8 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                   :step="0.1"
                   :min="0"
                   :max="14"
-                  help-text="بازه ایده‌آل: 6.0 - 7.0 - مقدار پیش‌فرض 7.0"
+                  help-text="بازه ایده‌آل: 6.0 - 7.0"
                 />
-
-                <!-- Calcium Water -->
                 <InputField
                   v-model.number="waterSource.water_ca_ppm"
                   label="کلسیم آب (ppm)"
@@ -4146,10 +4469,8 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                   icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM12 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
                   :step="1"
                   :min="0"
-                  help-text="بازه ایده‌آل: 40 - 80 ppm - مقدار پیش‌فرض 50"
+                  help-text="بازه ایده‌آل: 40 - 80 ppm"
                 />
-
-                <!-- Magnesium Water -->
                 <InputField
                   v-model.number="waterSource.water_mg_ppm"
                   label="منیزیم آب (ppm)"
@@ -4158,10 +4479,8 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                   icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2zM12 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
                   :step="1"
                   :min="0"
-                  help-text="بازه ایده‌آل: 15 - 30 ppm - مقدار پیش‌فرض 20"
+                  help-text="بازه ایده‌آل: 15 - 30 ppm"
                 />
-
-                <!-- Bicarbonate Water -->
                 <InputField
                   v-model.number="waterSource.water_hco3_ppm"
                   label="بیکربنات (ppm)"
@@ -4170,10 +4489,8 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                   icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   :step="1"
                   :min="0"
-                  help-text="بازه ایده‌آل: 0 - 100 ppm - مقدار پیش‌فرض 0"
+                  help-text="بازه ایده‌آل: 0 - 100 ppm"
                 />
-
-                <!-- Chlorine Water -->
                 <InputField
                   v-model.number="waterSource.water_cl_ppm"
                   label="کلر آب (ppm)"
@@ -4182,9 +4499,8 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                   icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z"
                   :step="1"
                   :min="0"
-                  help-text="بازه ایده‌آل: 0 - 50 ppm - مقدار پیش‌فرض 0"
+                  help-text="بازه ایده‌آل: 0 - 50 ppm"
                 />
-
               </div>
             </div>
           </div>
@@ -4195,15 +4511,27 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
           <div class="border border-blue-200 rounded-xl overflow-hidden">
             <div class="bg-blue-50 px-4 py-3 border-b border-blue-200">
               <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                <svg
+                  class="w-5 h-5 text-blue-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                  />
                 </svg>
-                <h3 class="font-semibold text-blue-800">مخزن اصلی (کودهای غیر کلسیمی)</h3>
+                <h3 class="font-semibold text-blue-800">
+                  مخزن اصلی (کودهای غیر کلسیمی)
+                </h3>
               </div>
-              <p class="text-xs text-blue-600 mt-1">این مخزن برای کودهای NPK، سولفات‌ها و ریز مغذی‌ها استفاده می‌شود</p>
+              <p class="text-xs text-blue-600 mt-1">
+                این مخزن برای کودهای NPK، سولفات‌ها و ریز مغذی‌ها استفاده می‌شود
+              </p>
             </div>
             <div class="p-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputField
                   v-model="tankMain.name"
                   label="نام مخزن"
@@ -4220,7 +4548,7 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                   :step="1"
                   :min="1"
                   :required="true"
-                  help-text="حجم مخزن بر حسب لیتر - مقدار پیش‌فرض 100 لیتر"
+                  help-text="حجم مخزن بر حسب لیتر"
                 />
               </div>
             </div>
@@ -4232,15 +4560,28 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
           <div class="border border-amber-200 rounded-xl overflow-hidden">
             <div class="bg-amber-50 px-4 py-3 border-b border-amber-200">
               <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                <svg
+                  class="w-5 h-5 text-amber-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                  />
                 </svg>
-                <h3 class="font-semibold text-amber-800">مخزن کلسیم (کودهای حاوی کلسیم)</h3>
+                <h3 class="font-semibold text-amber-800">
+                  مخزن کلسیم (کودهای حاوی کلسیم)
+                </h3>
               </div>
-              <p class="text-xs text-amber-600 mt-1">این مخزن فقط برای کودهای حاوی کلسیم مانند نیترات کلسیم و کلات آهن استفاده می‌شود</p>
+              <p class="text-xs text-amber-600 mt-1">
+                این مخزن فقط برای کودهای حاوی کلسیم مانند نیترات کلسیم و کلات
+                آهن استفاده می‌شود
+              </p>
             </div>
             <div class="p-4">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <InputField
                   v-model="tankCalcium.name"
                   label="نام مخزن"
@@ -4257,7 +4598,7 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                   :step="1"
                   :min="1"
                   :required="true"
-                  help-text="حجم مخزن بر حسب لیتر - مقدار پیش‌فرض 100 لیتر"
+                  help-text="حجم مخزن بر حسب لیتر"
                 />
               </div>
             </div>
@@ -4269,12 +4610,25 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
           <div class="border border-purple-200 rounded-xl overflow-hidden">
             <div class="bg-purple-50 px-4 py-3 border-b border-purple-200">
               <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                <svg
+                  class="w-5 h-5 text-purple-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                  />
                 </svg>
-                <h3 class="font-semibold text-purple-800">تنظیمات سیستم استوک (محلول مادر)</h3>
+                <h3 class="font-semibold text-purple-800">
+                  تنظیمات سیستم استوک (محلول مادر)
+                </h3>
               </div>
-              <p class="text-xs text-purple-600 mt-1">این تنظیمات برای محاسبه مقدار کود مورد نیاز برای ساخت استوک استفاده می‌شود</p>
+              <p class="text-xs text-purple-600 mt-1">
+                این تنظیمات برای محاسبه مقدار کود مورد نیاز برای ساخت استوک
+                استفاده می‌شود
+              </p>
             </div>
             <div class="p-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -4301,9 +4655,14 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
                   help-text="مثال: 200 یعنی 1 لیتر استوک + 199 لیتر آب = 200 لیتر محلول نهایی"
                 />
               </div>
-              <div class="mt-3 text-xs text-gray-500 bg-[var(--bg-primary)] rounded-lg p-2">
+              <div
+                class="mt-3 text-xs text-gray-500 bg-[var(--bg-primary)] rounded-lg p-2"
+              >
                 <span class="font-medium">💡 مفهوم نسبت تزریق:</span>
-                <span> به ازای هر 1 لیتر استوک، {{ injectorRatio - 1 }} لیتر آب اضافه می‌شود تا {{ injectorRatio }} لیتر محلول نهایی بدست آید.</span>
+                <span>
+                  به ازای هر 1 لیتر استوک، {{ injectorRatio - 1 }} لیتر آب اضافه
+                  می‌شود تا {{ injectorRatio }} لیتر محلول نهایی بدست آید.</span
+                >
               </div>
             </div>
           </div>
@@ -4314,48 +4673,119 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
             :disabled="isLoading || !selectedVariety || !selectedStage"
             class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
           >
-            <svg v-if="isLoading" class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              v-if="isLoading"
+              class="w-5 h-5 animate-spin"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
-            <svg v-else class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <svg
+              v-else
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
-            {{ isLoading ? 'در حال محاسبه...' : 'محاسبه ترکیب بهینه دو مخزن' }}
+            {{ isLoading ? "در حال محاسبه..." : "محاسبه ترکیب بهینه دو مخزن" }}
           </button>
         </div>
       </div>
 
       <!-- Errors -->
-      <div v-if="validationErrors.length > 0" class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+      <div
+        v-if="validationErrors.length > 0"
+        class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4"
+      >
         <div class="flex gap-3">
-          <svg class="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            class="w-5 h-5 text-red-500"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           <div class="flex-1">
             <h4 class="text-sm font-bold text-red-800">خطاهای اعتبارسنجی</h4>
             <ul class="mt-1 text-sm text-red-700 list-disc list-inside">
-              <li v-for="(err, idx) in validationErrors" :key="idx">{{ err }}</li>
+              <li v-for="(err, idx) in validationErrors" :key="idx">
+                {{ err }}
+              </li>
             </ul>
           </div>
-          <button @click="validationErrors = []" class="text-red-400 hover:text-red-600">✕</button>
+          <button
+            @click="validationErrors = []"
+            class="text-red-400 hover:text-red-600"
+          >
+            ✕
+          </button>
         </div>
       </div>
 
-      <div v-if="errorMessage" class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+      <div
+        v-if="errorMessage"
+        class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4"
+      >
         <div class="flex gap-3">
-          <svg class="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            class="w-5 h-5 text-red-500"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           <p class="text-sm text-red-700">{{ errorMessage }}</p>
-          <button @click="errorMessage = ''" class="mr-auto text-red-400 hover:text-red-600">✕</button>
+          <button
+            @click="errorMessage = ''"
+            class="mr-auto text-red-400 hover:text-red-600"
+          >
+            ✕
+          </button>
         </div>
       </div>
 
       <!-- Loading -->
       <div v-if="isLoading" class="mt-8 flex justify-center">
-        <div class="bg-[var(--bg-card)] rounded-xl shadow-card px-6 py-4 flex items-center gap-3">
-          <div class="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+        <div
+          class="bg-[var(--bg-card)] rounded-xl shadow-card px-6 py-4 flex items-center gap-3"
+        >
+          <div
+            class="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"
+          ></div>
           <span class="text-gray-600">در حال محاسبه...</span>
         </div>
       </div>
@@ -4373,52 +4803,97 @@ def calculate_tank_doses(doses: List[Dict], tank_volume_liters: float) -> List[D
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
-import ResultsDisplay from '../components/calculator/ResultsDisplay.vue'
-import InputField from '../components/common/InputField.vue'
-import ThemeToggle from '../components/common/ThemeToggle.vue'
-
-const API_BASE_URL = 'http://127.0.0.1:8000/api/v1'
-
-const connectionStatus = ref('checking')
-const selectedCrop = ref('توت‌فرنگی')
-const cultivationType = ref('هیدروپونیک')
-const selectedVariety = ref('')
-const selectedStage = ref('')
-const isLoading = ref(false)
-const isLoadingFertilizers = ref(false)
-const result = ref<any>(null)
-const errorMessage = ref('')
-const validationErrors = ref<string[]>([])
-const showFertilizerList = ref(false)
-const fertilizers = ref<any[]>([])
+import { ref, reactive, computed, onMounted, toRaw } from "vue";
+import axios from "axios";
+import ResultsDisplay from "../components/calculator/ResultsDisplay.vue";
+import InputField from "../components/common/InputField.vue";
+import ThemeToggle from "../components/common/ThemeToggle.vue";
 
 // ============================================================
-// فیلدهای جدید سیستم استوک
-// ============================================================
-const stockTankVolume = ref(20)
-const injectorRatio = ref(200)
-
-// ============================================================
-// 🆕 Stateهای جدید برای آنالیز آب و پساب (نسخه 3.4.0)
+// Constants
 // ============================================================
 
-// درصدهای آب و پساب
-const waterPercent = ref(80)
-const wastewaterPercent = ref(20)
+const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
 
-// آنالیز آب (14 عنصر + EC + pH)
-const waterAnalysis = ref({
+// ============================================================
+// State - Connection & UI
+// ============================================================
+
+const connectionStatus = ref("checking");
+const selectedCrop = ref("توت‌فرنگی");
+const cultivationType = ref("هیدروپونیک");
+const selectedVariety = ref("");
+const selectedStage = ref("");
+const isLoading = ref(false);
+const isLoadingFertilizers = ref(false);
+const result = ref<any>(null);
+const errorMessage = ref("");
+const validationErrors = ref<string[]>([]);
+const showFertilizerList = ref(false);
+const fertilizers = ref<any[]>([]);
+
+// ============================================================
+// State - Stock System
+// ============================================================
+
+const stockTankVolume = ref(20);
+const injectorRatio = ref(200);
+
+// ============================================================
+// State - Advanced Settings (Custom Nutrient Needs)
+// ============================================================
+
+const advancedSettingsOpen = ref(false);
+
+const editableNutrients = ref([
+  { element: "N", name: "نیتروژن", value: 0 },
+  { element: "P", name: "فسفر", value: 0 },
+  { element: "K", name: "پتاسیم", value: 0 },
+  { element: "Ca", name: "کلسیم", value: 0 },
+  { element: "Mg", name: "منیزیم", value: 0 },
+  { element: "S", name: "گوگرد", value: 0 },
+  { element: "Fe", name: "آهن", value: 0 },
+  { element: "Zn", name: "روی", value: 0 },
+  { element: "Mn", name: "منگنز", value: 0 },
+  { element: "Cu", name: "مس", value: 0 },
+  { element: "B", name: "بُر", value: 0 },
+  { element: "Mo", name: "مولیبدن", value: 0 },
+  { element: "Cl", name: "کلر", value: 0 },
+]);
+
+let defaultNutrientValues: Record<string, number> = {};
+
+// ============================================================
+// State - Brand Filter
+// ============================================================
+
+const brandDropdownOpen = ref(false);
+const allBrandsList = ref<string[]>([
+  "گل سم گرگان",
+  "رازاک شیمی",
+  "گرین استار",
+  "زاگرا استار",
+  "اطلس",
+  "ردسا",
+]);
+const selectedBrands = ref<string[]>([]);
+const selectAllBrands = ref(false);
+
+// ============================================================
+// 🆕 State - Water & Wastewater Analysis (v3.4.0)
+// ============================================================
+
+const waterPercent = ref(80);
+const wastewaterPercent = ref(20);
+
+// عناصر آنالیز آب (14 عنصر + EC + pH)
+const waterAnalysis = reactive<Record<string, number>>({
   n_no3: 10,
   p: 2,
   s: 5,
   n_nh4: 0,
   k: 8,
   ca: 50,
-  mg: 20,
-  na: 5,
-  cl: 5,
   fe: 0.5,
   mn: 0.1,
   zn: 0.05,
@@ -4426,20 +4901,17 @@ const waterAnalysis = ref({
   cu: 0.02,
   mo: 0.01,
   ec: 0.4,
-  ph: 7.0
-})
+  ph: 7.0,
+});
 
-// آنالیز پساب (14 عنصر + EC + pH)
-const wastewaterAnalysis = ref({
+// آنالیز پساب
+const wastewaterAnalysis = reactive<Record<string, number>>({
   n_no3: 25,
   p: 5,
   s: 10,
   n_nh4: 2,
   k: 15,
   ca: 80,
-  mg: 30,
-  na: 10,
-  cl: 15,
   fe: 1.0,
   mn: 0.3,
   zn: 0.1,
@@ -4447,113 +4919,40 @@ const wastewaterAnalysis = ref({
   cu: 0.05,
   mo: 0.02,
   ec: 1.2,
-  ph: 6.5
-})
-
-// وضعیت نمایش بخش آنالیز آب
-const waterAnalysisOpen = ref(false)
+  ph: 6.5,
+});
 
 // ============================================================
-// تنظیمات پیشرفته - منو کشویی
+// Computed - Combined Water Preview
 // ============================================================
-const advancedSettingsOpen = ref(false)
 
-// لیست عناصر قابل ویرایش
-const editableNutrients = ref([
-  { element: 'N', name: 'نیتروژن', value: 0 },
-  { element: 'P', name: 'فسفر', value: 0 },
-  { element: 'K', name: 'پتاسیم', value: 0 },
-  { element: 'Ca', name: 'کلسیم', value: 0 },
-  { element: 'Mg', name: 'منیزیم', value: 0 },
-  { element: 'S', name: 'گوگرد', value: 0 },
-  { element: 'Fe', name: 'آهن', value: 0 },
-  { element: 'Zn', name: 'روی', value: 0 },
-  { element: 'Mn', name: 'منگنز', value: 0 },
-  { element: 'Cu', name: 'مس', value: 0 },
-  { element: 'B', name: 'بُر', value: 0 },
-  { element: 'Mo', name: 'مولیبدن', value: 0 },
-  { element: 'Cl', name: 'کلر', value: 0 }
-])
+const hasWaterData = computed(() => {
+  return (
+    Object.values(waterAnalysis).some((v) => v > 0) ||
+    Object.values(wastewaterAnalysis).some((v) => v > 0)
+  );
+});
 
-// ذخیره مقادیر پیش‌فرض برای بازنشانی
-let defaultNutrientValues: Record<string, number> = {}
+const combinedWaterPreview = computed(() => {
+  const result: Record<string, number> = {};
+  const keys = Object.keys(waterAnalysis);
 
-// دریافت نیازهای گیاه از دیتابیس بر اساس مرحله رشد
-const fetchNutrientNeeds = async (stageName: string) => {
-  if (!stageName) return
-
-  try {
-    const response = await axios.get(`${API_BASE_URL}/growth-stages`)
-    const stages = response.data
-
-    // پیدا کردن مرحله رشد مناسب
-    const stage = stages.find((s: any) => s.name === stageName)
-
-    if (stage && stage.nutrient_needs) {
-      const needs = stage.nutrient_needs
-
-      // به‌روزرسانی مقادیر editableNutrients
-      for (const nutrient of editableNutrients.value) {
-        const value = needs[nutrient.element] || 0
-        nutrient.value = value
-        defaultNutrientValues[nutrient.element] = value
-      }
-    }
-  } catch (err) {
-    console.error('Error fetching nutrient needs:', err)
+  for (const key of keys) {
+    const waterVal = waterAnalysis[key] || 0;
+    const wasteVal = wastewaterAnalysis[key] || 0;
+    result[key] =
+      (waterPercent.value * waterVal + wastewaterPercent.value * wasteVal) /
+      100;
   }
-}
 
-// بازنشانی به مقادیر پیش‌فرض
-const resetNutrientsToDefault = () => {
-  for (const nutrient of editableNutrients.value) {
-    nutrient.value = defaultNutrientValues[nutrient.element] || 0
-  }
-}
-
-// دریافت نیازهای گیاه به صورت آبجکت برای ارسال به سرور
-const getCustomNutrientNeeds = () => {
-  const needs: Record<string, number> = {}
-  for (const nutrient of editableNutrients.value) {
-    needs[nutrient.element] = nutrient.value
-  }
-  return needs
-}
-
-// وقتی مرحله رشد تغییر می‌کند، نیازهای گیاه را از دیتابیس بگیر
-const onStageChange = () => {
-  if (selectedStage.value) {
-    fetchNutrientNeeds(selectedStage.value)
-  }
-}
+  return result;
+});
 
 // ============================================================
-// فیلدهای فیلتر برند (Multi-Select)
+// State - Water Source (Common)
 // ============================================================
-const brandDropdownOpen = ref(false)
-const allBrandsList = ref<string[]>([
-  'گل سم گرگان',
-  'رازاک شیمی',
-  'گرین استار',
-  'زاگرا استار',
-  'اطلس',
-  'ردسا'
-])
-const selectedBrands = ref<string[]>([])
-const selectAllBrands = ref(false)
 
-const toggleAllBrands = () => {
-  if (selectAllBrands.value) {
-    selectedBrands.value = [...allBrandsList.value]
-  } else {
-    selectedBrands.value = []
-  }
-}
-
-// ============================================================
-// فیلدهای منبع آب (یک منبع مشترک)
-// ============================================================
-const waterSource = ref({
+const waterSource = reactive({
   water_ec_ms_cm: 0.4,
   water_ph: 7.0,
   water_ca_ppm: 50,
@@ -4563,214 +4962,332 @@ const waterSource = ref({
   water_na_ppm: 0,
   water_so4_ppm: 0,
   water_no3_ppm: 0,
-  water_fe_ppm: 0
-})
-
-// مخزن اصلی
-const tankMain = ref({
-  name: 'مخزن اصلی',
-  tank_type: 'main',
-  volume_liters: 100
-})
-
-// مخزن کلسیم
-const tankCalcium = ref({
-  name: 'مخزن کلسیم',
-  tank_type: 'calcium',
-  volume_liters: 100
-})
+  water_fe_ppm: 0,
+});
 
 // ============================================================
-// توابع کمکی
+// State - Tanks
 // ============================================================
 
-const getElementLabel = (key: string): string => {
-  const labels: Record<string, string> = {
-    'n_no3': 'NO3',
-    'p': 'P',
-    's': 'S',
-    'n_nh4': 'NH4',
-    'k': 'K',
-    'ca': 'Ca',
-    'mg': 'Mg',
-    'na': 'Na',
-    'cl': 'Cl',
-    'fe': 'Fe',
-    'mn': 'Mn',
-    'zn': 'Zn',
-    'b': 'B',
-    'cu': 'Cu',
-    'mo': 'Mo',
-    'ec': 'EC',
-    'ph': 'pH'
-  }
-  return labels[key] || key
-}
+const tankMain = reactive({
+  name: "مخزن اصلی",
+  tank_type: "main",
+  volume_liters: 100,
+});
+
+const tankCalcium = reactive({
+  name: "مخزن کلسیم",
+  tank_type: "calcium",
+  volume_liters: 100,
+});
+
+// ============================================================
+// Helper Functions
+// ============================================================
+
+const getElementDisplayName = (key: string) => {
+  const names: Record<string, string> = {
+    n_no3: "N-NO₃ (نیترات)",
+    p: "P (فسفر)",
+    s: "S (گوگرد)",
+    n_nh4: "N-NH₄ (آمونیوم)",
+    k: "K (پتاسیم)",
+    ca: "Ca (کلسیم)",
+    fe: "Fe (آهن)",
+    mn: "Mn (منگنز)",
+    zn: "Zn (روی)",
+    b: "B (بور)",
+    cu: "Cu (مس)",
+    mo: "Mo (مولیبدن)",
+    ec: "EC (هدایت الکتریکی)",
+    ph: "pH (اسیدیته)",
+  };
+  return names[key] || key;
+};
 
 const getFertilizerDescription = (name: string) => {
   const descriptions: Record<string, string> = {
-    'نیترات کلسیم': 'منبع کلسیم و نیتروژن - برای رشد ساختار گیاه و جلوگیری از پوسیدگی گلگاه',
-    'سولفات منیزیم': 'منبع منیزیم و گوگرد - برای تولید کلروفیل و فعالسازی آنزیم‌ها',
-    'سولفات پتاسیم': 'منبع پتاسیم و گوگرد - برای کیفیت میوه و مقاومت به تنش',
-    'کلات آهن': 'منبع آهن - برای جلوگیری از زردی برگ‌ها (کلروز)',
-    'فرتی‌گل 20-20-20': 'کود کامل NPK متعادل - مناسب برای رشد عمومی و مراحل اولیه',
-    'فرتی‌گل 36-12-12': 'کود NPK با پتاسیم بالا - مناسب برای میوه‌دهی و افزایش کیفیت',
-    'فرتی‌گل 10-50-10': 'کود NPK با فسفر بالا - مناسب برای ریشه‌زایی و گلدهی',
-    'فرتی‌گل 30-5-15': 'کود NPK با نیتروژن بالا - مناسب برای رشد رویشی',
-    'یونی کمپلکس پودری': 'کود کامل ریز مغذی‌ها - برای تامین عناصر کم مصرف',
-    'NPK 20-20-20 گرین استار': 'کود NPK متعادل - مناسب برای رشد عمومی',
-    'NPK 12-12-36 گرین استار': 'کود NPK با پتاسیم بالا - مناسب برای میوه‌دهی',
-    'NPK 10-52-10 زاگرا استار': 'کود NPK با فسفر بالا - مناسب برای ریشه‌زایی',
-    'کلرید پتاسیم': 'منبع پتاسیم و کلر - برای تغذیه عمومی (در آب با کلر پایین)'
+    "نیترات کلسیم":
+      "منبع کلسیم و نیتروژن - برای رشد ساختار گیاه و جلوگیری از پوسیدگی گلگاه",
+    "سولفات منیزیم":
+      "منبع منیزیم و گوگرد - برای تولید کلروفیل و فعالسازی آنزیم‌ها",
+    "سولفات پتاسیم": "منبع پتاسیم و گوگرد - برای کیفیت میوه و مقاومت به تنش",
+    "کلات آهن": "منبع آهن - برای جلوگیری از زردی برگ‌ها (کلروز)",
+    "فرتی‌گل 20-20-20":
+      "کود کامل NPK متعادل - مناسب برای رشد عمومی و مراحل اولیه",
+    "فرتی‌گل 36-12-12":
+      "کود NPK با پتاسیم بالا - مناسب برای میوه‌دهی و افزایش کیفیت",
+    "فرتی‌گل 10-50-10": "کود NPK با فسفر بالا - مناسب برای ریشه‌زایی و گلدهی",
+    "فرتی‌گل 30-5-15": "کود NPK با نیتروژن بالا - مناسب برای رشد رویشی",
+    "یونی کمپلکس پودری": "کود کامل ریز مغذی‌ها - برای تامین عناصر کم مصرف",
+    "NPK 20-20-20 گرین استار": "کود NPK متعادل - مناسب برای رشد عمومی",
+    "NPK 12-12-36 گرین استار": "کود NPK با پتاسیم بالا - مناسب برای میوه‌دهی",
+    "NPK 10-52-10 زاگرا استار": "کود NPK با فسفر بالا - مناسب برای ریشه‌زایی",
+    "کلرید پتاسیم": "منبع پتاسیم و کلر - برای تغذیه عمومی (در آب با کلر پایین)",
+  };
+  return descriptions[name] || "کود مغذی برای تامین عناصر مورد نیاز گیاه";
+};
+
+// ============================================================
+// Nutrient Needs Functions
+// ============================================================
+
+const fetchNutrientNeeds = async (stageName: string) => {
+  if (!stageName) return;
+
+  try {
+    const response = await axios.get(`${API_BASE_URL}/growth-stages`);
+    const stages = response.data;
+
+    const stage = stages.find((s: any) => s.name === stageName);
+
+    if (stage && stage.nutrient_needs) {
+      const needs = stage.nutrient_needs;
+
+      for (const nutrient of editableNutrients.value) {
+        const value = needs[nutrient.element] || 0;
+        nutrient.value = value;
+        defaultNutrientValues[nutrient.element] = value;
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching nutrient needs:", err);
   }
-  return descriptions[name] || 'کود مغذی برای تامین عناصر مورد نیاز گیاه'
-}
+};
+
+const resetNutrientsToDefault = () => {
+  for (const nutrient of editableNutrients.value) {
+    nutrient.value = defaultNutrientValues[nutrient.element] || 0;
+  }
+};
+
+const getCustomNutrientNeeds = () => {
+  const needs: Record<string, number> = {};
+  for (const nutrient of editableNutrients.value) {
+    needs[nutrient.element] = nutrient.value;
+  }
+  return needs;
+};
+
+const onStageChange = () => {
+  if (selectedStage.value) {
+    fetchNutrientNeeds(selectedStage.value);
+  }
+};
+
+// ============================================================
+// Brand Functions
+// ============================================================
+
+const toggleAllBrands = () => {
+  if (selectAllBrands.value) {
+    selectedBrands.value = [...allBrandsList.value];
+  } else {
+    selectedBrands.value = [];
+  }
+};
+
+// ============================================================
+// Fertilizer Functions
+// ============================================================
 
 const fetchFertilizers = async () => {
-  isLoadingFertilizers.value = true
+  isLoadingFertilizers.value = true;
   try {
-    const response = await axios.get(`${API_BASE_URL}/fertilizers`)
-    fertilizers.value = response.data
+    const response = await axios.get(`${API_BASE_URL}/fertilizers`);
+    fertilizers.value = response.data;
   } catch (err) {
-    console.error('Error fetching fertilizers:', err)
+    console.error("Error fetching fertilizers:", err);
   } finally {
-    isLoadingFertilizers.value = false
+    isLoadingFertilizers.value = false;
   }
-}
+};
+
+// ============================================================
+// Connection Check
+// ============================================================
 
 const checkConnection = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/health`)
-    if (response.data && response.data.status === 'ok') {
-      connectionStatus.value = 'connected'
-      console.log('Connected to server')
-      await fetchFertilizers()
+    const response = await axios.get(`${API_BASE_URL}/health`);
+    if (response.data && response.data.status === "ok") {
+      connectionStatus.value = "connected";
+      console.log("Connected to server");
+      await fetchFertilizers();
     } else {
-      connectionStatus.value = 'disconnected'
-      errorMessage.value = 'خطا در اتصال به سرور'
+      connectionStatus.value = "disconnected";
+      errorMessage.value = "خطا در اتصال به سرور";
     }
   } catch (err: any) {
-    console.error('Connection error:', err.message)
-    connectionStatus.value = 'disconnected'
-    errorMessage.value = 'خطا در اتصال به سرور. لطفاً سرور بک‌اند را بررسی کنید.'
+    console.error("Connection error:", err.message);
+    connectionStatus.value = "disconnected";
+    errorMessage.value =
+      "خطا در اتصال به سرور. لطفاً سرور بک‌اند را بررسی کنید.";
   }
-}
+};
+
+// ============================================================
+// 🆕 Main Calculation Function (v3.4.0 - با رفع Proxy)
+// ============================================================
 
 const calculateDualTank = async () => {
-  validationErrors.value = []
+  validationErrors.value = [];
 
   if (!selectedVariety.value) {
-    validationErrors.value.push('لطفاً رقم گیاه را انتخاب کنید')
+    validationErrors.value.push("لطفاً رقم گیاه را انتخاب کنید");
   }
   if (!selectedStage.value) {
-    validationErrors.value.push('لطفاً مرحله رشد را انتخاب کنید')
+    validationErrors.value.push("لطفاً مرحله رشد را انتخاب کنید");
   }
 
-  const mainVolume = Number(tankMain.value.volume_liters)
+  const mainVolume = Number(tankMain.volume_liters);
   if (isNaN(mainVolume) || mainVolume <= 0) {
-    validationErrors.value.push('حجم مخزن اصلی معتبر نیست (باید عدد مثبت باشد)')
+    validationErrors.value.push(
+      "حجم مخزن اصلی معتبر نیست (باید عدد مثبت باشد)",
+    );
   }
 
-  const calciumVolume = Number(tankCalcium.value.volume_liters)
+  const calciumVolume = Number(tankCalcium.volume_liters);
   if (isNaN(calciumVolume) || calciumVolume <= 0) {
-    validationErrors.value.push('حجم مخزن کلسیم معتبر نیست (باید عدد مثبت باشد)')
+    validationErrors.value.push(
+      "حجم مخزن کلسیم معتبر نیست (باید عدد مثبت باشد)",
+    );
+  }
+
+  // اعتبارسنجی درصد آب و پساب
+  const totalPercent = waterPercent.value + wastewaterPercent.value;
+  if (Math.abs(totalPercent - 100) > 0.01) {
+    validationErrors.value.push(
+      `مجموع درصد آب و پساب باید 100 باشد. مقدار فعلی: ${totalPercent}%`,
+    );
   }
 
   if (validationErrors.value.length > 0) {
-    return
+    return;
   }
 
-  isLoading.value = true
-  errorMessage.value = ''
-  result.value = null
+  isLoading.value = true;
+  errorMessage.value = "";
+  result.value = null;
 
   try {
+    // ✅ تبدیل Proxyها به Object ساده با toRaw
+    const rawWaterSource = toRaw(waterSource);
+    const rawTankMain = toRaw(tankMain);
+    const rawTankCalcium = toRaw(tankCalcium);
+    const rawWaterAnalysis = toRaw(waterAnalysis);
+    const rawWastewaterAnalysis = toRaw(wastewaterAnalysis);
+    const rawCustomNutrientNeeds = getCustomNutrientNeeds();
+
     const payload = {
       crop_name: selectedCrop.value,
       variety_name: selectedVariety.value,
       stage_name: selectedStage.value,
-      brand_filter: selectedBrands.value.length > 0 ? selectedBrands.value : null,
-      custom_nutrient_needs: getCustomNutrientNeeds(),
+      brand_filter:
+        selectedBrands.value.length > 0 ? selectedBrands.value : null,
+      custom_nutrient_needs: rawCustomNutrientNeeds,
+
+      // ✅ استفاده از Object ساده به جای Proxy
       tank_main: {
-        name: tankMain.value.name,
-        tank_type: tankMain.value.tank_type,
+        name: rawTankMain.name,
+        tank_type: rawTankMain.tank_type,
         volume_liters: mainVolume,
-        water_ec_ms_cm: waterSource.value.water_ec_ms_cm,
-        water_ph: waterSource.value.water_ph,
-        water_ca_ppm: waterSource.value.water_ca_ppm,
-        water_mg_ppm: waterSource.value.water_mg_ppm,
-        water_hco3_ppm: waterSource.value.water_hco3_ppm,
-        water_cl_ppm: waterSource.value.water_cl_ppm,
-        water_na_ppm: waterSource.value.water_na_ppm,
-        water_so4_ppm: waterSource.value.water_so4_ppm,
-        water_no3_ppm: waterSource.value.water_no3_ppm,
-        water_fe_ppm: waterSource.value.water_fe_ppm
+        water_ec_ms_cm: rawWaterSource.water_ec_ms_cm,
+        water_ph: rawWaterSource.water_ph,
+        water_ca_ppm: rawWaterSource.water_ca_ppm,
+        water_mg_ppm: rawWaterSource.water_mg_ppm,
+        water_hco3_ppm: rawWaterSource.water_hco3_ppm,
+        water_cl_ppm: rawWaterSource.water_cl_ppm,
+        water_na_ppm: rawWaterSource.water_na_ppm,
+        water_so4_ppm: rawWaterSource.water_so4_ppm,
+        water_no3_ppm: rawWaterSource.water_no3_ppm,
+        water_fe_ppm: rawWaterSource.water_fe_ppm,
       },
       tank_calcium: {
-        name: tankCalcium.value.name,
-        tank_type: tankCalcium.value.tank_type,
+        name: rawTankCalcium.name,
+        tank_type: rawTankCalcium.tank_type,
         volume_liters: calciumVolume,
-        water_ec_ms_cm: waterSource.value.water_ec_ms_cm,
-        water_ph: waterSource.value.water_ph,
-        water_ca_ppm: waterSource.value.water_ca_ppm,
-        water_mg_ppm: waterSource.value.water_mg_ppm,
-        water_hco3_ppm: waterSource.value.water_hco3_ppm,
-        water_cl_ppm: waterSource.value.water_cl_ppm,
-        water_na_ppm: waterSource.value.water_na_ppm,
-        water_so4_ppm: waterSource.value.water_so4_ppm,
-        water_no3_ppm: waterSource.value.water_no3_ppm,
-        water_fe_ppm: waterSource.value.water_fe_ppm
+        water_ec_ms_cm: rawWaterSource.water_ec_ms_cm,
+        water_ph: rawWaterSource.water_ph,
+        water_ca_ppm: rawWaterSource.water_ca_ppm,
+        water_mg_ppm: rawWaterSource.water_mg_ppm,
+        water_hco3_ppm: rawWaterSource.water_hco3_ppm,
+        water_cl_ppm: rawWaterSource.water_cl_ppm,
+        water_na_ppm: rawWaterSource.water_na_ppm,
+        water_so4_ppm: rawWaterSource.water_so4_ppm,
+        water_no3_ppm: rawWaterSource.water_no3_ppm,
+        water_fe_ppm: rawWaterSource.water_fe_ppm,
       },
       stock_tank_volume_liters: stockTankVolume.value,
       injector_ratio: injectorRatio.value,
-      // 🆕 فیلدهای جدید برای آنالیز آب و پساب
+
+      // 🆕 آنالیز آب و پساب ترکیبی (تبدیل شده با toRaw)
       water_percent: waterPercent.value,
       wastewater_percent: wastewaterPercent.value,
-      water_analysis: waterAnalysis.value,
-      wastewater_analysis: wastewaterAnalysis.value
-    }
+      water_analysis: rawWaterAnalysis,
+      wastewater_analysis: rawWastewaterAnalysis,
+    };
 
-    console.log('Sending request with water analysis:', payload.water_analysis)
-    const response = await axios.post(`${API_BASE_URL}/calculate-dual-tank`, payload)
+    console.log("📤 Sending request with water analysis:", rawWaterAnalysis);
+    console.log(
+      "📤 Water percent:",
+      waterPercent.value,
+      "Wastewater percent:",
+      wastewaterPercent.value,
+    );
+
+    const response = await axios.post(
+      `${API_BASE_URL}/calculate-dual-tank`,
+      payload,
+    );
 
     if (response.data.success) {
-      result.value = response.data
-      console.log('Calculation successful')
+      result.value = response.data;
+      console.log("✅ Calculation successful");
     } else {
-      errorMessage.value = response.data.error_message || 'خطا در محاسبه'
+      errorMessage.value = response.data.error_message || "خطا در محاسبه";
     }
   } catch (err: any) {
-    console.error('Calculation error:', err)
+    console.error("❌ Calculation error:", err);
     if (err.response?.data?.detail) {
-      if (typeof err.response.data.detail === 'string') {
-        errorMessage.value = err.response.data.detail
+      if (typeof err.response.data.detail === "string") {
+        errorMessage.value = err.response.data.detail;
       } else if (Array.isArray(err.response.data.detail)) {
         validationErrors.value = err.response.data.detail.map((e: any) => {
-          if (e.msg === 'Input should be a valid number') {
-            return 'لطفاً مقدار معتبر برای حجم مخزن وارد کنید'
+          if (e.msg === "Input should be a valid number") {
+            return "لطفاً مقدار معتبر برای حجم مخزن وارد کنید";
           }
-          return e.msg
-        })
+          return e.msg;
+        });
       } else {
-        errorMessage.value = JSON.stringify(err.response.data.detail)
+        errorMessage.value = JSON.stringify(err.response.data.detail);
       }
-    } else if (err.message === 'Network Error') {
-      errorMessage.value = 'خطا در اتصال به سرور. لطفاً از اجرای سرور بک‌اند اطمینان حاصل کنید.'
+    } else if (err.message === "Network Error") {
+      errorMessage.value =
+        "خطا در اتصال به سرور. لطفاً از اجرای سرور بک‌اند اطمینان حاصل کنید.";
     } else {
-      errorMessage.value = 'خطا در محاسبه. لطفاً دوباره تلاش کنید.'
+      errorMessage.value = "خطا در محاسبه. لطفاً دوباره تلاش کنید.";
     }
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
+
+// ============================================================
+// Print Function
+// ============================================================
 
 const printResult = () => {
-  window.print()
-}
+  window.print();
+};
+
+// ============================================================
+// Lifecycle Hooks
+// ============================================================
 
 onMounted(() => {
-  checkConnection()
-})
+  checkConnection();
+});
 </script>
 
 <style scoped>
@@ -4795,7 +5312,7 @@ onMounted(() => {
 
 ## File 17: `frontend/src/components/calculator/ResultsDisplay.vue`
 
-**Size:** 42.4 KB
+**Size:** 27.5 KB
 
 ```vue
 <template>
@@ -4826,7 +5343,7 @@ onMounted(() => {
       </p>
     </div>
 
-    <!-- بخش 1: تنظیمات شما -->
+    <!-- تنظیمات شما -->
     <div
       class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200"
     >
@@ -4847,32 +5364,10 @@ onMounted(() => {
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-green-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-            />
-          </svg>
           <div class="text-xs text-gray-500">مرحله رشد</div>
           <div class="font-bold text-gray-800">{{ result.stage_name }}</div>
         </div>
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-blue-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M4 20h16a2 2 0 002-2V8a2 2 0 00-2-2h-7.93a2 2 0 01-1.66-.9l-.82-1.2A2 2 0 007.93 3H4a2 2 0 00-2 2v13a2 2 0 002 2z"
-            />
-          </svg>
           <div class="text-xs text-gray-500">حجم مخزن اصلی</div>
           <div class="font-bold text-gray-800">
             {{ formatNumber(result.tank_main_result?.tank_volume_liters || 0) }}
@@ -4880,17 +5375,6 @@ onMounted(() => {
           </div>
         </div>
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-amber-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-            />
-          </svg>
           <div class="text-xs text-gray-500">حجم مخزن کلسیم</div>
           <div class="font-bold text-gray-800">
             {{
@@ -4900,59 +5384,9 @@ onMounted(() => {
           </div>
         </div>
         <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-purple-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.414 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-            />
-          </svg>
-          <div class="text-xs text-gray-500">حجم مخزن استوک</div>
-          <div class="font-bold text-gray-800">
-            {{ props.stockTankVolume || 20 }}
-            <span class="text-sm font-normal">لیتر</span>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-indigo-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
           <div class="text-xs text-gray-500">نسبت تزریق</div>
           <div class="font-bold text-gray-800">
             1:{{ props.injectorRatio || 200 }}
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-3 text-center shadow-sm">
-          <svg
-            class="w-6 h-6 mx-auto text-gray-600 mb-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
-          </svg>
-          <div class="text-xs text-gray-500">حجم کل محلول نهایی</div>
-          <div class="font-bold text-gray-800">
-            {{
-              (
-                (result.tank_main_result?.tank_volume_liters || 0) +
-                (result.tank_calcium_result?.tank_volume_liters || 0)
-              ).toLocaleString()
-            }}
-            <span class="text-sm font-normal">لیتر</span>
           </div>
         </div>
       </div>
@@ -4982,7 +5416,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- جدول نیاز گیاه و عناصر تامین شده -->
+    <!-- جدول مقایسه نیاز گیاه -->
     <div
       class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden"
     >
@@ -5058,7 +5492,9 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- مخزن اصلی -->
+    <!-- ============================================================ -->
     <div
       class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden"
     >
@@ -5101,7 +5537,6 @@ onMounted(() => {
                 <th class="border border-gray-300 px-3 py-2 text-center">
                   مقدار برای استوک
                 </th>
-                <th class="border border-gray-300 px-3 py-2 text-center"></th>
               </tr>
             </thead>
             <tbody>
@@ -5136,25 +5571,6 @@ onMounted(() => {
                     میلی‌گرم</span
                   >
                 </td>
-                <td class="border border-gray-300 px-3 py-2 text-center">
-                  <button
-                    @click="showFertilizerDetail(dose.name)"
-                    class="text-blue-600 hover:text-blue-800 transition"
-                    title="مشاهده اطلاعات کامل کود"
-                  >
-                    <svg
-                      class="w-5 h-5 inline"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 16v-4M12 8h.01" />
-                    </svg>
-                    اطلاعات
-                  </button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -5175,6 +5591,7 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- مرحله 1: ساخت استوک -->
         <div class="bg-purple-50 rounded-lg p-3 mb-3">
           <h4 class="font-medium text-purple-800 mb-2 flex items-center gap-1">
             <svg
@@ -5219,6 +5636,7 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- مرحله 2: مصرف استوک -->
         <div class="bg-green-50 rounded-lg p-3 mb-3">
           <h4 class="font-medium text-green-800 mb-2 flex items-center gap-1">
             <svg
@@ -5259,35 +5677,12 @@ onMounted(() => {
             </div>
           </div>
         </div>
-
-        <details class="mt-3">
-          <summary
-            class="cursor-pointer text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            مشاهده دستورالعمل اختلاط مستقیم (بدون استوک)
-          </summary>
-          <div
-            class="mt-3 p-4 bg-gray-100 rounded-lg text-sm whitespace-pre-line font-mono"
-            v-html="
-              formatInstructions(result.tank_main_result.mixing_instructions)
-            "
-          ></div>
-        </details>
       </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- مخزن کلسیم -->
+    <!-- ============================================================ -->
     <div
       class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden"
     >
@@ -5330,7 +5725,6 @@ onMounted(() => {
                 <th class="border border-gray-300 px-3 py-2 text-center">
                   مقدار برای استوک
                 </th>
-                <th class="border border-gray-300 px-3 py-2 text-center"></th>
               </tr>
             </thead>
             <tbody>
@@ -5365,25 +5759,6 @@ onMounted(() => {
                     میلی‌گرم</span
                   >
                 </td>
-                <td class="border border-gray-300 px-3 py-2 text-center">
-                  <button
-                    @click="showFertilizerDetail(dose.name)"
-                    class="text-amber-600 hover:text-amber-800 transition"
-                    title="مشاهده اطلاعات کامل کود"
-                  >
-                    <svg
-                      class="w-5 h-5 inline"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 16v-4M12 8h.01" />
-                    </svg>
-                    اطلاعات
-                  </button>
-                </td>
               </tr>
             </tbody>
           </table>
@@ -5404,6 +5779,7 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- مرحله 1: ساخت استوک کلسیم -->
         <div class="bg-purple-50 rounded-lg p-3 mb-3">
           <h4 class="font-medium text-purple-800 mb-2 flex items-center gap-1">
             <svg
@@ -5448,6 +5824,7 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- مرحله 2: مصرف استوک کلسیم -->
         <div class="bg-green-50 rounded-lg p-3 mb-3">
           <h4 class="font-medium text-green-800 mb-2 flex items-center gap-1">
             <svg
@@ -5491,6 +5868,7 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- هشدار مهم -->
         <div class="bg-red-50 rounded-lg p-3 mb-3">
           <p class="text-sm text-red-700 flex items-center gap-2">
             <svg
@@ -5508,35 +5886,12 @@ onMounted(() => {
             اصلی مخلوط نکنید!
           </p>
         </div>
-
-        <details class="mt-3">
-          <summary
-            class="cursor-pointer text-amber-600 hover:text-amber-700 font-medium text-sm inline-flex items-center gap-1"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            مشاهده دستورالعمل اختلاط مستقیم (بدون استوک) - مخزن کلسیم
-          </summary>
-          <div
-            class="mt-3 p-4 bg-gray-100 rounded-lg text-sm whitespace-pre-line font-mono"
-            v-html="
-              formatInstructions(result.tank_calcium_result.mixing_instructions)
-            "
-          ></div>
-        </details>
       </div>
     </div>
 
+    <!-- ============================================================ -->
     <!-- نکات نگهداری و ایمنی استوک -->
+    <!-- ============================================================ -->
     <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
       <h3 class="font-semibold text-yellow-800 mb-3 flex items-center gap-2">
         <svg
@@ -5554,203 +5909,19 @@ onMounted(() => {
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
         <div class="bg-white rounded-lg p-2">
-          <span class="font-bold">ماندگاری در یخچال:</span> 7 روز (دمای 4 درجه)
+          <span class="font-bold">ماندگاری در یخچال:</span>
+          {{ result.shelf_life_fridge || "7 روز" }}
         </div>
         <div class="bg-white rounded-lg p-2">
-          <span class="font-bold">ماندگاری در دمای محیط:</span> 3 روز (دمای زیر
-          25 درجه)
+          <span class="font-bold">ماندگاری در دمای محیط:</span>
+          {{ result.shelf_life_room || "3 روز" }}
         </div>
         <div class="bg-white rounded-lg p-2 col-span-2">
-          <span class="font-bold">نشانه‌های خرابی:</span> رسوب سفید رنگ، تغییر
-          رنگ، بوی نامطبوع، باد کردگی ظرف
-        </div>
-      </div>
-    </div>
-
-    <!-- مودال اطلاعات کامل کود -->
-    <div
-      v-if="selectedFertilizer"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      @click.self="selectedFertilizer = null"
-    >
-      <div
-        class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden shadow-xl"
-      >
-        <div
-          class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-green-600 to-teal-600"
-        >
-          <h3 class="text-lg font-semibold text-white">اطلاعات کامل کود</h3>
-          <button
-            @click="selectedFertilizer = null"
-            class="text-white hover:text-gray-200 text-xl"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="p-6 overflow-y-auto max-h-[calc(85vh-70px)]">
-          <div v-if="isLoadingFertilizerDetail" class="text-center py-8">
-            <div
-              class="inline-block w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"
-            ></div>
-            <p class="mt-2 text-gray-500">در حال بارگذاری...</p>
-          </div>
-          <div v-else-if="fertilizerDetail" class="space-y-4">
-            <div>
-              <h4 class="font-bold text-gray-800 text-lg">
-                {{ fertilizerDetail.persian_name || fertilizerDetail.name }}
-              </h4>
-              <div class="flex gap-2 mt-1">
-                <span
-                  class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
-                  >{{ fertilizerDetail.brand_name }}</span
-                >
-                <span
-                  class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full"
-                  >{{ fertilizerDetail.fertilizer_type }}</span
-                >
-              </div>
-            </div>
-
-            <div class="border-t pt-3">
-              <h5 class="font-semibold text-gray-700 mb-2">توضیحات</h5>
-              <p class="text-sm text-gray-600 whitespace-pre-line">
-                {{
-                  fertilizerDetail.description ||
-                  "توضیحاتی برای این کود ثبت نشده است"
-                }}
-              </p>
-            </div>
-
-            <div class="border-t pt-3">
-              <h5 class="font-semibold text-gray-700 mb-2">ترکیبات شیمیایی</h5>
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-                <div v-if="fertilizerDetail.n_percent">
-                  N:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.n_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.p_percent">
-                  P:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.p_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.k_percent">
-                  K:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.k_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.ca_percent">
-                  Ca:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.ca_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.mg_percent">
-                  Mg:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.mg_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.s_percent">
-                  S:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.s_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.fe_percent">
-                  Fe:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.fe_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.zn_percent">
-                  Zn:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.zn_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.mn_percent">
-                  Mn:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.mn_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.cu_percent">
-                  Cu:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.cu_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.b_percent">
-                  B:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.b_percent }}%</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.mo_percent">
-                  Mo:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.mo_percent }}%</span
-                  >
-                </div>
-              </div>
-            </div>
-
-            <div class="border-t pt-3">
-              <h5 class="font-semibold text-gray-700 mb-2">اطلاعات مصرف</h5>
-              <div class="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  حداقل دوز:
-                  <span class="font-medium"
-                    >{{
-                      fertilizerDetail.min_dose_g_per_liter || "نامشخص"
-                    }}
-                    g/L</span
-                  >
-                </div>
-                <div>
-                  حداکثر دوز:
-                  <span class="font-medium"
-                    >{{
-                      fertilizerDetail.max_dose_g_per_liter || "نامشخص"
-                    }}
-                    g/L</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.solubility_g_per_l">
-                  حلالیت:
-                  <span class="font-medium"
-                    >{{ fertilizerDetail.solubility_g_per_l }} g/L</span
-                  >
-                </div>
-                <div v-if="fertilizerDetail.ph_effect">
-                  اثر بر pH:
-                  <span class="font-medium">{{
-                    fertilizerDetail.ph_effect
-                  }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div
-              v-if="fertilizerDetail.registration_code"
-              class="border-t pt-3"
-            >
-              <h5 class="font-semibold text-gray-700 mb-2">اطلاعات ثبتی</h5>
-              <div class="text-sm">
-                کد ثبت:
-                <span class="font-mono">{{
-                  fertilizerDetail.registration_code
-                }}</span>
-              </div>
-            </div>
-          </div>
-          <div v-else class="text-center py-8 text-gray-500">
-            اطلاعاتی برای این کود یافت نشد
-          </div>
+          <span class="font-bold">نشانه‌های خرابی:</span>
+          {{
+            result.warning_signs ||
+            "رسوب سفید رنگ، تغییر رنگ، بوی نامطبوع، باد کردگی ظرف"
+          }}
         </div>
       </div>
     </div>
@@ -5775,8 +5946,7 @@ onMounted(() => {
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import axios from "axios";
+import { computed } from "vue";
 
 const props = defineProps<{
   result: any;
@@ -5784,57 +5954,20 @@ const props = defineProps<{
   injectorRatio?: number;
 }>();
 
-const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
-
-const selectedFertilizer = ref<any>(null);
-const fertilizerDetail = ref<any>(null);
-const isLoadingFertilizerDetail = ref(false);
-const allFertilizers = ref<any[]>([]);
-
-const fetchAllFertilizers = async () => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/fertilizers`);
-    allFertilizers.value = response.data;
-  } catch (err) {
-    console.error("Error fetching fertilizers:", err);
-  }
-};
-
-const showFertilizerDetail = async (fertilizerName: string) => {
-  isLoadingFertilizerDetail.value = true;
-  selectedFertilizer.value = { name: fertilizerName };
-  fertilizerDetail.value = null;
-
-  try {
-    const found = allFertilizers.value.find(
-      (f: any) => f.name === fertilizerName,
-    );
-    if (found) {
-      fertilizerDetail.value = found;
-    }
-  } catch (err) {
-    console.error("Error fetching fertilizer detail:", err);
-  } finally {
-    isLoadingFertilizerDetail.value = false;
-  }
-};
+// ============================================================
+// Helper Functions
+// ============================================================
 
 const getStockAmount = (dose: any) => {
   const doseGpl = dose.dose_g_per_liter || 0;
   const injectorRatio = props.injectorRatio || 200;
   const stockVolume = props.stockTankVolume || 20;
-  const amountGram = doseGpl * injectorRatio * stockVolume;
-  return amountGram;
+  return doseGpl * injectorRatio * stockVolume;
 };
 
 const formatNumber = (num: number) => {
   if (!num && num !== 0) return "0";
   return new Intl.NumberFormat("fa-IR").format(Math.round(num));
-};
-
-const formatInstructions = (text: string) => {
-  if (!text) return "";
-  return text.replace(/\n/g, "<br>").replace(/\*/g, "•");
 };
 
 const getElementName = (element: string) => {
@@ -5855,6 +5988,10 @@ const getElementName = (element: string) => {
   };
   return names[element] || element;
 };
+
+// ============================================================
+// Computed - Nutrient Comparison
+// ============================================================
 
 const nutrientComparison = computed(() => {
   const elements = ["N", "P", "K", "Ca", "Mg", "Fe", "Zn", "Mn", "B"];
@@ -5877,51 +6014,13 @@ const nutrientComparison = computed(() => {
     return { element: elem, need, supplied, status };
   });
 });
-
-onMounted(() => {
-  fetchAllFertilizers();
-});
 </script>
 
 <style scoped>
-details summary {
-  list-style: none;
-  cursor: pointer;
-}
-
-details summary::-webkit-details-marker {
-  display: none;
-}
-
-details summary::before {
-  content: "📂 ";
-  font-size: 14px;
-}
-
-details[open] summary::before {
-  content: "📁 ";
-}
-
 @media print {
   .bg-white {
     break-inside: avoid;
     page-break-inside: avoid;
-  }
-
-  details {
-    display: block !important;
-  }
-
-  details summary {
-    display: block !important;
-  }
-
-  details[open] summary::before {
-    content: "📁 ";
-  }
-
-  .fixed {
-    display: none !important;
   }
 }
 </style>
@@ -6493,4 +6592,4 @@ input[type="number"] {
 - Test files
 - Project management files
 
-**Generated:** 2026-06-16 18:36:37
+**Generated:** 2026-06-17 06:08:59

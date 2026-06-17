@@ -11,12 +11,12 @@ from datetime import datetime
 class TankBase(BaseModel):
     name: str
     volume_liters: float = Field(..., gt=0, description="حجم مخزن به لیتر")
-    water_ec_ms_cm: Optional[float] = Field(0.4, ge=0, le=10, description="EC آب به میلی‌زیمنس بر سانتی‌متر - بازه ایده‌آل: 0.2-0.8")
-    water_ph: Optional[float] = Field(7.0, ge=0, le=14, description="pH آب - بازه ایده‌آل: 6.0-7.0")
-    water_ca_ppm: float = Field(50, ge=0, description="کلسیم آب به ppm - بازه ایده‌آل: 40-80")
-    water_mg_ppm: float = Field(20, ge=0, description="منیزیم آب به ppm - بازه ایده‌آل: 15-30")
-    water_hco3_ppm: float = Field(0, ge=0, description="بیکربنات آب به ppm - بازه ایده‌آل: 0-100")
-    water_cl_ppm: float = Field(0, ge=0, description="کلر آب به ppm - بازه ایده‌آل: 0-50")
+    water_ec_ms_cm: Optional[float] = Field(0.4, ge=0, le=10, description="EC آب به میلی‌زیمنس بر سانتی‌متر")
+    water_ph: Optional[float] = Field(7.0, ge=0, le=14, description="pH آب")
+    water_ca_ppm: float = Field(50, ge=0, description="کلسیم آب به ppm")
+    water_mg_ppm: float = Field(20, ge=0, description="منیزیم آب به ppm")
+    water_hco3_ppm: float = Field(0, ge=0, description="بیکربنات آب به ppm")
+    water_cl_ppm: float = Field(0, ge=0, description="کلر آب به ppm")
     water_na_ppm: float = Field(0, ge=0, description="سدیم آب به ppm")
     water_so4_ppm: float = Field(0, ge=0, description="سولفات آب به ppm")
     water_no3_ppm: float = Field(0, ge=0, description="نیترات آب به ppm")
@@ -39,62 +39,16 @@ class TankResponse(TankBase):
 # Calculation Request Schemas
 # ============================================================
 class CalculationRequest(BaseModel):
-    """درخواست محاسبه ترکیب کود - نسخه 3.3.0 با پشتیبانی از استوک"""
-
-    # اطلاعات محصول و مرحله رشد
-    crop_name: str = Field(..., description="نام محصول (مثال: توت‌فرنگی)")
-    variety_name: str = Field(..., description="نام رقم (مثال: سن اندرسا)")
-    stage_name: str = Field(..., description="مرحله رشد (مثال: رشد رویشی)")
-
-    # فیلتر برند (اختیاری)
-    brand_filter: Optional[str] = Field(None, description="فیلتر برند کود (اختیاری)")
-
-    # اطلاعات مخزن اصلی (تغذیه گیاهان)
+    crop_name: str = Field(..., description="نام محصول")
+    variety_name: str = Field(..., description="نام رقم")
+    stage_name: str = Field(..., description="مرحله رشد")
+    brand_filter: Optional[str] = Field(None, description="فیلتر برند")
     tank: TankCreate = Field(..., description="اطلاعات مخزن اصلی")
-
-    # ============================================================
-    # فیلدهای جدید نسخه 3.3.0 - سیستم مدیریت استوک
-    # ============================================================
-
-    # حجم مخزن استوک (ظرفی که کود در آن حل می‌شود)
-    stock_tank_volume_liters: float = Field(
-        20.0,
-        ge=1.0,
-        le=500.0,
-        description="حجم مخزن استوک به لیتر (ظرفی که محلول مادر در آن ساخته می‌شود) - پیش‌فرض 20 لیتر"
-    )
-
-    # نسبت تزریق (Injector Ratio) - فرمت 1:X
-    injector_ratio: float = Field(
-        200.0,
-        ge=50,
-        le=1000,
-        description="نسبت تزریق 1:X - مثلاً 200 یعنی 1 لیتر استوک + 199 لیتر آب = 200 لیتر محلول نهایی"
-    )
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "crop_name": "توت‌فرنگی",
-                "variety_name": "سن اندرسا",
-                "stage_name": "رشد رویشی",
-                "brand_filter": None,
-                "tank": {
-                    "name": "مخزن A",
-                    "volume_liters": 1000,
-                    "water_ec_ms_cm": 0.4,
-                    "water_ph": 7.0,
-                    "water_ca_ppm": 50,
-                    "water_mg_ppm": 20
-                },
-                "stock_tank_volume_liters": 20,
-                "injector_ratio": 200
-            }
-        }
+    stock_tank_volume_liters: float = Field(20.0, ge=1.0, le=500.0, description="حجم مخزن استوک")
+    injector_ratio: float = Field(200.0, ge=50, le=1000, description="نسبت تزریق")
 
     @validator('injector_ratio')
     def validate_injector_ratio(cls, v):
-        """اعتبارسنجی نسبت تزریق - باید بین 50 تا 1000 باشد"""
         if v < 50:
             raise ValueError(f"نسبت تزریق نمی‌تواند کمتر از 50 باشد. مقدار وارد شده: {v}")
         if v > 1000:
@@ -103,7 +57,6 @@ class CalculationRequest(BaseModel):
 
     @validator('stock_tank_volume_liters')
     def validate_stock_tank_volume(cls, v):
-        """اعتبارسنجی حجم مخزن استوک - باید بین 1 تا 500 لیتر باشد"""
         if v < 1:
             raise ValueError(f"حجم مخزن استوک نمی‌تواند کمتر از 1 لیتر باشد. مقدار وارد شده: {v}")
         if v > 500:
@@ -115,53 +68,30 @@ class CalculationRequest(BaseModel):
 # Calculation Response Schemas
 # ============================================================
 class FertilizerDose(BaseModel):
-    """مقدار مصرف هر کود"""
-    name: str = Field(..., description="نام کود")
-    dose_g_per_liter: float = Field(..., description="دوز مصرف به گرم در لیتر (محلول نهایی)")
-    dose_g_for_tank: float = Field(..., description="دوز مصرف کل برای مخزن اصلی به گرم")
-
-    # ============================================================
-    # فیلدهای جدید نسخه 3.3.0 - سیستم مدیریت استوک
-    # ============================================================
-    dose_kg_for_stock: float = Field(
-        ...,
-        description="مقدار کود مورد نیاز برای ساخت استوک (کیلوگرم) - بر اساس حجم مخزن استوک و نسبت تزریق"
-    )
-    dose_g_for_stock_alternative: Optional[float] = Field(
-        None,
-        description="مقدار کود به گرم برای استوک‌های کوچک (کمتر از 1 کیلوگرم)"
-    )
+    name: str
+    dose_g_per_liter: float
+    dose_g_for_tank: float
+    dose_kg_for_stock: float
+    dose_g_for_stock_alternative: Optional[float] = None
 
 
 class StockInstructions(BaseModel):
-    """دستورالعمل ساخت و مصرف استوک - نسخه 3.3.0"""
-
-    # تنظیمات کاربر
-    stock_tank_volume_liters: float = Field(..., description="حجم مخزن استوک به لیتر")
-    injector_ratio: float = Field(..., description="نسبت تزریق 1:X")
-    main_tank_volume_liters: float = Field(..., description="حجم مخزن اصلی به لیتر")
-
-    # توضیح مفهوم نسبت تزریق
-    injector_explanation: str = Field(..., description="توضیح ساده نسبت تزریق برای کاربر")
-
-    # دستورالعمل ساخت استوک
-    fertilizers_for_stock: List[Dict[str, Any]] = Field(..., description="لیست کودها با مقدار کیلوگرم برای استوک")
-    mixing_instructions: str = Field(..., description="روش ساخت استوک گام به گام")
-
-    # دستورالعمل مصرف استوک
-    stock_liters_for_main_tank: float = Field(..., description="مقدار استوک بر حسب لیتر برای کل مخزن اصلی")
-    stock_ml_per_liter: float = Field(..., description="مقدار استوک بر حسب میلی‌لیتر برای هر لیتر آب")
-    usage_instructions: str = Field(..., description="روش مصرف استوک در مخزن اصلی")
-
-    # نکات نگهداری
-    storage_instructions: str = Field(..., description="نکات نگهداری و ایمنی استوک")
-    shelf_life_fridge: str = Field(..., description="ماندگاری در یخچال")
-    shelf_life_room: str = Field(..., description="ماندگاری در دمای محیط")
-    warning_signs: str = Field(..., description="نشانه‌های خرابی استوک")
+    stock_tank_volume_liters: float
+    injector_ratio: float
+    main_tank_volume_liters: float
+    injector_explanation: str
+    fertilizers_for_stock: List[Dict[str, Any]]
+    mixing_instructions: str
+    stock_liters_for_main_tank: float
+    stock_ml_per_liter: float
+    usage_instructions: str
+    storage_instructions: str
+    shelf_life_fridge: str
+    shelf_life_room: str
+    warning_signs: str
 
 
 class NutrientComparison(BaseModel):
-    """مقایسه عناصر مورد نیاز با عناصر تامین شده"""
     element: str
     required_ppm: float
     supplied_ppm: float
@@ -170,40 +100,27 @@ class NutrientComparison(BaseModel):
 
 
 class CalculationResponse(BaseModel):
-    """پاسخ نهایی محاسبه - نسخه 3.3.0 با ساختار چهاربخشی"""
-
-    success: bool = Field(..., description="موفقیت آمیز بودن محاسبه")
-    message: Optional[str] = Field(None, description="پیام خطا در صورت ناموفق بودن")
-
-    crop_name: str = Field(..., description="نام محصول")
-    variety_name: str = Field(..., description="نام رقم")
-    stage_name: str = Field(..., description="مرحله رشد")
-
-    tank_name: str = Field(..., description="نام مخزن اصلی")
-    tank_volume_liters: float = Field(..., description="حجم مخزن اصلی به لیتر")
-
-    doses: List[FertilizerDose] = Field(..., description="لیست دوز کودها")
-    stock_instructions: StockInstructions = Field(..., description="دستورالعمل کامل ساخت و مصرف استوک")
-
-    warnings: List[str] = Field(default_factory=list, description="لیست هشدارها")
-    interactions: List[Dict[str, str]] = Field(default_factory=list, description="لیست تداخلات شیمیایی")
-
-    nutrient_comparison: Optional[List[NutrientComparison]] = Field(None, description="مقایسه عناصر")
-
-    # ============================================================
-    # فیلدهای جدید نسخه 3.3.1 - نیازهای سفارشی کاربر
-    # ============================================================
-    custom_needs: Optional[Dict[str, float]] = Field(None, description="نیازهای سفارشی وارد شده توسط کاربر")
-
-    target_ec: Optional[float] = Field(None, description="EC هدف")
-    target_ph: Optional[float] = Field(None, description="pH هدف")
-    calculation_time: datetime = Field(default_factory=datetime.now, description="زمان محاسبه")
+    success: bool
+    message: Optional[str] = None
+    crop_name: str
+    variety_name: str
+    stage_name: str
+    tank_name: str
+    tank_volume_liters: float
+    doses: List[FertilizerDose]
+    stock_instructions: StockInstructions
+    warnings: List[str] = []
+    interactions: List[Dict[str, str]] = []
+    nutrient_comparison: Optional[List[NutrientComparison]] = None
+    custom_needs: Optional[Dict[str, float]] = None
+    target_ec: Optional[float] = None
+    target_ph: Optional[float] = None
+    calculation_time: datetime = Field(default_factory=datetime.now)
 
 
 # ============================================================
-# Create Schemas (برای دریافت داده از فرانت‌اند)
+# Create Schemas
 # ============================================================
-
 class CropCreate(BaseModel):
     name: str
     scientific_name: Optional[str] = None
@@ -289,58 +206,53 @@ class AcidCreate(BaseModel):
 
 
 # ============================================================
-# ============================================================
-# 🆕 DualTankRequest با پشتیبانی از آنالیز آب و پساب ترکیبی
-# ============================================================
+# 🆕 DualTankRequest با پشتیبانی از عناصر هدف ۱۶ گانه
 # ============================================================
 class DualTankRequest(BaseModel):
-    """درخواست محاسبه دو مخزن - نسخه 3.4.0 با پشتیبانی از آنالیز آب و پساب ترکیبی"""
+    """درخواست محاسبه دو مخزن - نسخه 3.4.0 با پشتیبانی از عناصر هدف ۱۶ گانه"""
 
     # اطلاعات محصول و مرحله رشد
-    crop_name: str = Field(..., description="نام محصول (مثال: توت‌فرنگی)")
-    variety_name: str = Field(..., description="نام رقم (مثال: سن اندرسا)")
-    stage_name: str = Field(..., description="مرحله رشد (مثال: رشد رویشی)")
+    crop_name: str = Field(..., description="نام محصول")
+    variety_name: str = Field(..., description="نام رقم")
+    stage_name: str = Field(..., description="مرحله رشد")
 
     # فیلتر برند (چندگانه)
-    brand_filter: Optional[List[str]] = Field(None, description="لیست برندهای انتخاب شده - در صورت خالی بودن یعنی همه برندها")
+    brand_filter: Optional[List[str]] = Field(None, description="لیست برندهای انتخاب شده")
 
     # اطلاعات مخازن
-    tank_main: TankCreate = Field(..., description="اطلاعات مخزن اصلی (کودهای غیر کلسیمی)")
-    tank_calcium: TankCreate = Field(..., description="اطلاعات مخزن کلسیم (کودهای حاوی کلسیم)")
+    tank_main: TankCreate = Field(..., description="اطلاعات مخزن اصلی")
+    tank_calcium: TankCreate = Field(..., description="اطلاعات مخزن کلسیم")
 
     # تنظیمات سیستم استوک
-    stock_tank_volume_liters: float = Field(20.0, ge=1.0, le=500.0, description="حجم مخزن استوک به لیتر - پیش‌فرض 20 لیتر")
-    injector_ratio: float = Field(200.0, ge=50, le=1000, description="نسبت تزریق 1:X - پیش‌فرض 200")
-
-    # نیازهای سفارشی کاربر
-    custom_nutrient_needs: Optional[Dict[str, float]] = Field(None, description="نیازهای تغذیه‌ای سفارشی وارد شده توسط کاربر")
+    stock_tank_volume_liters: float = Field(20.0, ge=1.0, le=500.0, description="حجم مخزن استوک")
+    injector_ratio: float = Field(200.0, ge=50, le=1000, description="نسبت تزریق")
 
     # ============================================================
-    # 🆕 فیلدهای جدید برای آنالیز آب و پساب ترکیبی (نسخه 3.4.0)
+    # 🆕 عناصر هدف ۱۶ گانه
     # ============================================================
-    water_percent: float = Field(
-        80.0,
-        ge=0,
-        le=100,
-        description="درصد آب تامینی (مثلاً 80% آب و 20% پساب)"
-    )
-    wastewater_percent: float = Field(
-        20.0,
-        ge=0,
-        le=100,
-        description="درصد پساب تامینی (مثلاً 20%)"
+    target_elements_16: Optional[Dict[str, float]] = Field(
+        None,
+        description="عناصر هدف ۱۶ گانه (N-NO3, P, S, N-NH4, K, Ca, Mg, Na, Cl, Fe, Mn, Zn, B, Cu, Mo)"
     )
 
-    # آنالیز آب (14 عنصر + EC + pH)
+    # نیازهای سفارشی کاربر (فرمت قدیمی - برای سازگاری)
+    custom_nutrient_needs: Optional[Dict[str, float]] = Field(
+        None,
+        description="نیازهای تغذیه‌ای سفارشی (فرمت قدیمی)"
+    )
+
+    # ============================================================
+    # آنالیز آب و پساب ترکیبی
+    # ============================================================
+    water_percent: float = Field(80.0, ge=0, le=100, description="درصد آب تامینی")
+    wastewater_percent: float = Field(20.0, ge=0, le=100, description="درصد پساب تامینی")
     water_analysis: Dict[str, float] = Field(
         default_factory=dict,
-        description="آنالیز آب شامل عناصر (N-NO3, P, S, N-NH4, K, Ca, Fe, Mn, Zn, B, Cu, Mo) و EC و pH"
+        description="آنالیز آب (N-NO3, P, S, N-NH4, K, Ca, Fe, Mn, Zn, B, Cu, Mo, EC, pH)"
     )
-
-    # آنالیز پساب (14 عنصر + EC + pH)
     wastewater_analysis: Dict[str, float] = Field(
         default_factory=dict,
-        description="آنالیز پساب شامل عناصر (N-NO3, P, S, N-NH4, K, Ca, Fe, Mn, Zn, B, Cu, Mo) و EC و pH"
+        description="آنالیز پساب (N-NO3, P, S, N-NH4, K, Ca, Fe, Mn, Zn, B, Cu, Mo, EC, pH)"
     )
 
     class Config:
@@ -370,13 +282,22 @@ class DualTankRequest(BaseModel):
                 },
                 "stock_tank_volume_liters": 20,
                 "injector_ratio": 200,
-                "custom_nutrient_needs": {
-                    "N": 120,
-                    "P": 50,
-                    "K": 120,
-                    "Ca": 105,
+                "target_elements_16": {
+                    "N-NO3": 150,
+                    "P": 30,
+                    "S": 50,
+                    "N-NH4": 10,
+                    "K": 200,
+                    "Ca": 180,
                     "Mg": 40,
-                    "Fe": 3
+                    "Na": 0,
+                    "Cl": 0,
+                    "Fe": 2.5,
+                    "Mn": 0.5,
+                    "Zn": 0.3,
+                    "B": 0.2,
+                    "Cu": 0.05,
+                    "Mo": 0.02
                 },
                 "water_percent": 80,
                 "wastewater_percent": 20,
@@ -417,7 +338,6 @@ class DualTankRequest(BaseModel):
 
     @validator('water_percent', 'wastewater_percent')
     def validate_percentages(cls, v, values):
-        """اعتبارسنجی درصدها - مجموع باید 100 باشد"""
         if 'water_percent' in values and 'wastewater_percent' in values:
             total = values['water_percent'] + values['wastewater_percent']
             if abs(total - 100) > 0.01:
@@ -440,11 +360,23 @@ class DualTankRequest(BaseModel):
             raise ValueError(f"حجم مخزن استوک نمی‌تواند بیشتر از 500 لیتر باشد. مقدار وارد شده: {v}")
         return v
 
+    @validator('target_elements_16')
+    def validate_target_elements_16(cls, v):
+        if v is None:
+            return v
+        valid_elements = ['N-NO3', 'P', 'S', 'N-NH4', 'K', 'Ca', 'Mg', 'Na', 'Cl', 'Fe', 'Mn', 'Zn', 'B', 'Cu', 'Mo']
+        for key in v.keys():
+            if key not in valid_elements:
+                raise ValueError(f"عنصر نامعتبر: {key}. عناصر مجاز: {', '.join(valid_elements)}")
+        for key, value in v.items():
+            if value < 0:
+                raise ValueError(f"مقدار عنصر {key} نمی‌تواند منفی باشد: {value}")
+        return v
+
 
 # ============================================================
 # Response Schemas
 # ============================================================
-
 class CropResponse(BaseModel):
     id: int
     name: str
@@ -575,10 +507,9 @@ class HistoryResponse(BaseModel):
 # ============================================================
 # Reset Database Schema
 # ============================================================
-
 class ResetRequest(BaseModel):
-    confirm: bool = Field(..., description="تأیید برای ریست دیتابیس")
-    password: Optional[str] = Field(None, description="رمز عبور برای ریست (در صورت نیاز)")
+    confirm: bool
+    password: Optional[str] = None
 
 
 class ResetResponse(BaseModel):

@@ -99,6 +99,137 @@
       </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- 🆕 تعادل کاتیون/آنیون -->
+    <!-- ============================================================ -->
+    <div v-if="result.ion_balance" class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-3">
+        <h3 class="text-white font-bold flex items-center gap-2">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          ⚖️ تعادل کاتیون و آنیون
+        </h3>
+        <p class="text-indigo-100 text-xs mt-1">
+          مجموع بار الکتریکی عناصر بر اساس میلی‌اکی‌والان (MEQ/L) که باید برابر شوند
+        </p>
+      </div>
+
+      <div class="p-5">
+        <!-- عناصر هدف -->
+        <div class="mb-4">
+          <h4 class="text-sm font-semibold text-gray-700 mb-2">🎯 عناصر هدف</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
+              <div class="text-xs text-blue-600">کاتیون</div>
+              <div class="text-xl font-bold text-blue-700">
+                {{ result.ion_balance.target.cation.toFixed(2) }}
+                <span class="text-sm font-normal">MEQ/L</span>
+              </div>
+            </div>
+            <div class="bg-red-50 rounded-lg p-3 text-center border border-red-200">
+              <div class="text-xs text-red-600">آنیون</div>
+              <div class="text-xl font-bold text-red-700">
+                {{ result.ion_balance.target.anion.toFixed(2) }}
+                <span class="text-sm font-normal">MEQ/L</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-2 text-center">
+            <span
+              :class="result.ion_balance.target.is_balanced ? 'text-green-600' : 'text-red-600'"
+              class="text-sm font-medium"
+            >
+              <span v-if="result.ion_balance.target.is_balanced">✅ متعادل</span>
+              <span v-else>❌ {{ result.ion_balance.target.warning }}</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- محلول نهایی -->
+        <div>
+          <h4 class="text-sm font-semibold text-gray-700 mb-2">🧪 محلول نهایی</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
+              <div class="text-xs text-blue-600">کاتیون</div>
+              <div class="text-xl font-bold text-blue-700">
+                {{ result.ion_balance.final.cation.toFixed(2) }}
+                <span class="text-sm font-normal">MEQ/L</span>
+              </div>
+            </div>
+            <div class="bg-red-50 rounded-lg p-3 text-center border border-red-200">
+              <div class="text-xs text-red-600">آنیون</div>
+              <div class="text-xl font-bold text-red-700">
+                {{ result.ion_balance.final.anion.toFixed(2) }}
+                <span class="text-sm font-normal">MEQ/L</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-2 text-center">
+            <span
+              :class="result.ion_balance.final.is_balanced ? 'text-green-600' : 'text-red-600'"
+              class="text-sm font-medium"
+            >
+              <span v-if="result.ion_balance.final.is_balanced">✅ متعادل</span>
+              <span v-else>❌ {{ result.ion_balance.final.warning }}</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- وضعیت کلی -->
+        <div class="mt-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
+          <div class="text-sm text-gray-700 whitespace-pre-line">
+            {{ result.ion_balance.interpretation }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 🆕 جدول توازن واحدها (PPM/MEQ/MMOLS) -->
+    <!-- ============================================================ -->
+    <div v-if="result.unit_conversion_table" class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-teal-600 to-cyan-600 px-5 py-3">
+        <h3 class="text-white font-bold flex items-center gap-2">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+          </svg>
+          📊 جدول توازن واحدها
+        </h3>
+        <p class="text-teal-100 text-xs mt-1">
+          تبدیل لحظه‌ای بین واحدهای PPM/L، MEQ/L و MMOLS/L
+        </p>
+      </div>
+
+      <div class="p-5">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="border border-gray-300 px-2 py-2 text-right">عنصر</th>
+                <th class="border border-gray-300 px-2 py-2 text-center">PPM/L</th>
+                <th class="border border-gray-300 px-2 py-2 text-center">MEQ/L</th>
+                <th class="border border-gray-300 px-2 py-2 text-center">MMOLS/L</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="item in result.unit_conversion_table.target"
+                :key="item.element"
+                class="hover:bg-gray-50"
+              >
+                <td class="border border-gray-300 px-2 py-2 font-medium text-gray-700">{{ item.element }}</td>
+                <td class="border border-gray-300 px-2 py-2 text-center font-mono">{{ item.ppm.toFixed(2) }}</td>
+                <td class="border border-gray-300 px-2 py-2 text-center font-mono">{{ item.meq.toFixed(4) }}</td>
+                <td class="border border-gray-300 px-2 py-2 text-center font-mono">{{ item.mmol.toFixed(4) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-xs text-gray-400 mt-2 text-center">📌 مقادیر بر اساس عناصر هدف وارد شده محاسبه شده‌اند</p>
+      </div>
+    </div>
+
     <!-- جدول مقایسه نیاز گیاه -->
     <div
       class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden"

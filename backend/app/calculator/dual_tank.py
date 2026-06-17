@@ -1,6 +1,8 @@
+# backend/app/calculator/dual_tank.py
+
 from typing import List, Dict, Tuple, Optional
 import copy
-from .core import calculate_water_contribution
+from .core import calculate_water_contribution, SUPPORTED_ELEMENTS
 from .ec import calculate_final_ec
 from .optimization import optimize_fertilizer_doses_professional
 from .tank import calculate_tank_doses
@@ -497,12 +499,22 @@ def calculate_dual_tank_professional(
     tank_calcium,
     brand_filter: Optional[str] = None,
     max_total_dose: float = 5.0,
-    crop_type: Optional[str] = None,        # پارامتر جدید مرحله 4
-    growth_stage: Optional[str] = None      # پارامتر جدید مرحله 4
+    crop_type: Optional[str] = None,        # پارامتر جدید برای تشخیص نوع گیاه
+    growth_stage: Optional[str] = None      # پارامتر جدید برای تشخیص مرحله رشد
 ) -> Tuple[Dict, Dict, List[Dict], str]:
     """
     محاسبه دوز بهینه برای دو مخزن با استفاده از الگوریتم لایه‌به‌لایه حرفه‌ای
     با در نظر گرفتن تداخلات شیمیایی و ضریب پویای تقسیم نیتروژن
+
+    Args:
+        remaining_needs: نیازهای باقیمانده پس از کسر آب
+        all_fertilizers: لیست همه کودهای موجود
+        tank_main: اطلاعات مخزن اصلی
+        tank_calcium: اطلاعات مخزن کلسیم
+        brand_filter: فیلتر برند (اختیاری)
+        max_total_dose: حداکثر دوز کل
+        crop_type: نوع گیاه (برای ضریب تقسیم نیتروژن)
+        growth_stage: مرحله رشد (برای ضریب تقسیم نیتروژن)
     """
 
     if brand_filter:

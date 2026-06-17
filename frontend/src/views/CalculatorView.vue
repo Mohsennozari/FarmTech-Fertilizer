@@ -1,3 +1,5 @@
+<!-- frontend/src/views/CalculatorView.vue -->
+
 <template>
   <div class="min-h-screen bg-[var(--bg-primary)]">
     <!-- Header -->
@@ -386,7 +388,16 @@
           </div>
 
           <!-- ============================================================ -->
-          <!-- 🆕 بخش آنالیز آب و پساب ترکیبی (نسخه 3.4.0) -->
+          <!-- 🆕 بخش عناصر هدف ۱۶ گانه -->
+          <!-- ============================================================ -->
+          <TargetElementsTable
+            :target-elements="targetElements16"
+            :final-solution="finalSolution16"
+            @update:targets="(targets) => { targetElements16 = targets; }"
+          />
+
+          <!-- ============================================================ -->
+          <!-- 🆕 بخش آنالیز آب و پساب ترکیبی -->
           <!-- ============================================================ -->
           <div class="border border-blue-200 rounded-xl overflow-hidden">
             <div class="bg-blue-50 px-4 py-3 border-b border-blue-200">
@@ -1094,12 +1105,13 @@ import axios from "axios";
 import ResultsDisplay from "../components/calculator/ResultsDisplay.vue";
 import InputField from "../components/common/InputField.vue";
 import ThemeToggle from "../components/common/ThemeToggle.vue";
+import TargetElementsTable from "../components/calculator/TargetElementsTable.vue";
 
 // ============================================================
 // Constants
 // ============================================================
 
-const API_BASE_URL = "http://127.0.0.1:8000/api/v1";
+const API_BASE_URL = "/api/v1";
 
 // ============================================================
 // State - Connection & UI
@@ -1117,6 +1129,13 @@ const errorMessage = ref("");
 const validationErrors = ref<string[]>([]);
 const showFertilizerList = ref(false);
 const fertilizers = ref<any[]>([]);
+
+// ============================================================
+// 🆕 State - Target Elements 16
+// ============================================================
+
+const targetElements16 = ref<Record<string, number>>({});
+const finalSolution16 = ref<Record<string, number>>({});
 
 // ============================================================
 // State - Stock System
@@ -1166,13 +1185,12 @@ const selectedBrands = ref<string[]>([]);
 const selectAllBrands = ref(false);
 
 // ============================================================
-// 🆕 State - Water & Wastewater Analysis (v3.4.0)
+// 🆕 State - Water & Wastewater Analysis
 // ============================================================
 
 const waterPercent = ref(80);
 const wastewaterPercent = ref(20);
 
-// عناصر آنالیز آب (14 عنصر + EC + pH)
 const waterAnalysis = reactive<Record<string, number>>({
   n_no3: 10,
   p: 2,
@@ -1190,7 +1208,6 @@ const waterAnalysis = reactive<Record<string, number>>({
   ph: 7.0,
 });
 
-// آنالیز پساب
 const wastewaterAnalysis = reactive<Record<string, number>>({
   n_no3: 25,
   p: 5,
@@ -1322,9 +1339,11 @@ const fetchNutrientNeeds = async (stageName: string) => {
   if (!stageName) return;
 
   try {
+    console.log(`📤 Fetching nutrient needs for stage: ${stageName}`);
     const response = await axios.get(`${API_BASE_URL}/growth-stages`);
-    const stages = response.data;
+    console.log('✅ Growth stages response:', response.data);
 
+    const stages = response.data;
     const stage = stages.find((s: any) => s.name === stageName);
 
     if (stage && stage.nutrient_needs) {
@@ -1335,9 +1354,10 @@ const fetchNutrientNeeds = async (stageName: string) => {
         nutrient.value = value;
         defaultNutrientValues[nutrient.element] = value;
       }
+      console.log('✅ Nutrient needs loaded:', needs);
     }
-  } catch (err) {
-    console.error("Error fetching nutrient needs:", err);
+  } catch (err: any) {
+    console.error('❌ Error fetching nutrient needs:', err.message);
   }
 };
 
@@ -1380,10 +1400,12 @@ const toggleAllBrands = () => {
 const fetchFertilizers = async () => {
   isLoadingFertilizers.value = true;
   try {
+    console.log('📤 Fetching fertilizers...');
     const response = await axios.get(`${API_BASE_URL}/fertilizers`);
     fertilizers.value = response.data;
-  } catch (err) {
-    console.error("Error fetching fertilizers:", err);
+    console.log('✅ Fertilizers loaded:', fertilizers.value.length);
+  } catch (err: any) {
+    console.error('❌ Error fetching fertilizers:', err.message);
   } finally {
     isLoadingFertilizers.value = false;
   }
@@ -1394,26 +1416,31 @@ const fetchFertilizers = async () => {
 // ============================================================
 
 const checkConnection = async () => {
+  console.log('🔍 Checking connection to backend...');
+  console.log(`📍 API_BASE_URL: ${API_BASE_URL}`);
+
   try {
     const response = await axios.get(`${API_BASE_URL}/health`);
+    console.log('✅ Health check response:', response.data);
+
     if (response.data && response.data.status === "ok") {
       connectionStatus.value = "connected";
-      console.log("Connected to server");
+      console.log('✅ Connected to server successfully');
       await fetchFertilizers();
     } else {
       connectionStatus.value = "disconnected";
       errorMessage.value = "خطا در اتصال به سرور";
+      console.error('❌ Invalid health response:', response.data);
     }
   } catch (err: any) {
-    console.error("Connection error:", err.message);
+    console.error('❌ Connection error:', err.message);
     connectionStatus.value = "disconnected";
-    errorMessage.value =
-      "خطا در اتصال به سرور. لطفاً سرور بک‌اند را بررسی کنید.";
+    errorMessage.value = 'خطا در اتصال به سرور. لطفاً سرور بک‌اند را بررسی کنید.';
   }
 };
 
 // ============================================================
-// 🆕 Main Calculation Function (v3.4.0 - با رفع Proxy)
+// 🆕 Main Calculation Function
 // ============================================================
 
 const calculateDualTank = async () => {
@@ -1440,7 +1467,6 @@ const calculateDualTank = async () => {
     );
   }
 
-  // اعتبارسنجی درصد آب و پساب
   const totalPercent = waterPercent.value + wastewaterPercent.value;
   if (Math.abs(totalPercent - 100) > 0.01) {
     validationErrors.value.push(
@@ -1457,7 +1483,6 @@ const calculateDualTank = async () => {
   result.value = null;
 
   try {
-    // ✅ تبدیل Proxyها به Object ساده با toRaw
     const rawWaterSource = toRaw(waterSource);
     const rawTankMain = toRaw(tankMain);
     const rawTankCalcium = toRaw(tankCalcium);
@@ -1473,7 +1498,11 @@ const calculateDualTank = async () => {
         selectedBrands.value.length > 0 ? selectedBrands.value : null,
       custom_nutrient_needs: rawCustomNutrientNeeds,
 
-      // ✅ استفاده از Object ساده به جای Proxy
+      // 🆕 عناصر هدف ۱۶ گانه
+      target_elements_16: Object.keys(targetElements16.value).length > 0
+        ? { ...targetElements16.value }
+        : null,
+
       tank_main: {
         name: rawTankMain.name,
         tank_type: rawTankMain.tank_type,
@@ -1506,36 +1535,41 @@ const calculateDualTank = async () => {
       },
       stock_tank_volume_liters: stockTankVolume.value,
       injector_ratio: injectorRatio.value,
-
-      // 🆕 آنالیز آب و پساب ترکیبی (تبدیل شده با toRaw)
       water_percent: waterPercent.value,
       wastewater_percent: wastewaterPercent.value,
       water_analysis: rawWaterAnalysis,
       wastewater_analysis: rawWastewaterAnalysis,
     };
 
-    console.log("📤 Sending request with water analysis:", rawWaterAnalysis);
-    console.log(
-      "📤 Water percent:",
-      waterPercent.value,
-      "Wastewater percent:",
-      wastewaterPercent.value,
-    );
+    console.log('📤 Sending request to:', `${API_BASE_URL}/calculate-dual-tank`);
+    console.log('📤 Payload:', payload);
 
     const response = await axios.post(
       `${API_BASE_URL}/calculate-dual-tank`,
       payload,
     );
 
+    console.log('📥 Response status:', response.status);
+    console.log('📥 Response data:', response.data);
+
     if (response.data.success) {
       result.value = response.data;
-      console.log("✅ Calculation successful");
+
+      if (response.data.final_solution_ppm) {
+        finalSolution16.value = response.data.final_solution_ppm;
+      }
+
+      console.log('✅ Calculation successful');
     } else {
       errorMessage.value = response.data.error_message || "خطا در محاسبه";
+      console.error('❌ Calculation failed:', response.data.error_message);
     }
   } catch (err: any) {
-    console.error("❌ Calculation error:", err);
-    if (err.response?.data?.detail) {
+    console.error('❌ Calculation error:', err);
+
+    if (err.code === 'ERR_NETWORK') {
+      errorMessage.value = 'خطا در اتصال به سرور. لطفاً سرور بک‌اند را بررسی کنید.';
+    } else if (err.response?.data?.detail) {
       if (typeof err.response.data.detail === "string") {
         errorMessage.value = err.response.data.detail;
       } else if (Array.isArray(err.response.data.detail)) {
@@ -1548,9 +1582,6 @@ const calculateDualTank = async () => {
       } else {
         errorMessage.value = JSON.stringify(err.response.data.detail);
       }
-    } else if (err.message === "Network Error") {
-      errorMessage.value =
-        "خطا در اتصال به سرور. لطفاً از اجرای سرور بک‌اند اطمینان حاصل کنید.";
     } else {
       errorMessage.value = "خطا در محاسبه. لطفاً دوباره تلاش کنید.";
     }
@@ -1572,6 +1603,8 @@ const printResult = () => {
 // ============================================================
 
 onMounted(() => {
+  console.log('🚀 CalculatorView mounted');
+  console.log(`📍 API_BASE_URL: ${API_BASE_URL}`);
   checkConnection();
 });
 </script>
