@@ -2,7 +2,91 @@
 
 from typing import List, Dict, Tuple, Optional
 
-SUPPORTED_ELEMENTS = ['N', ' P', 'K', 'Ca', 'Mg', 'S', 'Fe', 'Zn', 'Mn', 'Cu', 'B', 'Mo', 'Cl']
+# ============================================================
+# لیست عناصر و ثابت‌های مربوطه
+# ============================================================
+
+# لیست ۱۶ عنصر مطابق پرامپت جدید "تغذیه سبز"
+ELEMENTS_16 = [
+    'N-NO3',
+    'P',
+    'S',
+    'N-NH4',
+    'K',
+    'Ca',
+    'Mg',
+    'Na',
+    'Cl',
+    'Fe',
+    'Mn',
+    'Zn',
+    'B',
+    'Cu',
+    'Mo'
+]
+
+# عناصر پشتیبانی شده قبلی (برای سازگاری با کد موجود)
+SUPPORTED_ELEMENTS = ['N', 'P', 'K', 'Ca', 'Mg', 'S', 'Fe', 'Zn', 'Mn', 'Cu', 'B', 'Mo', 'Cl']
+
+# نگاشت عناصر ۱۶ گانه به کلیدهای قدیمی
+ELEMENT_MAPPING_16_TO_OLD = {
+    'N-NO3': 'N',
+    'N-NH4': 'N',  # نیتروژن آمونیومی هم به N تبدیل می‌شود
+}
+
+# عناصری که در مدل‌های قدیمی وجود ندارند
+NEW_ELEMENTS_16 = ['Na', 'Cl']
+
+
+def get_element_key_16(element_name: str) -> str:
+    """
+    تبدیل نام عنصر به کلید استاندارد ۱۶ گانه
+    """
+    if element_name in ELEMENTS_16:
+        return element_name
+    # اگر عنصر با کلید قدیمی داده شد، تبدیل کن
+    mapping = {
+        'N': 'N-NO3',
+        'P': 'P',
+        'S': 'S',
+        'K': 'K',
+        'Ca': 'Ca',
+        'Mg': 'Mg',
+        'Fe': 'Fe',
+        'Mn': 'Mn',
+        'Zn': 'Zn',
+        'B': 'B',
+        'Cu': 'Cu',
+        'Mo': 'Mo',
+        'Cl': 'Cl'
+    }
+    return mapping.get(element_name, element_name)
+
+
+def normalize_target_elements(target_elements: Dict[str, float]) -> Dict[str, float]:
+    """
+    نرمال‌سازی عناصر هدف: اطمینان از وجود همه ۱۶ عنصر
+    """
+    normalized = {}
+    for elem in ELEMENTS_16:
+        normalized[elem] = target_elements.get(elem, 0.0)
+    return normalized
+
+
+def convert_16_to_supported(target_16: Dict[str, float]) -> Dict[str, float]:
+    """
+    تبدیل عناصر ۱۶ گانه به فرمت پشتیبانی شده قدیمی (برای سازگاری با الگوریتم)
+    """
+    result = {}
+    for elem in SUPPORTED_ELEMENTS:
+        if elem == 'N':
+            # N ترکیبی از N-NO3 و N-NH4 است
+            result[elem] = target_16.get('N-NO3', 0) + target_16.get('N-NH4', 0)
+        elif elem in target_16:
+            result[elem] = target_16[elem]
+        else:
+            result[elem] = 0.0
+    return result
 
 
 def calculate_element_ppm(fertilizer, dose_g_per_liter: float) -> Dict[str, float]:
